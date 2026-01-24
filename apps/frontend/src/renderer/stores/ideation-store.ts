@@ -76,14 +76,14 @@ const initialConfig: IdeationConfig = {
 };
 
 // Initialize all type states to 'pending' initially (will be set when generation starts)
-// Note: high_value_features removed, low_hanging_fruit renamed to code_improvements
+// Marketing-focused ideation types for Creative Studio
 const initialTypeStates: Record<IdeationType, IdeationTypeState> = {
-  code_improvements: 'pending',
-  ui_ux_improvements: 'pending',
-  documentation_gaps: 'pending',
-  security_hardening: 'pending',
-  performance_optimizations: 'pending',
-  code_quality: 'pending'
+  campaign_concepts: 'pending',
+  content_ideas: 'pending',
+  growth_tactics: 'pending',
+  brand_partnerships: 'pending',
+  viral_strategies: 'pending',
+  channel_ideas: 'pending'
 };
 
 export const useIdeationStore = create<IdeationState>((set) => ({
@@ -626,15 +626,29 @@ export function getIdeationSummary(session: IdeationSession | null): IdeationSum
   };
 }
 
-// Type guards for idea types
-// Note: isLowHangingFruitIdea renamed to isCodeImprovementIdea
-// isHighValueIdea removed - strategic features belong to Roadmap
-export function isCodeImprovementIdea(idea: Idea): idea is Idea & { type: 'code_improvements' } {
-  return idea.type === 'code_improvements';
+// Type guards for marketing idea types
+export function isCampaignConceptIdea(idea: Idea): idea is Idea & { type: 'campaign_concepts' } {
+  return idea.type === 'campaign_concepts';
 }
 
-export function isUIUXIdea(idea: Idea): idea is Idea & { type: 'ui_ux_improvements' } {
-  return idea.type === 'ui_ux_improvements';
+export function isContentIdeaIdea(idea: Idea): idea is Idea & { type: 'content_ideas' } {
+  return idea.type === 'content_ideas';
+}
+
+export function isGrowthTacticIdea(idea: Idea): idea is Idea & { type: 'growth_tactics' } {
+  return idea.type === 'growth_tactics';
+}
+
+export function isBrandPartnershipIdea(idea: Idea): idea is Idea & { type: 'brand_partnerships' } {
+  return idea.type === 'brand_partnerships';
+}
+
+export function isViralStrategyIdea(idea: Idea): idea is Idea & { type: 'viral_strategies' } {
+  return idea.type === 'viral_strategies';
+}
+
+export function isChannelIdeaIdea(idea: Idea): idea is Idea & { type: 'channel_ideas' } {
+  return idea.type === 'channel_ideas';
 }
 
 // IPC listener setup - call this once when the app initializes

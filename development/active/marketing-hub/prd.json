@@ -1,0 +1,1029 @@
+{
+  "id": "marketing-hub",
+  "title": "Marketing Hub - Auto-Claude Transformation",
+  "description": "Transform Auto-Claude autonomous coding framework into AI-powered marketing automation platform",
+  "version": "1.0.0",
+  "metadata": {
+    "createdAt": "2026-01-24T11:30:00Z",
+    "updatedAt": "2026-01-24T11:30:00Z",
+    "gitBranch": "prd/marketing-hub",
+    "worktreePath": ".git/worktrees/marketing-hub",
+    "status": "active",
+    "priority": "high"
+  },
+  "phases": [
+    {
+      "id": "PHASE-1",
+      "name": "Foundation",
+      "duration": "Week 1",
+      "description": "Global settings integration and internal rebrand"
+    },
+    {
+      "id": "PHASE-2",
+      "name": "API Settings UI",
+      "duration": "Week 2",
+      "description": "Configuration panels and connection testing"
+    },
+    {
+      "id": "PHASE-3",
+      "name": "Agent Restructuring",
+      "duration": "Week 3-4",
+      "description": "Marketing agents and updated prompts"
+    },
+    {
+      "id": "PHASE-4",
+      "name": "Frontend Transformation",
+      "duration": "Week 5-6",
+      "description": "Campaign UI, content calendar, creative studio"
+    },
+    {
+      "id": "PHASE-5",
+      "name": "Platform Integrations",
+      "duration": "Week 7+",
+      "description": "Social, email, analytics, advertising APIs"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Create Global Settings Reader Module",
+      "phase": "PHASE-1",
+      "status": "pending",
+      "priority": "critical",
+      "acceptanceCriteria": [
+        "Reads ~/.claude/settings.json correctly",
+        "Parses env variables and model mappings",
+        "Handles missing config gracefully",
+        "Provides clean API for consumers",
+        "Includes unit tests with 80%+ coverage"
+      ],
+      "dependencies": [],
+      "filesInvolved": [
+        "apps/backend/core/global_settings.py",
+        "tests/test_global_settings.py"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-001-01",
+          "title": "Implement GlobalSettings class",
+          "status": "pending",
+          "microtasks": [
+            "Create class with load() method",
+            "Implement get() with dot notation",
+            "Add property methods for common values",
+            "Handle multiple config paths"
+          ]
+        },
+        {
+          "id": "TASK-001-02",
+          "title": "Add error handling and validation",
+          "status": "pending",
+          "microtasks": [
+            "Handle missing files gracefully",
+            "Validate JSON structure",
+            "Provide meaningful error messages",
+            "Add logging for debugging"
+          ]
+        },
+        {
+          "id": "TASK-001-03",
+          "title": "Write unit tests",
+          "status": "pending",
+          "microtasks": [
+            "Test with valid settings.json",
+            "Test with missing file",
+            "Test with invalid JSON",
+            "Test property accessors"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Update Client Factory for Global Settings",
+      "phase": "PHASE-1",
+      "status": "pending",
+      "priority": "critical",
+      "acceptanceCriteria": [
+        "Client factory reads global settings before env vars",
+        "Model mappings from global settings work",
+        "API endpoint from global settings applied",
+        "Configuration priority chain enforced",
+        "Backward compatibility maintained"
+      ],
+      "dependencies": ["TASK-001"],
+      "filesInvolved": [
+        "apps/backend/core/client.py",
+        "apps/backend/core/auth.py",
+        "apps/backend/cli/utils.py"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-002-01",
+          "title": "Integrate GlobalSettings into create_client()",
+          "status": "pending",
+          "microtasks": [
+            "Import GlobalSettings class",
+            "Read global settings before env vars",
+            "Apply model mappings",
+            "Set base URL from global config"
+          ]
+        },
+        {
+          "id": "TASK-002-02",
+          "title": "Update auth token resolution",
+          "status": "pending",
+          "microtasks": [
+            "Check global settings for API token",
+            "Update priority chain",
+            "Maintain backward compatibility",
+            "Add tests for token resolution"
+          ]
+        },
+        {
+          "id": "TASK-002-03",
+          "title": "Update model configuration in CLI",
+          "status": "pending",
+          "microtasks": [
+            "Read models from global settings",
+            "Update DEFAULT_MODEL resolution",
+            "Add model override support",
+            "Test with different model configs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Internal Rebrand to Marketing Hub",
+      "phase": "PHASE-1",
+      "status": "pending",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "package.json updated with new branding",
+        "App title and description changed",
+        "README reflects marketing positioning",
+        "Code comments updated",
+        "No broken references to old name"
+      ],
+      "dependencies": [],
+      "filesInvolved": [
+        "package.json",
+        "apps/frontend/package.json",
+        "README.md",
+        "apps/backend/README.md"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-003-01",
+          "title": "Update package metadata",
+          "status": "pending",
+          "microtasks": [
+            "Update name in package.json",
+            "Change productName and description",
+            "Update version to 1.0.0",
+            "Update branding in electron-builder.yml"
+          ]
+        },
+        {
+          "id": "TASK-003-02",
+          "title": "Rewrite README for marketing positioning",
+          "status": "pending",
+          "microtasks": [
+            "Update project description",
+            "Change feature list to marketing focus",
+            "Update quick start examples",
+            "Change screenshots and examples"
+          ]
+        },
+        {
+          "id": "TASK-003-03",
+          "title": "Update code documentation",
+          "status": "pending",
+          "microtasks": [
+            "Search for 'Auto-Claude' references",
+            "Update to 'Marketing Hub'",
+            "Update CLAUDE.md file",
+            "Update docstrings and comments"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Create API Settings UI Feature",
+      "phase": "PHASE-2",
+      "status": "pending",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "New feature module created",
+        "API configuration panel functional",
+        "Model selector working",
+        "Connection test implemented",
+        "Settings persist correctly"
+      ],
+      "dependencies": ["TASK-002"],
+      "filesInvolved": [
+        "apps/frontend/src/features/api-settings/",
+        "apps/frontend/src/features/api-settings/ApiSettings.tsx",
+        "apps/frontend/src/features/api-settings/ApiSettingsStore.ts",
+        "apps/frontend/src/features/api-settings/ModelSelector.tsx",
+        "apps/frontend/src/features/api-settings/ConnectionTest.tsx"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-004-01",
+          "title": "Create API settings store",
+          "status": "pending",
+          "microtasks": [
+            "Create Zustand store",
+            "Define state structure",
+            "Add actions for updates",
+            "Implement persistence"
+          ]
+        },
+        {
+          "id": "TASK-004-02",
+          "title": "Build API configuration panel",
+          "status": "pending",
+          "microtasks": [
+            "Create main component",
+            "Add API token input with show/hide",
+            "Add base URL input",
+            "Add timeout slider"
+          ]
+        },
+        {
+          "id": "TASK-004-03",
+          "title": "Build model selector component",
+          "status": "pending",
+          "microtasks": [
+            "Create selector dropdowns",
+            "Load models from global settings",
+            "Add custom model input option",
+            "Validate model names"
+          ]
+        },
+        {
+          "id": "TASK-004-04",
+          "title": "Implement connection testing",
+          "status": "pending",
+          "microtasks": [
+            "Add test button",
+            "Call backend test endpoint",
+            "Display results",
+            "Handle errors gracefully"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Integrate API Settings into Main App",
+      "phase": "PHASE-2",
+      "status": "pending",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "Settings accessible from navigation",
+        "IPC handlers configured",
+        "i18n translations added",
+        "Settings route registered",
+        "Navigation menu updated"
+      ],
+      "dependencies": ["TASK-004"],
+      "filesInvolved": [
+        "apps/frontend/src/App.tsx",
+        "apps/frontend/src/shared/i18n/locales/en/*.json",
+        "apps/frontend/src/shared/i18n/locales/fr/*.json"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-005-01",
+          "title": "Add navigation entry",
+          "status": "pending",
+          "microtasks": [
+            "Update App.tsx routing",
+            "Add settings menu item",
+            "Create route for /settings",
+            "Add icon for settings"
+          ]
+        },
+        {
+          "id": "TASK-005-02",
+          "title": "Configure IPC handlers",
+          "status": "pending",
+          "microtasks": [
+            "Add IPC handlers in main process",
+            "Wire up API save/load",
+            "Wire up connection test",
+            "Handle errors"
+          ]
+        },
+        {
+          "id": "TASK-005-03",
+          "title": "Add i18n translations",
+          "status": "pending",
+          "microtasks": [
+            "Add English translations",
+            "Add French translations",
+            "Use translation keys in UI",
+            "Test language switching"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Adapt Planner Agent for Campaigns",
+      "phase": "PHASE-3",
+      "status": "pending",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "Planner creates campaign plans",
+        "Marketing-specific subtasks generated",
+        "Campaign phases defined",
+        "Testing workflows included",
+        "Memory stores campaign patterns"
+      ],
+      "dependencies": ["TASK-003"],
+      "filesInvolved": [
+        "apps/backend/agents/planner.py",
+        "apps/backend/prompts/planner.md"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-006-01",
+          "title": "Update planner prompt",
+          "status": "pending",
+          "microtasks": [
+            "Rewrite for marketing campaigns",
+            "Define campaign phases",
+            "Add marketing subtask types",
+            "Include QA testing"
+          ]
+        },
+        {
+          "id": "TASK-006-02",
+          "title": "Adapt planner implementation",
+          "status": "pending",
+          "microtasks": [
+            "Update terminology",
+            "Change output structure",
+            "Add campaign-specific logic",
+            "Test with sample brief"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-007",
+      "title": "Create Content Creator Agent",
+      "phase": "PHASE-3",
+      "status": "pending",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "Agent creates marketing copy",
+        "Supports multiple content types",
+        "Brand guidelines respected",
+        "SEO optimization included",
+        "Quality checks performed"
+      ],
+      "dependencies": ["TASK-006"],
+      "filesInvolved": [
+        "apps/backend/agents/content_creator.py",
+        "apps/backend/prompts/content_creator.md"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-007-01",
+          "title": "Create content creator agent",
+          "status": "pending",
+          "microtasks": [
+            "Create agent file",
+            "Write system prompt",
+            "Define content types",
+            "Add SEO optimization"
+          ]
+        },
+        {
+          "id": "TASK-007-02",
+          "title": "Implement brand awareness",
+          "status": "pending",
+          "microtasks": [
+            "Read brand guidelines",
+            "Apply tone of voice",
+            "Use brand assets",
+            "Maintain consistency"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-008",
+      "title": "Create Social Media Agent",
+      "phase": "PHASE-3",
+      "status": "pending",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "Generates platform-specific content",
+        "Scheduling support included",
+        "Hashtag optimization",
+        "Engagement tracking",
+        "Multi-platform publishing"
+      ],
+      "dependencies": ["TASK-007"],
+      "filesInvolved": [
+        "apps/backend/agents/social_media_agent.py",
+        "apps/backend/prompts/social_media.md"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-008-01",
+          "title": "Create social media agent",
+          "status": "pending",
+          "microtasks": [
+            "Create agent file",
+            "Write platform-specific prompts",
+            "Add scheduling logic",
+            "Include hashtag research"
+          ]
+        },
+        {
+          "id": "TASK-008-02",
+          "title": "Add platform integrations",
+          "status": "pending",
+          "microtasks": [
+            "Twitter/X API",
+            "LinkedIn API",
+            "Instagram API",
+            "Facebook API"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-009",
+      "title": "Create Email Marketing Agent",
+      "phase": "PHASE-3",
+      "status": "pending",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "Generates email campaigns",
+        "Drip sequence support",
+        "Personalization included",
+        "A/B testing templates",
+        "Analytics integration"
+      ],
+      "dependencies": ["TASK-007"],
+      "filesInvolved": [
+        "apps/backend/agents/email_agent.py",
+        "apps/backend/prompts/email_marketing.md"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-009-01",
+          "title": "Create email marketing agent",
+          "status": "pending",
+          "microtasks": [
+            "Create agent file",
+            "Write email prompts",
+            "Add drip sequence logic",
+            "Include personalization"
+          ]
+        },
+        {
+          "id": "TASK-009-02",
+          "title": "Add email integrations",
+          "status": "pending",
+          "microtasks": [
+            "Mailchimp API",
+            "SendGrid API",
+            "ConvertKit API",
+            "Analytics tracking"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-010",
+      "title": "Repurpose Kanban Board for Campaigns",
+      "phase": "PHASE-4",
+      "status": "pending",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "Board shows campaign workflow",
+        "Columns reflect marketing stages",
+        "Campaign cards display properly",
+        "Queue management works",
+        "Bulk operations functional"
+      ],
+      "dependencies": ["TASK-005"],
+      "filesInvolved": [
+        "apps/frontend/src/features/tasks/KanbanBoard.tsx",
+        "apps/frontend/src/features/tasks/TaskStore.ts"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-010-01",
+          "title": "Update Kanban terminology",
+          "status": "pending",
+          "microtasks": [
+            "Change 'spec' to 'campaign'",
+            "Update column labels",
+            "Change status values",
+            "Update i18n keys"
+          ]
+        },
+        {
+          "id": "TASK-010-02",
+          "title": "Adapt campaign workflow",
+          "status": "pending",
+          "microtasks": [
+            "Define campaign stages",
+            "Update status transitions",
+            "Add marketing-specific actions",
+            "Test workflow"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-011",
+      "title": "Convert Roadmap to Content Calendar",
+      "phase": "PHASE-4",
+      "status": "pending",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "Calendar view for campaigns",
+        "Date-based organization",
+        "Campaign timeline display",
+        "Drag-and-drop scheduling",
+        "Content type filtering"
+      ],
+      "dependencies": ["TASK-010"],
+      "filesInvolved": [
+        "apps/frontend/src/features/roadmap/Roadmap.tsx",
+        "apps/frontend/src/features/content-calendar/"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-011-01",
+          "title": "Create content calendar component",
+          "status": "pending",
+          "microtasks": [
+            "Build calendar UI",
+            "Add date navigation",
+            "Show campaign items",
+            "Add filtering"
+          ]
+        },
+        {
+          "id": "TASK-011-02",
+          "title": "Implement scheduling",
+          "status": "pending",
+          "microtasks": [
+            "Add drag-and-drop",
+            "Update campaign dates",
+            "Sync with agent data",
+            "Handle conflicts"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-012",
+      "title": "Create Creative Studio (Ideation)",
+      "phase": "PHASE-4",
+      "status": "pending",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "AI-powered idea generation",
+        "Marketing-specific categories",
+        "Creative campaign concepts",
+        "Idea to task conversion",
+        "Filtering and sorting"
+      ],
+      "dependencies": ["TASK-005"],
+      "filesInvolved": [
+        "apps/frontend/src/features/ideation/Ideation.tsx",
+        "apps/frontend/src/features/creative-studio/"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-012-01",
+          "title": "Update ideation for marketing",
+          "status": "pending",
+          "microtasks": [
+            "Change idea categories",
+            "Update prompts",
+            "Add marketing types",
+            "Update i18n"
+          ]
+        },
+        {
+          "id": "TASK-012-02",
+          "title": "Add creative tools",
+          "status": "pending",
+          "microtasks": [
+            "Campaign concept generator",
+            "Tagline creator",
+            "Visual style suggestions",
+            "Brand voice matcher"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-013",
+      "title": "Convert Insights to Marketing Intelligence",
+      "phase": "PHASE-4",
+      "status": "pending",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "AI chat for marketing insights",
+        "Campaign performance analysis",
+        "Competitor intelligence",
+        "Trend detection",
+        "Recommendation engine"
+      ],
+      "dependencies": ["TASK-005"],
+      "filesInvolved": [
+        "apps/frontend/src/features/insights/Insights.tsx",
+        "apps/backend/agents/marketing_analytics.py"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-013-01",
+          "title": "Update insights context",
+          "status": "pending",
+          "microtasks": [
+            "Change to marketing focus",
+            "Update knowledge base",
+            "Add campaign context",
+            "Update prompts"
+          ]
+        },
+        {
+          "id": "TASK-013-02",
+          "title": "Add analytics integration",
+          "status": "pending",
+          "microtasks": [
+            "Connect to data sources",
+            "Analyze performance",
+            "Generate insights",
+            "Create recommendations"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-014",
+      "title": "Convert Context to Brand Knowledge",
+      "phase": "PHASE-4",
+      "status": "pending",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "Brand guidelines storage",
+        "Asset library",
+        "Style guide reference",
+        "Semantic search",
+        "Version history"
+      ],
+      "dependencies": ["TASK-005"],
+      "filesInvolved": [
+        "apps/frontend/src/features/context/Context.tsx",
+        "apps/frontend/src/features/brand-knowledge/"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-014-01",
+          "title": "Create brand knowledge base",
+          "status": "pending",
+          "microtasks": [
+            "Store brand guidelines",
+            "Add asset library",
+            "Create style guide",
+            "Add version control"
+          ]
+        },
+        {
+          "id": "TASK-014-02",
+          "title": "Integrate with agents",
+          "status": "pending",
+          "microtasks": [
+            "Expose to content creator",
+            "Use in consistency checks",
+            "Update semantic search",
+            "Track usage"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-015",
+      "title": "Social Platform Integrations",
+      "phase": "PHASE-5",
+      "status": "pending",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "Twitter/X publishing",
+        "LinkedIn posting",
+        "Instagram sharing",
+        "Facebook posting",
+        "Unified API interface"
+      ],
+      "dependencies": ["TASK-008"],
+      "filesInvolved": [
+        "apps/backend/integrations/social/",
+        "apps/backend/integrations/social/twitter.py",
+        "apps/backend/integrations/social/linkedin.py",
+        "apps/backend/integrations/social/instagram.py",
+        "apps/backend/integrations/social/facebook.py"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-015-01",
+          "title": "Create social platform base",
+          "status": "pending",
+          "microtasks": [
+            "Define platform interface",
+            "Create base class",
+            "Add authentication",
+            "Implement error handling"
+          ]
+        },
+        {
+          "id": "TASK-015-02",
+          "title": "Implement each platform",
+          "status": "pending",
+          "microtasks": [
+            "Twitter/X API integration",
+            "LinkedIn API integration",
+            "Instagram API integration",
+            "Facebook API integration"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-016",
+      "title": "Email Platform Integrations",
+      "phase": "PHASE-5",
+      "status": "pending",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "Mailchimp integration",
+        "SendGrid integration",
+        "ConvertKit integration",
+        "Campaign sync",
+        "Analytics tracking"
+      ],
+      "dependencies": ["TASK-009"],
+      "filesInvolved": [
+        "apps/backend/integrations/email/",
+        "apps/backend/integrations/email/mailchimp.py",
+        "apps/backend/integrations/email/sendgrid.py",
+        "apps/backend/integrations/email/convertkit.py"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-016-01",
+          "title": "Create email provider base",
+          "status": "pending",
+          "microtasks": [
+            "Define provider interface",
+            "Create base class",
+            "Add authentication",
+            "Implement sync logic"
+          ]
+        },
+        {
+          "id": "TASK-016-02",
+          "title": "Implement each provider",
+          "status": "pending",
+          "microtasks": [
+            "Mailchimp API integration",
+            "SendGrid API integration",
+            "ConvertKit API integration",
+            "Analytics sync"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-017",
+      "title": "Analytics Platform Integrations",
+      "phase": "PHASE-5",
+      "status": "pending",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "Google Analytics 4",
+        "Mixpanel integration",
+        "Amplitude integration",
+        "Unified reporting",
+        "ROI tracking"
+      ],
+      "dependencies": ["TASK-013"],
+      "filesInvolved": [
+        "apps/backend/integrations/analytics/",
+        "apps/backend/integrations/analytics/ga4.py",
+        "apps/backend/integrations/analytics/mixpanel.py",
+        "apps/backend/integrations/analytics/amplitude.py"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-017-01",
+          "title": "Create analytics base",
+          "status": "pending",
+          "microtasks": [
+            "Define analytics interface",
+            "Create base class",
+            "Add authentication",
+            "Implement data fetching"
+          ]
+        },
+        {
+          "id": "TASK-017-02",
+          "title": "Implement each platform",
+          "status": "pending",
+          "microtasks": [
+            "GA4 API integration",
+            "Mixpanel API integration",
+            "Amplitude API integration",
+            "ROI calculation"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-018",
+      "title": "Advertising Platform Integrations",
+      "phase": "PHASE-5",
+      "status": "pending",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "Google Ads integration",
+        "Meta Ads integration",
+        "LinkedIn Ads integration",
+        "Campaign management",
+        "Performance optimization"
+      ],
+      "dependencies": ["TASK-008"],
+      "filesInvolved": [
+        "apps/backend/integrations/ads/",
+        "apps/backend/integrations/ads/google_ads.py",
+        "apps/backend/integrations/ads/meta_ads.py",
+        "apps/backend/integrations/ads/linkedin_ads.py"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-018-01",
+          "title": "Create ads platform base",
+          "status": "pending",
+          "microtasks": [
+            "Define ads interface",
+            "Create base class",
+            "Add authentication",
+            "Implement campaign CRUD"
+          ]
+        },
+        {
+          "id": "TASK-018-02",
+          "title": "Implement each platform",
+          "status": "pending",
+          "microtasks": [
+            "Google Ads API",
+            "Meta Ads API",
+            "LinkedIn Ads API",
+            "Optimization suggestions"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-019",
+      "title": "SEO Tools Integration",
+      "phase": "PHASE-5",
+      "status": "pending",
+      "priority": "low",
+      "acceptanceCriteria": [
+        "Keyword research",
+        "On-page SEO analysis",
+        "Backlink tracking",
+        "Competitor analysis",
+        "Rank tracking"
+      ],
+      "dependencies": ["TASK-007"],
+      "filesInvolved": [
+        "apps/backend/agents/seo_agent.py",
+        "apps/backend/integrations/seo/"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-019-01",
+          "title": "Create SEO agent",
+          "status": "pending",
+          "microtasks": [
+            "Create SEO agent file",
+            "Write SEO prompts",
+            "Add keyword research",
+            "Include optimization tips"
+          ]
+        },
+        {
+          "id": "TASK-019-02",
+          "title": "Add SEO integrations",
+          "status": "pending",
+          "microtasks": [
+            "SEMrush API",
+            "Ahrefs API",
+            "Moz API",
+            "Google Search Console"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-020",
+      "title": "End-to-End Testing and Validation",
+      "phase": "PHASE-5",
+      "status": "pending",
+      "priority": "critical",
+      "acceptanceCriteria": [
+        "All acceptance criteria met",
+        "Integration tests passing",
+        "E2E tests for critical paths",
+        "Performance benchmarks met",
+        "Documentation complete"
+      ],
+      "dependencies": ["TASK-001", "TASK-002", "TASK-003", "TASK-004", "TASK-005", "TASK-006", "TASK-007", "TASK-008", "TASK-009", "TASK-010", "TASK-011", "TASK-012", "TASK-013", "TASK-014", "TASK-015", "TASK-016", "TASK-017", "TASK-018", "TASK-019"],
+      "filesInvolved": [
+        "tests/integration/",
+        "tests/e2e/",
+        "README.md",
+        "CHANGELOG.md"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-020-01",
+          "title": "Run acceptance criteria validation",
+          "status": "pending",
+          "microtasks": [
+            "Check each task's criteria",
+            "Document any gaps",
+            "Create fix tasks",
+            "Verify all complete"
+          ]
+        },
+        {
+          "id": "TASK-020-02",
+          "title": "Execute integration tests",
+          "status": "pending",
+          "microtasks": [
+            "Run all integration tests",
+            "Fix any failures",
+            "Update tests as needed",
+            "Document results"
+          ]
+        },
+        {
+          "id": "TASK-020-03",
+          "title": "Run E2E tests",
+          "status": "pending",
+          "microtasks": [
+            "Test critical user paths",
+            "Verify campaign workflow",
+            "Test platform integrations",
+            "Document any issues"
+          ]
+        },
+        {
+          "id": "TASK-020-04",
+          "title": "Update documentation",
+          "status": "pending",
+          "microtasks": [
+            "Update README",
+            "Create CHANGELOG",
+            "Document new features",
+            "Create migration guide"
+          ]
+        }
+      ]
+    }
+  ],
+  "configuration": {
+    "globalSettingsPriority": "first",
+    "defaultModels": {
+      "haiku": "glm-4.5-air",
+      "sonnet": "glm-4.7",
+      "opus": "glm-4.7"
+    },
+    "supportedMarketingDomains": [
+      "social-media",
+      "email-marketing",
+      "content-marketing",
+      "paid-advertising",
+      "seo"
+    ]
+  }
+}

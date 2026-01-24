@@ -52,7 +52,11 @@ export default defineConfig({
           index: resolve(__dirname, 'src/main/index.ts')
         },
         // Only node-pty needs to be external (native module rebuilt by electron-builder)
-        external: ['@lydell/node-pty']
+        external: ['@lydell/node-pty'],
+        output: {
+          // Force CommonJS output for main process to avoid ESM import issues with electron
+          format: 'cjs'
+        }
       }
     }
   },

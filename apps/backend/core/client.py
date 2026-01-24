@@ -143,6 +143,7 @@ from core.auth import (
     require_auth_token,
     validate_token_not_encrypted,
 )
+from core.global_settings import GlobalSettings
 from linear_updater import is_linear_enabled
 from prompts_pkg.project_context import detect_project_capabilities, load_project_index
 from security import bash_security_hook
@@ -458,10 +459,17 @@ def create_client(
     Only starts MCP servers that the agent actually needs, reducing context
     window bloat and startup latency.
 
+    Configuration priority chain:
+    1. Global ~/.claude/settings.json (HIGHEST priority)
+    2. Project .env file
+    3. System environment variables
+    4. System credential store
+    5. Hardcoded defaults
+
     Args:
         project_dir: Root directory for the project (working directory)
         spec_dir: Directory containing the spec (for settings file)
-        model: Claude model to use
+        model: Claude model to use (can be short name like "sonnet" or full model ID)
         agent_type: Agent type identifier from AGENT_CONFIGS
                    (e.g., 'coder', 'planner', 'qa_reviewer', 'spec_gatherer')
         max_thinking_tokens: Token budget for extended thinking (None = disabled)
@@ -490,7 +498,37 @@ def create_client(
        (see security.py for ALLOWED_COMMANDS)
     4. Tool filtering - Each agent type only sees relevant tools (prevents misuse)
     """
+    # =============================================================================
+    # STEP 1: Load global settings (HIGHEST priority)
+    # =============================================================================
+    # Global settings from ~/.claude/settings.json take precedence over all other
+    # configuration sources. This includes model mappings, API endpoints, and tokens.
+    global_settings = GlobalSettings.load()
+
+    # Apply model mappings from global settings
+    # If model is a short name (haiku, sonnet, opus), map it to full model ID
+    model_mappings = global_settings.models
+    if model in model_mappings:
+        # Map short name to full model ID
+        model = model_mappings[model]
+        logger.debug(f"Mapped model from global settings: {model}")
+
+    # Apply base URL from global settings (highest priority)
+    # This sets ANTHROPIC_BASE_URL for custom API endpoints
+    if global_settings.base_url:
+        os.environ["ANTHROPIC_BASE_URL"] = global_settings.base_url
+        logger.debug(f"Applied base URL from global settings: {global_settings.base_url}")
+
+    # Apply timeout from global settings if configured
+    if global_settings.timeout:
+        os.environ["API_TIMEOUT_MS"] = str(global_settings.timeout)
+        logger.debug(f"Applied timeout from global settings: {global_settings.timeout}ms")
+
+    # =============================================================================
+    # STEP 2: Get OAuth token (with global settings priority)
+    # =============================================================================
     # Get OAuth token - Claude CLI handles token lifecycle internally
+    # require_auth_token() now checks global settings first (via auth.py)
     oauth_token = require_auth_token()
 
     # Validate token is not encrypted before passing to SDK
@@ -502,6 +540,7 @@ def create_client(
     os.environ["CLAUDE_CODE_OAUTH_TOKEN"] = oauth_token
 
     # Collect env vars to pass to SDK (ANTHROPIC_BASE_URL, etc.)
+    # get_sdk_env_vars() respects the priority chain set by global settings
     sdk_env = get_sdk_env_vars()
 
     # Debug: Log git-bash path detection on Windows

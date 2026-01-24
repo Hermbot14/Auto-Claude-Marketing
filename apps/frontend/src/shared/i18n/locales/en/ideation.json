@@ -1,0 +1,216 @@
+{
+  "title": "Creative Studio",
+  "description": "AI-powered marketing idea generation",
+  "types": {
+    "campaign_concepts": {
+      "label": "Campaign Concepts",
+      "description": "Comprehensive marketing campaign ideas with themes, messaging, and channel recommendations",
+      "emptyState": "No campaign concepts generated yet",
+      "generating": "Generating campaign concepts...",
+      "completed": "Campaign concepts generated"
+    },
+    "content_ideas": {
+      "label": "Content Ideas",
+      "description": "Individual content piece ideas for blogs, videos, social media, and more",
+      "emptyState": "No content ideas generated yet",
+      "generating": "Generating content ideas...",
+      "completed": "Content ideas generated"
+    },
+    "growth_tactics": {
+      "label": "Growth Tactics",
+      "description": "Strategies for user acquisition, activation, retention, and revenue growth",
+      "emptyState": "No growth tactics generated yet",
+      "generating": "Generating growth tactics...",
+      "completed": "Growth tactics generated"
+    },
+    "brand_partnerships": {
+      "label": "Brand Partnerships",
+      "description": "Collaboration opportunities with complementary brands and influencers",
+      "emptyState": "No brand partnerships generated yet",
+      "generating": "Generating brand partnership ideas...",
+      "completed": "Brand partnerships generated"
+    },
+    "viral_strategies": {
+      "label": "Viral Strategies",
+      "description": "Shareable content ideas designed to maximize organic reach and engagement",
+      "emptyState": "No viral strategies generated yet",
+      "generating": "Generating viral strategies...",
+      "completed": "Viral strategies generated"
+    },
+    "channel_ideas": {
+      "label": "Channel Ideas",
+      "description": "Platform-specific strategies for organic and paid marketing channels",
+      "emptyState": "No channel ideas generated yet",
+      "generating": "Generating channel ideas...",
+      "completed": "Channel ideas generated"
+    }
+  },
+  "contentType": {
+    "blog": "Blog Post",
+    "video": "Video",
+    "infographic": "Infographic",
+    "podcast": "Podcast",
+    "social": "Social Media",
+    "ebook": "eBook",
+    "webinar": "Webinar",
+    "case_study": "Case Study"
+  },
+  "contentGoal": {
+    "awareness": "Awareness",
+    "consideration": "Consideration",
+    "conversion": "Conversion",
+    "retention": "Retention",
+    "advocacy": "Advocacy"
+  },
+  "growthTacticCategory": {
+    "acquisition": "Acquisition",
+    "activation": "Activation",
+    "retention": "Retention",
+    "revenue": "Revenue",
+    "referral": "Referral"
+  },
+  "partnershipType": {
+    "co_marketing": "Co-Marketing",
+    "affiliate": "Affiliate",
+    "sponsorship": "Sponsorship",
+    "influencer": "Influencer",
+    "strategic_alliance": "Strategic Alliance"
+  },
+  "channelStrategyType": {
+    "organic": "Organic",
+    "paid": "Paid",
+    "earned": "Earned",
+    "owned": "Owned"
+  },
+  "budgetLevel": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
+  "estimatedDuration": {
+    "short": "Short",
+    "medium": "Medium",
+    "long": "Long"
+  },
+  "estimatedEffort": {
+    "quick": "Quick",
+    "moderate": "Moderate",
+    "substantial": "Substantial"
+  },
+  "implementationComplexity": {
+    "simple": "Simple",
+    "moderate": "Moderate",
+    "complex": "Complex"
+  },
+  "impact": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
+  "virality": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
+  "tabs": {
+    "all": "All Ideas",
+    "campaign_concepts": "Campaigns",
+    "content_ideas": "Content",
+    "growth_tactics": "Growth",
+    "brand_partnerships": "Partnerships",
+    "viral_strategies": "Viral",
+    "channel_ideas": "Channels"
+  },
+  "emptyState": {
+    "title": "Welcome to Creative Studio",
+    "description": "Generate AI-powered marketing ideas for your campaigns, content, and growth strategies.",
+    "getStarted": "Generate Ideas",
+    "configure": "Configure Settings"
+  },
+  "generation": {
+    "title": "Generating Ideas",
+    "analyzing": "Analyzing project context...",
+    "discovering": "Discovering opportunities...",
+    "generating": "Generating ideas...",
+    "complete": "Generation complete!",
+    "error": "Generation failed",
+    "stop": "Stop Generation",
+    "refresh": "Regenerate Ideas"
+  },
+  "config": {
+    "title": "Configure Creative Studio",
+    "description": "Select which types of marketing ideas to generate",
+    "enabledTypes": "Idea Types",
+    "maxIdeas": "Maximum Ideas per Type",
+    "includeContext": "Include Project Context"
+  },
+  "filters": {
+    "showDismissed": "Show Dismissed",
+    "hideDismissed": "Hide Dismissed",
+    "showArchived": "Show Archived",
+    "hideArchived": "Hide Archived",
+    "selectAll": "Select All",
+    "clearSelection": "Clear Selection",
+    "deleteSelected": "Delete Selected"
+  },
+  "actions": {
+    "generate": "Generate Ideas",
+    "refresh": "Regenerate Ideas",
+    "stop": "Stop",
+    "dismiss": "Dismiss",
+    "dismissAll": "Dismiss All",
+    "convertToTask": "Convert to Task",
+    "goToTask": "Go to Task",
+    "delete": "Delete",
+    "archive": "Archive",
+    "restore": "Restore",
+    "addMore": "Add More Ideas"
+  },
+  "ideaDetails": {
+    "title": "Idea Details",
+    "description": "Description",
+    "rationale": "Rationale",
+    "campaignTheme": "Campaign Theme",
+    "targetAudience": "Target Audience",
+    "channels": "Channels",
+    "keyMessages": "Key Messages",
+    "callToAction": "Call to Action",
+    "expectedOutcomes": "Expected Outcomes",
+    "contentType": "Content Type",
+    "targetPlatform": "Target Platform",
+    "seoKeywords": "SEO Keywords",
+    "suggestedTitle": "Suggested Title",
+    "keyPoints": "Key Points",
+    "tacticCategory": "Category",
+    "mechanism": "How It Works",
+    "targetMetric": "Target Metric",
+    "resources": "Resources",
+    "timeline": "Timeline",
+    "partnershipType": "Partnership Type",
+    "targetPartner": "Target Partner",
+    "collaborationFormat": "Collaboration Format",
+    "valueProposition": "Value Proposition",
+    "audienceAlignment": "Audience Alignment",
+    "estimatedReach": "Estimated Reach",
+    "expectedROI": "Expected ROI",
+    "viralMechanism": "Viral Mechanism",
+    "emotionalTrigger": "Emotional Triggers",
+    "shareIncentives": "Share Incentives",
+    "platform": "Platform",
+    "contentFormat": "Content Format",
+    "amplificationTactics": "Amplification Tactics",
+    "channel": "Channel",
+    "strategyType": "Strategy Type",
+    "contentPillar": "Content Pillar",
+    "frequency": "Frequency",
+    "growthLevers": "Growth Levers",
+    "keyMetrics": "Key Metrics",
+    "estimatedCost": "Estimated Cost",
+    "timeCommitment": "Time Commitment"
+  },
+  "summary": {
+    "totalIdeas": "Total Ideas",
+    "byType": "by Type",
+    "lastGenerated": "Last Generated"
+  }
+}

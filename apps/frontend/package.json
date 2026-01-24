@@ -1,19 +1,19 @@
 {
-  "name": "auto-claude-ui",
-  "version": "2.7.5",
+  "name": "auto-claude-marketing",
+  "version": "1.0.0",
   "type": "module",
-  "description": "Desktop UI for Auto Claude autonomous coding framework",
-  "homepage": "https://github.com/AndyMik90/Auto-Claude",
+  "description": "Marketing website for Auto Claude autonomous coding framework",
+  "homepage": "https://github.com/AndyMik90/Auto-Claude-Marketing",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AndyMik90/Auto-Claude.git"
+    "url": "https://github.com/AndyMik90/Auto-Claude-Marketing.git"
   },
-  "main": "./out/main/index.js",
   "author": {
     "name": "Auto Claude Team",
     "email": "119136210+AndyMik90@users.noreply.github.com"
   },
-  "license": "AGPL-3.0",
+  "license": "MIT",
+  "main": "out/main/index.cjs",
   "engines": {
     "node": ">=24.0.0",
     "npm": ">=10.0.0"
@@ -120,7 +120,7 @@
     "@vitejs/plugin-react": "^5.1.2",
     "autoprefixer": "^10.4.22",
     "cross-env": "^10.1.0",
-    "electron": "39.2.7",
+    "electron": "^39.2.7",
     "electron-builder": "^26.4.0",
     "electron-vite": "^5.0.0",
     "husky": "^9.1.7",

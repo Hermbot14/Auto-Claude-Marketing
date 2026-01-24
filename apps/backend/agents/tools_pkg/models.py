@@ -324,6 +324,46 @@ AGENT_CONFIGS = {
         "auto_claude_tools": [],
         "thinking_default": "high",
     },
+    # ═══════════════════════════════════════════════════════════════════════
+    # MARKETING PHASES
+    # ═══════════════════════════════════════════════════════════════════════
+    "campaign_planner": {
+        "tools": BASE_READ_TOOLS + BASE_WRITE_TOOLS + WEB_TOOLS,
+        "mcp_servers": ["context7", "graphiti", "auto-claude"],
+        "mcp_servers_optional": ["linear"],
+        "auto_claude_tools": [
+            TOOL_GET_BUILD_PROGRESS,
+            TOOL_GET_SESSION_CONTEXT,
+            TOOL_RECORD_DISCOVERY,
+        ],
+        "thinking_default": "high",
+    },
+    "content_creator": {
+        "tools": BASE_READ_TOOLS + BASE_WRITE_TOOLS + WEB_TOOLS,
+        "mcp_servers": ["context7", "graphiti", "auto-claude"],
+        "mcp_servers_optional": ["linear"],
+        "auto_claude_tools": [
+            TOOL_UPDATE_SUBTASK_STATUS,
+            TOOL_GET_BUILD_PROGRESS,
+            TOOL_RECORD_DISCOVERY,
+            TOOL_RECORD_GOTCHA,
+            TOOL_GET_SESSION_CONTEXT,
+        ],
+        "thinking_default": "high",
+    },
+    "social_media": {
+        "tools": BASE_READ_TOOLS + BASE_WRITE_TOOLS + WEB_TOOLS,
+        "mcp_servers": ["context7", "graphiti", "auto-claude"],
+        "mcp_servers_optional": ["linear"],
+        "auto_claude_tools": [
+            TOOL_UPDATE_SUBTASK_STATUS,
+            TOOL_GET_BUILD_PROGRESS,
+            TOOL_RECORD_DISCOVERY,
+            TOOL_RECORD_GOTCHA,
+            TOOL_GET_SESSION_CONTEXT,
+        ],
+        "thinking_default": "high",
+    },
 }
 
 

@@ -5,10 +5,11 @@
   },
   "items": {
     "kanban": "Tableau Kanban",
+    "contentCalendar": "Calendrier de Contenu",
     "terminals": "Terminaux Agent",
-    "insights": "Insights",
+    "insights": "Intelligence Marketing",
     "roadmap": "Feuille de route",
-    "ideation": "Idéation",
+    "ideation": "Studio Créatif",
     "changelog": "Journal des modifications",
     "context": "Contexte",
     "githubIssues": "Issues GitHub",

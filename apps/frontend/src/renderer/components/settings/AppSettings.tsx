@@ -18,7 +18,8 @@ import {
   Globe,
   Code,
   Bug,
-  Users
+  Users,
+  Key
 } from 'lucide-react';
 
 // GitLab icon component (lucide-react doesn't have one)
@@ -53,6 +54,7 @@ import { DebugSettings } from './DebugSettings';
 import { AccountSettings } from './AccountSettings';
 import { ProjectSelector } from './ProjectSelector';
 import { ProjectSettingsContent, ProjectSettingsSection } from './ProjectSettingsContent';
+import { ApiSettings } from '../../features/api-settings';
 import { useProjectStore } from '../../stores/project-store';
 import type { UseProjectSettingsReturn } from '../project-settings/hooks/useProjectSettings';
 
@@ -65,7 +67,7 @@ interface AppSettingsDialogProps {
 }
 
 // App-level settings sections
-export type AppSection = 'appearance' | 'display' | 'language' | 'devtools' | 'agent' | 'paths' | 'accounts' | 'updates' | 'notifications' | 'debug';
+export type AppSection = 'appearance' | 'display' | 'language' | 'devtools' | 'agent' | 'paths' | 'accounts' | 'apiSettings' | 'updates' | 'notifications' | 'debug';
 
 interface NavItemConfig<T extends string> {
   id: T;
@@ -80,6 +82,7 @@ const appNavItemsConfig: NavItemConfig<AppSection>[] = [
   { id: 'agent', icon: Bot },
   { id: 'paths', icon: FolderOpen },
   { id: 'accounts', icon: Users },
+  { id: 'apiSettings', icon: Key },
   { id: 'updates', icon: Package },
   { id: 'notifications', icon: Bell },
   { id: 'debug', icon: Bug }
@@ -191,6 +194,8 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
         return <GeneralSettings settings={settings} onSettingsChange={setSettings} section="paths" />;
       case 'accounts':
         return <AccountSettings settings={settings} onSettingsChange={setSettings} isOpen={open} />;
+      case 'apiSettings':
+        return <ApiSettings />;
       case 'updates':
         return <AdvancedSettings settings={settings} onSettingsChange={setSettings} section="updates" version={version} />;
       case 'notifications':

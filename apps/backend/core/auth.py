@@ -4,6 +4,13 @@ Authentication helpers for Auto Claude.
 Provides centralized authentication token resolution with fallback support
 for multiple environment variables, and SDK environment variable passthrough
 for custom API endpoints.
+
+Configuration priority chain:
+1. Global ~/.claude/settings.json (HIGHEST priority)
+2. Project .env file
+3. System environment variables
+4. System credential store
+5. Hardcoded defaults
 """
 
 import json
@@ -13,6 +20,7 @@ import shutil
 import subprocess
 from typing import TYPE_CHECKING
 
+from core.global_settings import GlobalSettings
 from core.platform import (
     is_linux,
     is_macos,
@@ -557,7 +565,7 @@ def _get_token_from_config_dir(config_dir: str) -> str | None:
 
 def get_auth_token(config_dir: str | None = None) -> str | None:
     """
-    Get authentication token from environment variables or credential store.
+    Get authentication token from global settings, environment variables, or credential store.
 
     Args:
         config_dir: Optional custom config directory (profile's configDir).
@@ -565,10 +573,11 @@ def get_auth_token(config_dir: str | None = None) -> str | None:
                    If None, checks CLAUDE_CONFIG_DIR env var, then uses default locations.
 
     Checks multiple sources in priority order:
-    1. CLAUDE_CODE_OAUTH_TOKEN (env var)
-    2. ANTHROPIC_AUTH_TOKEN (CCR/proxy env var for enterprise setups)
-    3. Custom config directory (config_dir param or CLAUDE_CONFIG_DIR env var)
-    4. System credential store (macOS Keychain, Windows Credential Manager, Linux Secret Service)
+    1. Global ~/.claude/settings.json (HIGHEST priority - NEW)
+    2. CLAUDE_CODE_OAUTH_TOKEN (env var)
+    3. ANTHROPIC_AUTH_TOKEN (CCR/proxy env var for enterprise setups)
+    4. Custom config directory (config_dir param or CLAUDE_CONFIG_DIR env var)
+    5. System credential store (macOS Keychain, Windows Credential Manager, Linux Secret Service)
 
     NOTE: ANTHROPIC_API_KEY is intentionally NOT supported to prevent
     silent billing to user's API credits when OAuth is misconfigured.
@@ -579,23 +588,31 @@ def get_auth_token(config_dir: str | None = None) -> str | None:
     Returns:
         Token string if found, None otherwise
     """
-    # First check environment variables (highest priority)
+    # STEP 1: Check global settings first (HIGHEST priority)
+    # This reads from ~/.claude/settings.json env.ANTHROPIC_AUTH_TOKEN
+    global_settings = GlobalSettings.load()
+    global_token = global_settings.api_token
+    if global_token:
+        logger.debug("Using auth token from global settings (~/.claude/settings.json)")
+        return _try_decrypt_token(global_token)
+
+    # STEP 2: Check environment variables (second priority)
     for var in AUTH_TOKEN_ENV_VARS:
         token = os.environ.get(var)
         if token:
             return _try_decrypt_token(token)
 
-    # Check CLAUDE_CONFIG_DIR environment variable (profile's custom config directory)
+    # STEP 3: Check CLAUDE_CONFIG_DIR environment variable (profile's custom config directory)
     env_config_dir = os.environ.get("CLAUDE_CONFIG_DIR")
     effective_config_dir = config_dir or env_config_dir
 
-    # If a custom config directory is specified, read from there
+    # STEP 4: If a custom config directory is specified, read from there
     if effective_config_dir:
         token = _get_token_from_config_dir(effective_config_dir)
         if token:
             return _try_decrypt_token(token)
 
-    # Fallback to system credential store (default locations)
+    # STEP 5: Fallback to system credential store (default locations)
     return _try_decrypt_token(get_token_from_keychain())
 
 
@@ -608,7 +625,12 @@ def get_auth_token_source(config_dir: str | None = None) -> str | None:
                    If provided, checks this directory for credentials.
                    If None, checks CLAUDE_CONFIG_DIR env var.
     """
-    # Check environment variables first
+    # Check global settings first (HIGHEST priority)
+    global_settings = GlobalSettings.load()
+    if global_settings.api_token:
+        return "~/.claude/settings.json"
+
+    # Check environment variables
     for var in AUTH_TOKEN_ENV_VARS:
         if os.environ.get(var):
             return var

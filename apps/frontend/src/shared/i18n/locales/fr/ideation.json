@@ -1,0 +1,216 @@
+{
+  "title": "Studio Creatif",
+  "description": "Generation d'idees marketing alimentee par l'IA",
+  "types": {
+    "campaign_concepts": {
+      "label": "Concepts de Campagne",
+      "description": "Idees completes de campagnes marketing avec themes, messages et recommandations de canaux",
+      "emptyState": "Aucun concept de campagne genere pour le moment",
+      "generating": "Generation des concepts de campagne...",
+      "completed": "Concepts de campagne generes"
+    },
+    "content_ideas": {
+      "label": "Idees de Contenu",
+      "description": "Idees de contenus individuels pour blogs, videos, reseaux sociaux, et plus",
+      "emptyState": "Aucune idee de contenu generee pour le moment",
+      "generating": "Generation des idees de contenu...",
+      "completed": "Idees de contenu generees"
+    },
+    "growth_tactics": {
+      "label": "Tactiques de Croissance",
+      "description": "Strategies d'acquisition, d'activation, de retention et de croissance des revenus",
+      "emptyState": "Aucune tactique de croissance generee pour le moment",
+      "generating": "Generation des tactiques de croissance...",
+      "completed": "Tactiques de croissance generees"
+    },
+    "brand_partnerships": {
+      "label": "Partenariats de Marque",
+      "description": "Opportunites de collaboration avec des marques complementaires et des influenceurs",
+      "emptyState": "Aucun partenariat de marque genere pour le moment",
+      "generating": "Generation des idees de partenariats...",
+      "completed": "Partenariats de marques generes"
+    },
+    "viral_strategies": {
+      "label": "Strategies Virales",
+      "description": "Idees de contenu partageables concues pour maximiser la portee organique et l'engagement",
+      "emptyState": "Aucune strategie virale generee pour le moment",
+      "generating": "Generation des strategies virales...",
+      "completed": "Strategies virales generees"
+    },
+    "channel_ideas": {
+      "label": "Idees de Canaux",
+      "description": "Strategies specifiques aux plateformes pour les canaux marketing organiques et payants",
+      "emptyState": "Aucune idee de canal generee pour le moment",
+      "generating": "Generation des idees de canaux...",
+      "completed": "Idees de canaux generees"
+    }
+  },
+  "contentType": {
+    "blog": "Article de Blog",
+    "video": "Video",
+    "infographic": "Infographie",
+    "podcast": "Podcast",
+    "social": "Reseaux Sociaux",
+    "ebook": "Livre Numerique",
+    "webinar": "Webinaire",
+    "case_study": "Etude de Cas"
+  },
+  "contentGoal": {
+    "awareness": "Notoriete",
+    "consideration": "Consideration",
+    "conversion": "Conversion",
+    "retention": "Retention",
+    "advocacy": "Recommendation"
+  },
+  "growthTacticCategory": {
+    "acquisition": "Acquisition",
+    "activation": "Activation",
+    "retention": "Retention",
+    "revenue": "Revenus",
+    "referral": "Parrainage"
+  },
+  "partnershipType": {
+    "co_marketing": "Co-Marketing",
+    "affiliate": "Affiliation",
+    "sponsorship": "Parrainage",
+    "influencer": "Influenceur",
+    "strategic_alliance": "Alliance Strategique"
+  },
+  "channelStrategyType": {
+    "organic": "Organique",
+    "paid": "Payant",
+    "earned": "Gagne",
+    "owned": "Possede"
+  },
+  "budgetLevel": {
+    "low": "Faible",
+    "medium": "Moyen",
+    "high": "Eleve"
+  },
+  "estimatedDuration": {
+    "short": "Court",
+    "medium": "Moyen",
+    "long": "Long"
+  },
+  "estimatedEffort": {
+    "quick": "Rapide",
+    "moderate": "Modere",
+    "substantial": "Important"
+  },
+  "implementationComplexity": {
+    "simple": "Simple",
+    "moderate": "Modere",
+    "complex": "Complexe"
+  },
+  "impact": {
+    "low": "Faible",
+    "medium": "Moyen",
+    "high": "Eleve"
+  },
+  "virality": {
+    "low": "Faible",
+    "medium": "Moyen",
+    "high": "Eleve"
+  },
+  "tabs": {
+    "all": "Toutes les Idees",
+    "campaign_concepts": "Campagnes",
+    "content_ideas": "Contenu",
+    "growth_tactics": "Croissance",
+    "brand_partnerships": "Partenariats",
+    "viral_strategies": "Viral",
+    "channel_ideas": "Canaux"
+  },
+  "emptyState": {
+    "title": "Bienvenue dans le Studio Creatif",
+    "description": "Generez des idees marketing alimentees par l'IA pour vos campagnes, contenus et strategies de croissance.",
+    "getStarted": "Generer des Idees",
+    "configure": "Configurer les Parametres"
+  },
+  "generation": {
+    "title": "Generation des Idees",
+    "analyzing": "Analyse du contexte du projet...",
+    "discovering": "Decouverte des opportunites...",
+    "generating": "Generation des idees...",
+    "complete": "Generation terminee !",
+    "error": "Echec de la generation",
+    "stop": "Arreter la Generation",
+    "refresh": "Regenerer les Idees"
+  },
+  "config": {
+    "title": "Configurer le Studio Creatif",
+    "description": "Selectionnez les types d'idees marketing a generer",
+    "enabledTypes": "Types d'Idees",
+    "maxIdeas": "Maximum d'Idees par Type",
+    "includeContext": "Inclure le Contexte du Projet"
+  },
+  "filters": {
+    "showDismissed": "Afficher Rejetees",
+    "hideDismissed": "Masquer Rejetees",
+    "showArchived": "Afficher Archivees",
+    "hideArchived": "Masquer Archivees",
+    "selectAll": "Tout Selectionner",
+    "clearSelection": "Effacer la Selection",
+    "deleteSelected": "Supprimer la Selection"
+  },
+  "actions": {
+    "generate": "Generer des Idees",
+    "refresh": "Regenerer les Idees",
+    "stop": "Arreter",
+    "dismiss": "Rejeter",
+    "dismissAll": "Tout Rejeter",
+    "convertToTask": "Convertir en Tache",
+    "goToTask": "Aller a la Tache",
+    "delete": "Supprimer",
+    "archive": "Archiver",
+    "restore": "Restaurer",
+    "addMore": "Ajouter Plus d'Idees"
+  },
+  "ideaDetails": {
+    "title": "Details de l'Idee",
+    "description": "Description",
+    "rationale": "Justification",
+    "campaignTheme": "Theme de Campagne",
+    "targetAudience": "Public Cible",
+    "channels": "Canaux",
+    "keyMessages": "Messages Cles",
+    "callToAction": "Appel a l'Action",
+    "expectedOutcomes": "Resultats Attendus",
+    "contentType": "Type de Contenu",
+    "targetPlatform": "Plateforme Cible",
+    "seoKeywords": "Mots-cles SEO",
+    "suggestedTitle": "Titre Suggere",
+    "keyPoints": "Points Cles",
+    "tacticCategory": "Categorie",
+    "mechanism": "Fonctionnement",
+    "targetMetric": "Metrique Cible",
+    "resources": "Ressources",
+    "timeline": "Chronologie",
+    "partnershipType": "Type de Partenariat",
+    "targetPartner": "Partenaire Cible",
+    "collaborationFormat": "Format de Collaboration",
+    "valueProposition": "Proposition de Valeur",
+    "audienceAlignment": "Alignement des Audiences",
+    "estimatedReach": "Portee Estimee",
+    "expectedROI": "ROI Attendu",
+    "viralMechanism": "Mecanisme Viral",
+    "emotionalTrigger": "Declencheurs Emotionnels",
+    "shareIncentives": "Incitations au Partage",
+    "platform": "Plateforme",
+    "contentFormat": "Format de Contenu",
+    "amplificationTactics": "Tactiques d'Amplification",
+    "channel": "Canal",
+    "strategyType": "Type de Strategie",
+    "contentPillar": "Pilier de Contenu",
+    "frequency": "Frequence",
+    "growthLevers": "Leviers de Croissance",
+    "keyMetrics": "Metriques Cles",
+    "estimatedCost": "Cout Estime",
+    "timeCommitment": "Engagement Temps"
+  },
+  "summary": {
+    "totalIdeas": "Total des Idees",
+    "byType": "par Type",
+    "lastGenerated": "Derniere Generation"
+  }
+}

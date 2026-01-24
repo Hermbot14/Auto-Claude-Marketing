@@ -1,0 +1,81 @@
+{
+  "title": "Content Calendar",
+  "description": "Plan and schedule your marketing campaigns",
+  "navigation": {
+    "previous": "Previous",
+    "next": "Next",
+    "today": "Today",
+    "selectView": "Select view"
+  },
+  "views": {
+    "month": "Month",
+    "week": "Week",
+    "day": "Day",
+    "list": "List",
+    "noCampaigns": "No campaigns scheduled",
+    "noCampaignsDescription": "There are no campaigns scheduled for this day. Click 'Add Campaign' to create one.",
+    "noCampaignsInList": "No campaigns found. Try adjusting your filters.",
+    "allCampaigns": "All Campaigns"
+  },
+  "contentTypes": {
+    "blog": "Blog Post",
+    "social": "Social Media",
+    "email": "Email Campaign",
+    "ad": "Advertisement",
+    "video": "Video",
+    "other": "Other"
+  },
+  "filters": {
+    "title": "Filters",
+    "filters": "Filters",
+    "searchPlaceholder": "Search campaigns...",
+    "contentTypes": "Content Types",
+    "status": "Status",
+    "platforms": "Platforms",
+    "dateRange": "Date Range",
+    "clearFilters": "Clear Filters"
+  },
+  "sort": {
+    "date": "Date",
+    "title": "Title",
+    "status": "Status",
+    "priority": "Priority",
+    "contentType": "Content Type",
+    "toggleOrder": "Toggle sort order"
+  },
+  "actions": {
+    "addCampaign": "Add Campaign",
+    "editCampaign": "Edit Campaign",
+    "deleteCampaign": "Delete Campaign",
+    "duplicateCampaign": "Duplicate Campaign",
+    "scheduleCampaign": "Schedule Campaign"
+  },
+  "dialog": {
+    "editTitle": "Edit Campaign",
+    "editDescription": "Update the campaign details below.",
+    "title": "Title",
+    "titlePlaceholder": "Enter campaign title",
+    "description": "Description",
+    "descriptionPlaceholder": "Enter campaign description",
+    "contentType": "Content Type",
+    "status": "Status",
+    "priority": "Priority",
+    "scheduledDate": "Scheduled Date",
+    "dueDate": "Due Date",
+    "estimatedHours": "Estimated Hours",
+    "platforms": "Platforms"
+  },
+  "conflicts": {
+    "title": "Scheduling Conflict",
+    "description": "This campaign conflicts with other campaigns scheduled for the same date. Do you want to schedule it anyway?",
+    "conflictingWith": "Conflicting with",
+    "scheduleAnyway": "Schedule Anyway"
+  },
+  "toasts": {
+    "campaignCreated": "Campaign created successfully",
+    "campaignUpdated": "Campaign updated successfully",
+    "campaignDeleted": "Campaign deleted successfully",
+    "campaignMoved": "Campaign moved to {{date}}",
+    "conflictResolved": "Scheduling conflict resolved"
+  }
+}

@@ -78,6 +78,18 @@ class AgentRunner:
             interactive=interactive,
         )
 
+        # Determine if this is a marketing campaign project
+        project_type = self._detect_project_type()
+
+        # For marketing planner, use the marketing-specific prompt
+        if prompt_file == "planner.md" and project_type == "marketing_hub":
+            prompt_file = "planner_marketing.md"
+            debug(
+                "agent_runner",
+                "Using marketing planner prompt",
+                project_type=project_type,
+            )
+
         prompt_path = Path(__file__).parent.parent.parent / "prompts" / prompt_file
 
         if not prompt_path.exists():
@@ -291,3 +303,38 @@ class AgentRunner:
             return result_str
 
         return None
+
+    def _detect_project_type(self) -> str:
+        """Detect the project type from project_index.json or project context.
+
+        Returns:
+            Project type string (e.g., "marketing_hub", "single", "monorepo")
+        """
+        import json
+
+        # Check project_index.json in spec directory first
+        spec_index = self.spec_dir / "project_index.json"
+        if spec_index.exists():
+            try:
+                with open(spec_index, encoding="utf-8") as f:
+                    index = json.load(f)
+                    return index.get("project_type", "unknown")
+            except (json.JSONDecodeError, OSError):
+                pass
+
+        # Check project_index.json in auto-claude directory
+        auto_build_index = self.project_dir / ".auto-claude" / "project_index.json"
+        if auto_build_index.exists():
+            try:
+                with open(auto_build_index, encoding="utf-8") as f:
+                    index = json.load(f)
+                    return index.get("project_type", "unknown")
+            except (json.JSONDecodeError, OSError):
+                pass
+
+        # Check if this is the marketing hub project by directory structure
+        # Marketing Hub has specific directories like campaigns/, briefs/, etc.
+        if (self.project_dir / "campaigns").exists() or (self.project_dir / "briefs").exists():
+            return "marketing_hub"
+
+        return "unknown"

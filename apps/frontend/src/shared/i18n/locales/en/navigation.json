@@ -5,10 +5,11 @@
   },
   "items": {
     "kanban": "Kanban Board",
+    "contentCalendar": "Content Calendar",
     "terminals": "Agent Terminals",
-    "insights": "Insights",
+    "insights": "Marketing Intelligence",
     "roadmap": "Roadmap",
-    "ideation": "Ideation",
+    "ideation": "Creative Studio",
     "changelog": "Changelog",
     "context": "Context",
     "githubIssues": "GitHub Issues",
@@ -28,7 +29,7 @@
     "help": "Help & Feedback"
   },
   "messages": {
-    "initializeToCreateTasks": "Initialize Auto Claude to create tasks"
+    "initializeToCreateTasks": "Initialize Marketing Hub to create campaigns"
   },
   "updateBanner": {
     "title": "Update Available",

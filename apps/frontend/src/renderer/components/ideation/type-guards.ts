@@ -1,33 +1,61 @@
 import type {
   Idea,
-  CodeImprovementIdea,
-  UIUXImprovementIdea,
-  DocumentationGapIdea,
-  SecurityHardeningIdea,
-  PerformanceOptimizationIdea,
-  CodeQualityIdea
+  CampaignConceptIdea,
+  ContentIdeaIdea,
+  GrowthTacticIdea,
+  BrandPartnershipIdea,
+  ViralStrategyIdea,
+  ChannelIdeaIdea
 } from '../../../shared/types';
 
-export function isCodeImprovementIdea(idea: Idea): idea is CodeImprovementIdea {
-  return idea.type === 'code_improvements';
+// Marketing idea type guards for Creative Studio
+
+export function isCampaignConceptIdea(idea: Idea): idea is CampaignConceptIdea {
+  return idea.type === 'campaign_concepts';
 }
 
-export function isUIUXIdea(idea: Idea): idea is UIUXImprovementIdea {
-  return idea.type === 'ui_ux_improvements';
+export function isContentIdeaIdea(idea: Idea): idea is ContentIdeaIdea {
+  return idea.type === 'content_ideas';
 }
 
-export function isDocumentationGapIdea(idea: Idea): idea is DocumentationGapIdea {
-  return idea.type === 'documentation_gaps';
+export function isGrowthTacticIdea(idea: Idea): idea is GrowthTacticIdea {
+  return idea.type === 'growth_tactics';
 }
 
-export function isSecurityHardeningIdea(idea: Idea): idea is SecurityHardeningIdea {
+export function isBrandPartnershipIdea(idea: Idea): idea is BrandPartnershipIdea {
+  return idea.type === 'brand_partnerships';
+}
+
+export function isViralStrategyIdea(idea: Idea): idea is ViralStrategyIdea {
+  return idea.type === 'viral_strategies';
+}
+
+export function isChannelIdeaIdea(idea: Idea): idea is ChannelIdeaIdea {
+  return idea.type === 'channel_ideas';
+}
+
+// Legacy type guards for backward compatibility during migration
+// TODO: Remove once all components are migrated to marketing types
+export function isCodeImprovementIdea(idea: Idea): boolean {
+  return idea.type === 'code_improvement';
+}
+
+export function isUIUXIdea(idea: Idea): boolean {
+  return idea.type === 'uiux_improvement';
+}
+
+export function isDocumentationGapIdea(idea: Idea): boolean {
+  return idea.type === 'documentation_gap';
+}
+
+export function isSecurityHardeningIdea(idea: Idea): boolean {
   return idea.type === 'security_hardening';
 }
 
-export function isPerformanceOptimizationIdea(idea: Idea): idea is PerformanceOptimizationIdea {
-  return idea.type === 'performance_optimizations';
+export function isPerformanceOptimizationIdea(idea: Idea): boolean {
+  return idea.type === 'performance_optimization';
 }
 
-export function isCodeQualityIdea(idea: Idea): idea is CodeQualityIdea {
+export function isCodeQualityIdea(idea: Idea): boolean {
   return idea.type === 'code_quality';
 }

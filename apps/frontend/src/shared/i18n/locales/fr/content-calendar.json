@@ -1,0 +1,81 @@
+{
+  "title": "Calendrier de Contenu",
+  "description": "Planifiez et programmez vos campagnes marketing",
+  "navigation": {
+    "previous": "Précédent",
+    "next": "Suivant",
+    "today": "Aujourd'hui",
+    "selectView": "Sélectionner une vue"
+  },
+  "views": {
+    "month": "Mois",
+    "week": "Semaine",
+    "day": "Jour",
+    "list": "Liste",
+    "noCampaigns": "Aucune campagne programmée",
+    "noCampaignsDescription": "Il n'y a pas de campagnes programmées pour ce jour. Cliquez sur 'Ajouter une campagne' pour en créer une.",
+    "noCampaignsInList": "Aucune campagne trouvée. Essayez d'ajuster vos filtres.",
+    "allCampaigns": "Toutes les Campagnes"
+  },
+  "contentTypes": {
+    "blog": "Article de Blog",
+    "social": "Réseaux Sociaux",
+    "email": "Campagne Email",
+    "ad": "Publicité",
+    "video": "Vidéo",
+    "other": "Autre"
+  },
+  "filters": {
+    "title": "Filtres",
+    "filters": "Filtres",
+    "searchPlaceholder": "Rechercher des campagnes...",
+    "contentTypes": "Types de Contenu",
+    "status": "Statut",
+    "platforms": "Plateformes",
+    "dateRange": "Période",
+    "clearFilters": "Effacer les Filtres"
+  },
+  "sort": {
+    "date": "Date",
+    "title": "Titre",
+    "status": "Statut",
+    "priority": "Priorité",
+    "contentType": "Type de Contenu",
+    "toggleOrder": "Inverser l'ordre"
+  },
+  "actions": {
+    "addCampaign": "Ajouter une Campagne",
+    "editCampaign": "Modifier la Campagne",
+    "deleteCampaign": "Supprimer la Campagne",
+    "duplicateCampaign": "Dupliquer la Campagne",
+    "scheduleCampaign": "Programmer la Campagne"
+  },
+  "dialog": {
+    "editTitle": "Modifier la Campagne",
+    "editDescription": "Mettez à jour les détails de la campagne ci-dessous.",
+    "title": "Titre",
+    "titlePlaceholder": "Entrer le titre de la campagne",
+    "description": "Description",
+    "descriptionPlaceholder": "Entrer la description de la campagne",
+    "contentType": "Type de Contenu",
+    "status": "Statut",
+    "priority": "Priorité",
+    "scheduledDate": "Date Programmée",
+    "dueDate": "Date d'Échéance",
+    "estimatedHours": "Heures Estimées",
+    "platforms": "Plateformes"
+  },
+  "conflicts": {
+    "title": "Conflit de Programmation",
+    "description": "Cette campagne est en conflit avec d'autres campagnes programmées à la même date. Voulez-vous la programmer quand même ?",
+    "conflictingWith": "En conflit avec",
+    "scheduleAnyway": "Programmer Quand Même"
+  },
+  "toasts": {
+    "campaignCreated": "Campagne créée avec succès",
+    "campaignUpdated": "Campagne mise à jour avec succès",
+    "campaignDeleted": "Campagne supprimée avec succès",
+    "campaignMoved": "Campagne déplacée vers {{date}}",
+    "conflictResolved": "Conflit de programmation résolu"
+  }
+}

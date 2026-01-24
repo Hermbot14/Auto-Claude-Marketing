@@ -44,13 +44,22 @@ function isValidDropColumn(id: string): id is typeof TASK_STATUS_COLUMNS[number]
 
 /**
  * Get the visual column for a task status.
+ * Marketing Campaign Workflow:
+ * - draft: Campaign ideas being developed
+ * - scheduled: Content scheduled for publication
+ * - creating: Actively creating content
+ * - review: Quality review in progress
+ * - published: Live/launched campaigns
+ * - analyzing: Performance review
+ * - done: Complete
+ *
  * pr_created tasks are displayed in the 'done' column, so we map them accordingly.
- * error tasks are displayed in the 'human_review' column (errors need human attention).
+ * error tasks are displayed in the 'review' column (errors need human attention).
  * This is used to compare visual positions during drag-and-drop operations.
  */
 function getVisualColumn(status: TaskStatus): typeof TASK_STATUS_COLUMNS[number] {
   if (status === 'pr_created') return 'done';
-  if (status === 'error') return 'human_review';
+  if (status === 'error') return 'review';
   return status;
 }
 
@@ -153,34 +162,40 @@ function droppableColumnPropsAreEqual(
   return tasksEqual;
 }
 
-// Empty state content for each column
+// Empty state content for each column - Marketing Campaign Workflow
 const getEmptyStateContent = (status: TaskStatus, t: (key: string) => string): { icon: React.ReactNode; message: string; subtext?: string } => {
   switch (status) {
-    case 'backlog':
+    case 'draft':
       return {
         icon: <Inbox className="h-6 w-6 text-muted-foreground/50" />,
         message: t('kanban.emptyBacklog'),
         subtext: t('kanban.emptyBacklogHint')
       };
-    case 'queue':
+    case 'scheduled':
       return {
         icon: <Loader2 className="h-6 w-6 text-muted-foreground/50" />,
         message: t('kanban.emptyQueue'),
         subtext: t('kanban.emptyQueueHint')
       };
-    case 'in_progress':
+    case 'creating':
       return {
         icon: <Loader2 className="h-6 w-6 text-muted-foreground/50" />,
         message: t('kanban.emptyInProgress'),
         subtext: t('kanban.emptyInProgressHint')
       };
-    case 'ai_review':
+    case 'review':
       return {
         icon: <Eye className="h-6 w-6 text-muted-foreground/50" />,
         message: t('kanban.emptyAiReview'),
         subtext: t('kanban.emptyAiReviewHint')
       };
-    case 'human_review':
+    case 'published':
+      return {
+        icon: <CheckCircle2 className="h-6 w-6 text-muted-foreground/50" />,
+        message: t('kanban.emptyDone'),
+        subtext: t('kanban.emptyDoneHint')
+      };
+    case 'analyzing':
       return {
         icon: <Eye className="h-6 w-6 text-muted-foreground/50" />,
         message: t('kanban.emptyHumanReview'),
@@ -206,12 +221,12 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
     id: status
   });
 
-  // Calculate selection state for human_review column
-  const isHumanReview = status === 'human_review';
+  // Calculate selection state for review column (marketing workflow)
+  const isReviewColumn = status === 'review';
   const selectedCount = selectedTaskIds?.size ?? 0;
   const taskCount = tasks.length;
-  const isAllSelected = isHumanReview && taskCount > 0 && selectedCount === taskCount;
-  const isSomeSelected = isHumanReview && selectedCount > 0 && selectedCount < taskCount;
+  const isAllSelected = isReviewColumn && taskCount > 0 && selectedCount === taskCount;
+  const isSomeSelected = isReviewColumn && selectedCount > 0 && selectedCount < taskCount;
 
   // Determine checkbox checked state: true (all), 'indeterminate' (some), false (none)
   const selectAllCheckedState: boolean | 'indeterminate' = isAllSelected
@@ -279,15 +294,17 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
 
   const getColumnBorderColor = (): string => {
     switch (status) {
-      case 'backlog':
+      case 'draft':
         return 'column-backlog';
-      case 'queue':
+      case 'scheduled':
         return 'column-queue';
-      case 'in_progress':
+      case 'creating':
         return 'column-in-progress';
-      case 'ai_review':
+      case 'review':
         return 'column-ai-review';
-      case 'human_review':
+      case 'published':
+        return 'column-done';
+      case 'analyzing':
         return 'column-human-review';
       case 'done':
         return 'column-done';
@@ -311,8 +328,8 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
       {/* Column header - enhanced styling */}
       <div className="flex items-center justify-between p-4 border-b border-white/5">
         <div className="flex items-center gap-2.5">
-          {/* Select All checkbox for human_review column */}
-          {isHumanReview && onSelectAll && onDeselectAll && (
+          {/* Select All checkbox for review column (marketing workflow) */}
+          {isReviewColumn && onSelectAll && onDeselectAll && (
             <Tooltip delayDuration={200}>
               <TooltipTrigger asChild>
                 <div className="flex items-center">
@@ -333,7 +350,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
           <h2 className="font-semibold text-sm text-foreground">
             {t(TASK_STATUS_LABELS[status])}
           </h2>
-          {status === 'in_progress' && maxParallelTasks ? (
+          {status === 'creating' && maxParallelTasks ? (
             <span className={cn(
               "column-count-badge",
               tasks.length >= maxParallelTasks && "bg-warning/20 text-warning border-warning/30"
@@ -347,7 +364,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
           )}
         </div>
         <div className="flex items-center gap-1">
-          {status === 'backlog' && (
+          {status === 'draft' && (
             <>
               {onQueueAll && tasks.length > 0 && (
                 <Button
@@ -373,7 +390,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
               )}
             </>
           )}
-          {status === 'queue' && onQueueSettings && (
+          {status === 'scheduled' && onQueueSettings && (
             <Button
               variant="ghost"
               size="icon"
@@ -548,13 +565,15 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
 
   const tasksByStatus = useMemo(() => {
     // Note: pr_created tasks are shown in the 'done' column since they're essentially complete
-    // Note: error tasks are shown in the 'human_review' column since they need human attention
+    // Note: error tasks are shown in the 'review' column since they need human attention
+    // Marketing Campaign Workflow: draft → scheduled → creating → review → published → analyzing → done
     const grouped: Record<typeof TASK_STATUS_COLUMNS[number], Task[]> = {
-      backlog: [],
-      queue: [],
-      in_progress: [],
-      ai_review: [],
-      human_review: [],
+      draft: [],
+      scheduled: [],
+      creating: [],
+      review: [],
+      published: [],
+      analyzing: [],
       done: []
     };
 
@@ -612,16 +631,16 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
     return grouped;
   }, [filteredTasks, taskOrder]);
 
-  // Prune stale IDs when tasks move out of human_review column
+  // Prune stale IDs when tasks move out of review column (marketing workflow)
   useEffect(() => {
-    const validIds = new Set(tasksByStatus.human_review.map(t => t.id));
+    const validIds = new Set(tasksByStatus.review.map(t => t.id));
     setSelectedTaskIds(prev => {
       const filtered = new Set([...prev].filter(id => validIds.has(id)));
       return filtered.size === prev.size ? prev : filtered;
     });
-  }, [tasksByStatus.human_review]);
+  }, [tasksByStatus.review]);
 
-  // Selection callbacks for bulk actions (Human Review column)
+  // Selection callbacks for bulk actions (Review column - marketing workflow)
   const toggleTaskSelection = useCallback((taskId: string) => {
     setSelectedTaskIds(prev => {
       const next = new Set(prev);
@@ -635,10 +654,10 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
   }, []);
 
   const selectAllTasks = useCallback(() => {
-    const humanReviewTasks = tasksByStatus.human_review;
-    const allIds = new Set(humanReviewTasks.map(t => t.id));
+    const reviewTasks = tasksByStatus.review;
+    const allIds = new Set(reviewTasks.map(t => t.id));
     setSelectedTaskIds(allIds);
-  }, [tasksByStatus.human_review]);
+  }, [tasksByStatus.review]);
 
   const deselectAllTasks = useCallback(() => {
     setSelectedTaskIds(new Set());
@@ -646,8 +665,8 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
 
   // Get selected task objects for the BulkPRDialog
   const selectedTasks = useMemo(() => {
-    return tasksByStatus.human_review.filter(task => selectedTaskIds.has(task.id));
-  }, [tasksByStatus.human_review, selectedTaskIds]);
+    return tasksByStatus.review.filter(task => selectedTaskIds.has(task.id));
+  }, [tasksByStatus.review, selectedTaskIds]);
 
   // Handle opening the bulk PR dialog
   const handleOpenBulkPRDialog = useCallback(() => {
@@ -769,19 +788,19 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
   };
 
   /**
-   * Move all backlog tasks to queue
+   * Move all draft campaigns to scheduled (Marketing Campaign Workflow)
    */
   const handleQueueAll = async () => {
-    const backlogTasks = tasksByStatus.backlog;
-    if (backlogTasks.length === 0) return;
+    const draftTasks = tasksByStatus.draft;
+    if (draftTasks.length === 0) return;
 
     let movedCount = 0;
-    for (const task of backlogTasks) {
-      const result = await persistTaskStatus(task.id, 'queue');
+    for (const task of draftTasks) {
+      const result = await persistTaskStatus(task.id, 'scheduled');
       if (result.success) {
         movedCount++;
       } else {
-        console.error(`[Queue] Failed to move task ${task.id} to queue:`, result.error);
+        console.error(`[Queue] Failed to move campaign ${task.id} to scheduled:`, result.error);
       }
     }
 
@@ -820,13 +839,14 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
   };
 
   /**
-   * Automatically move tasks from Queue to In Progress to fill available capacity
-   * Promotes multiple tasks if needed (e.g., after bulk queue)
+   * Automatically move campaigns from Scheduled to Creating to fill available capacity
+   * Marketing Campaign Workflow: scheduled → creating
+   * Promotes multiple campaigns if needed (e.g., after bulk schedule)
    */
   const processQueue = useCallback(async () => {
     // Prevent concurrent executions to avoid race conditions
     if (isProcessingQueueRef.current) {
-      console.log('[Queue] Already processing queue, skipping duplicate call');
+      console.log('[Queue] Already processing schedule, skipping duplicate call');
       return;
     }
 
@@ -838,43 +858,43 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
       let consecutiveFailures = 0;
       const MAX_CONSECUTIVE_FAILURES = 10; // Safety limit to prevent infinite loop
 
-      // Loop until capacity is full or queue is empty
+      // Loop until capacity is full or schedule is empty
       while (true) {
         // Get CURRENT state from store to ensure accuracy
         const currentTasks = useTaskStore.getState().tasks;
-        const inProgressCount = currentTasks.filter((t) =>
-          t.status === 'in_progress' && !t.metadata?.archivedAt
+        const creatingCount = currentTasks.filter((t) =>
+          t.status === 'creating' && !t.metadata?.archivedAt
         ).length;
-        const queuedTasks = currentTasks.filter((t) =>
-          t.status === 'queue' && !t.metadata?.archivedAt && !attemptedTaskIds.has(t.id)
+        const scheduledTasks = currentTasks.filter((t) =>
+          t.status === 'scheduled' && !t.metadata?.archivedAt && !attemptedTaskIds.has(t.id)
         );
 
-        // Stop if no capacity, no queued tasks, or too many consecutive failures
-        if (inProgressCount >= maxParallelTasks || queuedTasks.length === 0) {
+        // Stop if no capacity, no scheduled tasks, or too many consecutive failures
+        if (creatingCount >= maxParallelTasks || scheduledTasks.length === 0) {
           break;
         }
 
         if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-          console.warn(`[Queue] Stopping queue processing after ${MAX_CONSECUTIVE_FAILURES} consecutive failures`);
+          console.warn(`[Queue] Stopping schedule processing after ${MAX_CONSECUTIVE_FAILURES} consecutive failures`);
           break;
         }
 
-        // Get the oldest task in queue (FIFO ordering)
-        const nextTask = queuedTasks.sort((a, b) => {
+        // Get the oldest task in schedule (FIFO ordering)
+        const nextTask = scheduledTasks.sort((a, b) => {
           const dateA = new Date(a.createdAt).getTime();
           const dateB = new Date(b.createdAt).getTime();
           return dateA - dateB; // Ascending order (oldest first)
         })[0];
 
-        console.log(`[Queue] Auto-promoting task ${nextTask.id} from Queue to In Progress (${inProgressCount + 1}/${maxParallelTasks})`);
-        const result = await persistTaskStatus(nextTask.id, 'in_progress');
+        console.log(`[Queue] Auto-promoting campaign ${nextTask.id} from Scheduled to Creating (${creatingCount + 1}/${maxParallelTasks})`);
+        const result = await persistTaskStatus(nextTask.id, 'creating');
 
         if (result.success) {
           // Reset consecutive failures on success
           consecutiveFailures = 0;
         } else {
           // If promotion failed, log error, mark as attempted, and skip to next task
-          console.error(`[Queue] Failed to promote task ${nextTask.id} to In Progress:`, result.error);
+          console.error(`[Queue] Failed to promote campaign ${nextTask.id} to Creating:`, result.error);
           attemptedTaskIds.add(nextTask.id);
           consecutiveFailures++;
         }
@@ -882,7 +902,7 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
 
       // Log if we had failed tasks
       if (attemptedTaskIds.size > 0) {
-        console.warn(`[Queue] Skipped ${attemptedTaskIds.size} task(s) that failed to promote`);
+        console.warn(`[Queue] Skipped ${attemptedTaskIds.size} campaign(s) that failed to promote`);
       }
     } finally {
       isProcessingQueueRef.current = false;
@@ -890,13 +910,13 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
   }, [maxParallelTasks]);
 
   // Register task status change listener for queue auto-promotion
-  // This ensures processQueue() is called whenever a task leaves in_progress
+  // This ensures processQueue() is called whenever a task leaves creating
   useEffect(() => {
     const unregister = useTaskStore.getState().registerTaskStatusChangeListener(
       (taskId, oldStatus, newStatus) => {
-        // When a task leaves in_progress (e.g., goes to human_review), process the queue
-        if (oldStatus === 'in_progress' && newStatus !== 'in_progress') {
-          console.log(`[Queue] Task ${taskId} left in_progress, processing queue to fill slot`);
+        // When a task leaves creating (e.g., goes to review), process the schedule
+        if (oldStatus === 'creating' && newStatus !== 'creating') {
+          console.log(`[Queue] Task ${taskId} left creating, processing schedule to fill slot`);
           processQueue();
         }
       }
@@ -943,11 +963,12 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
     // Check each column for stale IDs
     let hasStaleIds = false;
     const cleanedOrder: typeof taskOrder = {
-      backlog: [],
-      queue: [],
-      in_progress: [],
-      ai_review: [],
-      human_review: [],
+      draft: [],
+      scheduled: [],
+      creating: [],
+      review: [],
+      published: [],
+      analyzing: [],
       done: [],
       pr_created: [],
       error: []
@@ -1047,24 +1068,24 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
     if (!newStatus || newStatus === oldStatus) return;
 
     // ============================================
-    // QUEUE SYSTEM: Enforce parallel task limit
+    // QUEUE SYSTEM: Enforce parallel campaign limit (Marketing Campaign Workflow)
     // ============================================
-    if (newStatus === 'in_progress') {
+    if (newStatus === 'creating') {
       // Get CURRENT state from store directly to avoid stale prop/memo issues during rapid dragging
       const currentTasks = useTaskStore.getState().tasks;
-      const inProgressCount = currentTasks.filter((t) =>
-        t.status === 'in_progress' && !t.metadata?.archivedAt
+      const creatingCount = currentTasks.filter((t) =>
+        t.status === 'creating' && !t.metadata?.archivedAt
       ).length;
 
-      // If limit reached, move to queue instead
-      if (inProgressCount >= maxParallelTasks) {
-        // Only bypass the capacity check if coming from queue AND queue is NOT being processed
+      // If limit reached, move to scheduled instead
+      if (creatingCount >= maxParallelTasks) {
+        // Only bypass the capacity check if coming from scheduled AND schedule is NOT being processed
         // This prevents race condition where both auto-promotion and manual drag exceed the limit
-        const isAutoPromotionInProgress = oldStatus === 'queue' && isProcessingQueueRef.current;
+        const isAutoPromotionInProgress = oldStatus === 'scheduled' && isProcessingQueueRef.current;
 
         if (!isAutoPromotionInProgress) {
-          console.log(`[Queue] In Progress full (${inProgressCount}/${maxParallelTasks}), moving task to Queue`);
-          newStatus = 'queue';
+          console.log(`[Queue] Creating full (${creatingCount}/${maxParallelTasks}), moving campaign to Scheduled`);
+          newStatus = 'scheduled';
         }
       }
     }
@@ -1074,10 +1095,10 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
     await handleStatusChange(activeTaskId, newStatus, task);
 
     // ============================================
-    // QUEUE SYSTEM: Auto-process queue when slot opens
+    // QUEUE SYSTEM: Auto-process schedule when slot opens (Marketing Campaign Workflow)
     // ============================================
-    if (oldStatus === 'in_progress' && newStatus !== 'in_progress') {
-      // A task left In Progress - check if we can promote from queue
+    if (oldStatus === 'creating' && newStatus !== 'creating') {
+      // A task left Creating - check if we can promote from scheduled
       await processQueue();
     }
   };
@@ -1116,23 +1137,23 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
               onTaskClick={onTaskClick}
               onStatusChange={handleStatusChange}
               isOver={overColumnId === status}
-              onAddClick={status === 'backlog' ? onNewTaskClick : undefined}
-              onQueueAll={status === 'backlog' ? handleQueueAll : undefined}
-              onQueueSettings={status === 'queue' ? () => {
+              onAddClick={status === 'draft' ? onNewTaskClick : undefined}
+              onQueueAll={status === 'draft' ? handleQueueAll : undefined}
+              onQueueSettings={status === 'scheduled' ? () => {
                 // Only open modal if we have a valid projectId
                 if (!projectId) return;
                 queueSettingsProjectIdRef.current = projectId;
                 setShowQueueSettings(true);
               } : undefined}
               onArchiveAll={status === 'done' ? handleArchiveAll : undefined}
-              maxParallelTasks={status === 'in_progress' ? maxParallelTasks : undefined}
+              maxParallelTasks={status === 'creating' ? maxParallelTasks : undefined}
               archivedCount={status === 'done' ? archivedCount : undefined}
               showArchived={status === 'done' ? showArchived : undefined}
               onToggleArchived={status === 'done' ? toggleShowArchived : undefined}
-              selectedTaskIds={status === 'human_review' ? selectedTaskIds : undefined}
-              onSelectAll={status === 'human_review' ? selectAllTasks : undefined}
-              onDeselectAll={status === 'human_review' ? deselectAllTasks : undefined}
-              onToggleSelect={status === 'human_review' ? toggleTaskSelection : undefined}
+              selectedTaskIds={status === 'review' ? selectedTaskIds : undefined}
+              onSelectAll={status === 'review' ? selectAllTasks : undefined}
+              onDeselectAll={status === 'review' ? deselectAllTasks : undefined}
+              onToggleSelect={status === 'review' ? toggleTaskSelection : undefined}
             />
           ))}
         </div>

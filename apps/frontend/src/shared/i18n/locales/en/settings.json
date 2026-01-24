@@ -33,6 +33,10 @@
       "title": "Accounts",
       "description": "Claude accounts & API endpoints"
     },
+    "apiSettings": {
+      "title": "API Configuration",
+      "description": "Configure API settings and model preferences"
+    },
     "updates": {
       "title": "Updates",
       "description": "Auto Claude updates"
@@ -159,6 +163,40 @@
       "cancel": "Cancel",
       "delete": "Delete",
       "deleting": "Deleting..."
+    }
+  },
+  "apiConfig": {
+    "title": "API Configuration",
+    "description": "Configure your API settings and model preferences",
+    "apiToken": "API Token",
+    "apiTokenRequired": "API Token is required",
+    "apiTokenDescription": "Your Anthropic API key. Get one from {{link}}.",
+    "apiTokenLink": "console.anthropic.com",
+    "baseUrl": "Base URL",
+    "baseUrlRequired": "Base URL is required",
+    "baseUrlDescription": "The API endpoint URL. Use the default for Anthropic's API, or a custom URL for compatible services.",
+    "requestTimeout": "Request Timeout",
+    "requestTimeoutDescription": "Maximum time to wait for API responses (30-600 seconds)",
+    "seconds": "s",
+    "placeholder": {
+      "apiToken": "sk-ant-api03-...",
+      "baseUrl": "https://api.anthropic.com"
+    },
+    "actions": {
+      "save": "Save Settings",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "showToken": "Show API token",
+      "hideToken": "Hide API token"
+    },
+    "toast": {
+      "settingsSaved": "Settings saved",
+      "settingsSavedDescription": "API settings have been saved successfully.",
+      "saveFailed": "Save failed",
+      "saveFailedDescription": "Failed to save API settings. Please try again.",
+      "saveError": "An unexpected error occurred.",
+      "changesDiscarded": "Changes discarded",
+      "changesDiscardedDescription": "Your changes have been discarded."
     }
   },
   "modelSelect": {

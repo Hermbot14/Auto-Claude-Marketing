@@ -25,10 +25,14 @@ from .prompt_generator import (
 # Import all functions from prompts
 from .prompts import (
     get_coding_prompt,
+    get_content_creator_prompt,
+    get_email_marketing_prompt,
     get_followup_planner_prompt,
     get_planner_prompt,
     get_qa_fixer_prompt,
     get_qa_reviewer_prompt,
+    get_seo_prompt,
+    get_social_media_prompt,
     is_first_run,
 )
 
@@ -46,6 +50,10 @@ __all__ = [
     "get_followup_planner_prompt",
     "get_qa_reviewer_prompt",
     "get_qa_fixer_prompt",
+    "get_content_creator_prompt",
+    "get_email_marketing_prompt",
+    "get_social_media_prompt",
+    "get_seo_prompt",
     "is_first_run",
     # project_context functions
     "load_project_index",

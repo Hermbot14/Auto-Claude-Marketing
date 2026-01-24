@@ -33,6 +33,10 @@
       "title": "Comptes",
       "description": "Comptes Claude & endpoints API"
     },
+    "apiSettings": {
+      "title": "Configuration API",
+      "description": "Configurer les paramètres API et les préférences de modèle"
+    },
     "updates": {
       "title": "Mises à jour",
       "description": "Mises à jour Auto Claude"
@@ -159,6 +163,40 @@
       "cancel": "Annuler",
       "delete": "Supprimer",
       "deleting": "Suppression..."
+    }
+  },
+  "apiConfig": {
+    "title": "Configuration API",
+    "description": "Configurer vos paramètres API et préférences de modèle",
+    "apiToken": "Jeton API",
+    "apiTokenRequired": "Le jeton API est requis",
+    "apiTokenDescription": "Votre clé API Anthropic. Obtenez-en une sur {{link}}.",
+    "apiTokenLink": "console.anthropic.com",
+    "baseUrl": "URL de base",
+    "baseUrlRequired": "L'URL de base est requise",
+    "baseUrlDescription": "L'URL du endpoint API. Utilisez la valeur par défaut pour l'API Anthropic, ou une URL personnalisée pour les services compatibles.",
+    "requestTimeout": "Délai d'attente de requête",
+    "requestTimeoutDescription": "Temps maximum d'attente pour les réponses API (30-600 secondes)",
+    "seconds": "s",
+    "placeholder": {
+      "apiToken": "sk-ant-api03-...",
+      "baseUrl": "https://api.anthropic.com"
+    },
+    "actions": {
+      "save": "Enregistrer les paramètres",
+      "saving": "Enregistrement...",
+      "cancel": "Annuler",
+      "showToken": "Afficher le jeton API",
+      "hideToken": "Masquer le jeton API"
+    },
+    "toast": {
+      "settingsSaved": "Paramètres enregistrés",
+      "settingsSavedDescription": "Les paramètres API ont été enregistrés avec succès.",
+      "saveFailed": "Échec de l'enregistrement",
+      "saveFailedDescription": "Impossible d'enregistrer les paramètres API. Veuillez réessayer.",
+      "saveError": "Une erreur inattendue s'est produite.",
+      "changesDiscarded": " Modifications ignorées",
+      "changesDiscardedDescription": "Vos modifications ont été ignorées."
     }
   },
   "modelSelect": {

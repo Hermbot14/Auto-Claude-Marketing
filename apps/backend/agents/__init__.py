@@ -2,11 +2,14 @@
 Agents Module
 =============
 
-Modular agent system for autonomous coding.
+Modular agent system for autonomous coding and marketing content creation.
 
 This module provides:
 - run_autonomous_agent: Main coder agent loop
 - run_followup_planner: Follow-up planner for completed specs
+- run_content_creator: Marketing content generation agent
+- run_social_media_agent: Social media content generation and scheduling agent
+- run_email_agent: Email marketing campaigns and drip sequences agent
 - Memory management (Graphiti + file-based fallback)
 - Session management and post-processing
 - Utility functions for git and plan management
@@ -22,6 +25,9 @@ __all__ = [
     # Main API
     "run_autonomous_agent",
     "run_followup_planner",
+    "run_content_creator",
+    "run_social_media_agent",
+    "run_email_agent",
     # Memory
     "debug_memory_system_status",
     "get_graphiti_context",
@@ -53,6 +59,18 @@ def __getattr__(name):
         from .coder import run_autonomous_agent
 
         return run_autonomous_agent
+    elif name == "run_content_creator":
+        from .content_creator import run_content_creator
+
+        return run_content_creator
+    elif name == "run_social_media_agent":
+        from .social_media_agent import run_social_media_agent
+
+        return run_social_media_agent
+    elif name == "run_email_agent":
+        from .email_agent import run_email_agent
+
+        return run_email_agent
     elif name in (
         "debug_memory_system_status",
         "get_graphiti_context",

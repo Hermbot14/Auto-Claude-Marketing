@@ -16,6 +16,7 @@ if str(_PARENT_DIR) not in sys.path:
 
 from core.auth import get_auth_token, get_auth_token_source
 from core.dependency_validator import validate_platform_dependencies
+from core.global_settings import GlobalSettings
 
 
 def import_dotenv():
@@ -72,6 +73,72 @@ from ui import (
 
 # Configuration - uses shorthand that resolves via API Profile if configured
 DEFAULT_MODEL = "sonnet"  # Changed from "opus" (fix #433)
+
+
+def get_default_model() -> str:
+    """
+    Get the default model from global settings.
+
+    Reads the model from global settings (~/.claude/settings.json).
+    Priority chain:
+    1. Global settings ANTHROPIC_DEFAULT_SONNET_MODEL
+    2. Falls back to DEFAULT_MODEL constant
+
+    Returns:
+        Model identifier (short name like "sonnet" or full model ID)
+    """
+    global_settings = GlobalSettings.load()
+    model_mappings = global_settings.models
+
+    # Prefer sonnet as default (most balanced model)
+    if "sonnet" in model_mappings:
+        return "sonnet"
+
+    # Fallback to haiku if sonnet not configured
+    if "haiku" in model_mappings:
+        return "haiku"
+
+    # Fallback to opus if neither sonnet nor haiku configured
+    if "opus" in model_mappings:
+        return "opus"
+
+    # No global model mappings configured, use hardcoded default
+    return DEFAULT_MODEL
+
+
+def resolve_model(model: str | None = None) -> str:
+    """
+    Resolve a model name (short or full) using global settings mappings.
+
+    Args:
+        model: Model identifier (short name like "sonnet", "opus", "haiku",
+               or full model ID). If None, uses default model.
+
+    Returns:
+        Full model ID (e.g., "claude-sonnet-4-5-20250515")
+
+    Examples:
+        >>> resolve_model("sonnet")
+        "claude-sonnet-4-5-20250515"
+        >>> resolve_model("claude-sonnet-4-5-20250515")
+        "claude-sonnet-4-5-20250515"
+        >>> resolve_model(None)
+        "claude-sonnet-4-5-20250515"  # Uses default
+    """
+    # Use default if no model specified
+    if not model:
+        model = get_default_model()
+
+    # Load global settings for model mappings
+    global_settings = GlobalSettings.load()
+    model_mappings = global_settings.models
+
+    # If model is a short name, map it to full model ID
+    if model in model_mappings:
+        return model_mappings[model]
+
+    # Model is already a full ID or not in mappings, return as-is
+    return model
 
 
 def setup_environment() -> Path:
@@ -176,10 +243,18 @@ def validate_environment(spec_dir: Path) -> bool:
         if source:
             print(f"Auth: {source}")
 
-        # Show custom base URL if set
-        base_url = os.environ.get("ANTHROPIC_BASE_URL")
+        # Show custom base URL if set (from global settings or env var)
+        global_settings = GlobalSettings.load()
+        base_url = global_settings.base_url or os.environ.get("ANTHROPIC_BASE_URL")
         if base_url:
             print(f"API Endpoint: {base_url}")
+
+        # Show model configuration from global settings
+        model_mappings = global_settings.models
+        if model_mappings:
+            print(f"Models (from ~/.claude/settings.json):")
+            for short_name, model_id in model_mappings.items():
+                print(f"  {short_name}: {model_id}")
 
     # Check for spec.md in spec directory
     spec_file = spec_dir / "spec.md"
