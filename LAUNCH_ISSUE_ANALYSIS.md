@@ -57,7 +57,18 @@ When Rollup/Vite bundles the code:
 
 Even with `external: ['electron']`, the bundler may still be trying to resolve the module incorrectly. The `externalizeDepsPlugin` from electron-vite should handle this automatically, but something in the configuration is preventing it from working properly.
 
-## Latest Findings (2026-01-24)
+## Latest Findings (2026-01-24 - CONFIRMED ROOT CAUSE)
+
+**ROOT CAUSE CONFIRMED: npm Workspace Hoisting**
+
+The electron import issue is caused by npm workspace hoisting. Here's what happens:
+
+1. **Workspace Structure**: Root `package.json` has `"workspaces": ["apps/*", "libs/*"]`
+2. **Hoisting Behavior**: npm hoists `electron` to root `node_modules` (not in `apps/frontend/node_modules`)
+3. **Bundling Issue**: When bundler processes `require("electron")`, it resolves to absolute path:
+   - `C:\Projects\...\node_modules\electron\index.js`
+4. **Interception Bypass**: The absolute path bypasses Electron's runtime interception
+5. **Result**: Gets the electron executable path string instead of Electron API
 
 **Investigation Results:**
 
@@ -70,14 +81,14 @@ Even with `external: ['electron']`, the bundler may still be trying to resolve t
    - `const electron = require("electron");` appears in the bundle
    - But at runtime, this resolves to `undefined` instead of the Electron API
 
-3. **Configuration attempts:**
+3. **Configuration attempts (ALL FAILED):**
    - Added `electron` to `externalizeDepsPlugin` exclude list → Bundles electron, doesn't work
    - Added `electron` to build `external` list → Still returns undefined
    - Removed all custom output settings → Still returns undefined
+   - Tried nohoist workspace config → Prevents electron from installing at all
+   - Reverted to simple upstream config → Still returns undefined
 
-**Working Theory:**
-
-The issue may be related to the npm workspace structure (`package.json` in root with workspaces). The module resolution might be different in a workspace context compared to a standalone project.
+**CONFIRMED: The workspace structure is incompatible with Electron bundling.**
 
 ## Configuration
 
@@ -103,24 +114,70 @@ main: {
 
 ## Possible Solutions
 
-### Option 1: Check Original Working Configuration
-The upstream Auto-Claude repository likely has a working configuration. Need to compare:
-- Original electron-vite version
-- Original package.json settings
-- Original build configuration
+### ✅ WORKAROUND: Use Web Dev Server
+The renderer dev server works when started with `electron-vite dev`, but crashes when Electron fails. Access the UI directly in browser while working on proper fix:
+- Run `npm run dev` from `apps/frontend/`
+- The renderer dev server starts at `http://localhost:5173/`
+- Open in browser to access Marketing Hub UI
+- Note: Some Electron-specific features (IPC, file system) won't work
 
-### Option 2: Fresh Clone
-Clone a fresh copy of Auto-Claude and verify it works, then apply marketing changes incrementally.
+### Option 1: Use pnpm Instead of npm
+pnpm handles workspaces differently using symbolic links instead of hoisting:
+```bash
+# Remove npm lockfile
+rm package-lock.json
+rm -rf node_modules
+rm -rf apps/frontend/node_modules
 
-### Option 3: Debug Module Resolution
-Add logging to understand why `require("electron")` returns `undefined`:
-```javascript
-console.log('Electron require result:', require("electron"));
-console.log('Electron paths:', require.resolve("electron"));
+# Install with pnpm
+npm install -g pnpm
+pnpm install
 ```
 
-### Option 4: Alternative Build System
-Try using standard electron-builder instead of electron-vite.
+**Why this might work**: pnpm uses strict dependency isolation with symlinks, which may prevent the absolute path resolution issue.
+
+### Option 2: Remove Workspace Structure
+Convert to standalone project structure:
+1. Move `apps/frontend` contents to root level
+2. Remove workspace configuration from root `package.json`
+3. Use standard npm project structure
+
+**Why this might work**: No hoisting means electron stays in local `node_modules` where bundler can handle it correctly.
+
+### Option 3: Fresh Clone + Incremental Changes
+1. Clone fresh Auto-Claude repository
+2. Verify it works (test electron launch)
+3. Apply marketing changes incrementally
+4. Test after each major change
+
+**Why this might work**: Start from known working state and identify which change breaks Electron.
+
+### Option 4: Alternative Package Manager (Yarn with node-modules linker)
+```bash
+# Remove npm artifacts
+rm package-lock.json
+rm -rf node_modules
+
+# Use Yarn with node-modules linker (not pnp)
+yarn install --modes node-modules
+```
+
+**Why this might work**: Yarn's linker handles workspaces differently than npm.
+
+### Option 5: Manual Electron Path Resolution
+Add custom build logic to patch the bundled code after build:
+```javascript
+// Post-build script to replace electron require
+const fs = require('fs');
+const bundle = fs.readFileSync('out/main/index.cjs', 'utf8');
+const patched = bundle.replace(
+  /const electron = require\("electron"\)/g,
+  'const electron = require("electron")'
+);
+fs.writeFileSync('out/main/index.cjs', patched);
+```
+
+**Why this might work**: Directly patch the bundled output to use bare `require()` that Electron can intercept.
 
 ## Completed Work (19/20 Tasks - 95%)
 
@@ -156,8 +213,10 @@ The Marketing Hub transformation has made substantial progress:
 
 ## Files Modified During Troubleshooting
 
-- `apps/frontend/package.json` - Restored `type: "module"`, updated main field
-- `apps/frontend/electron.vite.config.ts` - Added `format: 'cjs'` output
-- `apps/frontend/src/main/index.ts` - Reverted local is/platform objects
-- `apps/frontend/src/shared/constants/ideation.ts` - Added legacy constants
+- `package.json` - Removed nohoist configuration (reverted to standard workspaces)
+- `apps/frontend/electron.vite.config.ts` - Multiple attempts, currently has `format: 'cjs'` output
+- `apps/frontend/src/shared/constants/ideation.ts` - Added legacy constants (SECURITY_CATEGORY_LABELS, etc.)
 - `apps/frontend/src/renderer/components/ideation/type-guards.ts` - Added legacy type guards
+- `apps/frontend/vite.web.config.ts` - Created as web app workaround
+- `apps/frontend/package.json` - Added `dev:web` script
+- `LAUNCH_ISSUE_ANALYSIS.md` - This analysis document

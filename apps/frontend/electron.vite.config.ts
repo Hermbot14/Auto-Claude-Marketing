@@ -42,8 +42,6 @@ export default defineConfig({
         '@opentelemetry/instrumentation',
         'debug',
         'ms'
-        // NOTE: electron is NOT in exclude list - it must be externalized
-        // (left as require('electron') so Electron runtime provides it)
       ]
     })],
     build: {
@@ -51,16 +49,11 @@ export default defineConfig({
         input: {
           index: resolve(__dirname, 'src/main/index.ts')
         },
-        // These modules will be externalized (left as require() in output)
-        external: ['@lydell/node-pty', 'electron'],
         output: {
-          // Force CommonJS output for main process
-          format: 'cjs',
-          // Ensure electron module references are preserved
-          interop: 'auto',
-          // Don't transform dynamic require calls
-          dynamicImportInCjs: false
-        }
+          format: 'cjs'
+        },
+        // Only node-pty needs to be external (native module rebuilt by electron-builder)
+        external: ['@lydell/node-pty']
       }
     }
   },
