@@ -4,10 +4,16 @@
   "description": "Autonomous multi-agent coding framework powered by Claude AI",
   "license": "AGPL-3.0",
   "author": "Auto Claude Team",
-  "workspaces": [
-    "apps/*",
-    "libs/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "libs/*"
+    ],
+    "nohoist": [
+      "electron",
+      "**/electron"
+    ]
+  },
   "scripts": {
     "install:backend": "node scripts/install-backend.js",
     "install:frontend": "cd apps/frontend && npm install",
