@@ -198,3 +198,39 @@ export const SECURITY_SEVERITY_COLORS: Record<string, string> = {
   high: 'bg-orange-500/10 text-orange-500',
   critical: 'bg-destructive/10 text-destructive'
 };
+
+// Legacy security category labels (for backward compatibility)
+export const SECURITY_CATEGORY_LABELS: Record<string, string> = {
+  authentication: 'Authentication',
+  authorization: 'Authorization',
+  encryption: 'Encryption',
+  input_validation: 'Input Validation',
+  output_encoding: 'Output Encoding',
+  session_management: 'Session Management',
+  data_protection: 'Data Protection',
+  api_security: 'API Security'
+};
+
+// Legacy performance category labels (for backward compatibility)
+export const PERFORMANCE_CATEGORY_LABELS: Record<string, string> = {
+  rendering: 'Rendering',
+  network: 'Network',
+  memory: 'Memory',
+  cpu: 'CPU Usage',
+  database: 'Database',
+  caching: 'Caching',
+  bundle_size: 'Bundle Size',
+  load_time: 'Load Time'
+};
+
+// Legacy code quality category labels (for backward compatibility)
+export const CODE_QUALITY_CATEGORY_LABELS: Record<string, string> = {
+  complexity: 'Complexity',
+  duplication: 'Duplication',
+  maintainability: 'Maintainability',
+  test_coverage: 'Test Coverage',
+  error_handling: 'Error Handling',
+  naming_conventions: 'Naming Conventions',
+  documentation: 'Documentation',
+  type_safety: 'Type Safety'
+};

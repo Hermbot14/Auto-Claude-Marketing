@@ -23,6 +23,61 @@ The `require("electron")` statement in the built code returns `undefined` instea
 6. ✅ Tried running from root and frontend directories
 7. ✅ Modified `@electron-toolkit/utils` exclusion settings
 8. ✅ Added legacy constants for backward compatibility
+9. ✅ Tried adding electron to externalizeDepsPlugin exclude list
+10. ✅ Tried adding electron to build external list
+11. ✅ Verified electron npm package exports path (not API)
+12. ✅ Created web app workaround (vite.web.config.ts)
+
+## Root Cause Analysis (DEEP DIVE)
+
+**The Core Issue:**
+
+The `electron` npm package does NOT export the Electron API. When you do `require("electron")` in Node.js:
+
+1. The bundler resolves this to `node_modules/electron/index.js`
+2. That file exports the **path to the electron executable** (e.g., "electron.exe")
+3. It does NOT export the Electron API (`app`, `BrowserWindow`, etc.)
+
+**How Electron Works:**
+
+When running inside Electron:
+- Electron intercepts `require("electron")` calls
+- Replaces them with the actual Electron API
+- This happens at runtime through Node.js module resolution hooks
+
+**Why Bundling Breaks It:**
+
+When Rollup/Vite bundles the code:
+- It resolves `require("electron")` to the actual npm package
+- It embeds the path string (or `undefined`) directly in the bundle
+- The `require()` is no longer a dynamic call that Electron can intercept
+- Result: `electron` is `undefined` at runtime
+
+**Why external: ['electron'] Doesn't Fix It:**
+
+Even with `external: ['electron']`, the bundler may still be trying to resolve the module incorrectly. The `externalizeDepsPlugin` from electron-vite should handle this automatically, but something in the configuration is preventing it from working properly.
+
+## Latest Findings (2026-01-24)
+
+**Investigation Results:**
+
+1. **electron npm package structure:**
+   - `node_modules/electron/index.js` exports the electron executable path
+   - The actual Electron API is injected by Electron at runtime
+   - The bundler is resolving to the npm package instead of leaving it as an external require
+
+2. **Build output analysis:**
+   - `const electron = require("electron");` appears in the bundle
+   - But at runtime, this resolves to `undefined` instead of the Electron API
+
+3. **Configuration attempts:**
+   - Added `electron` to `externalizeDepsPlugin` exclude list → Bundles electron, doesn't work
+   - Added `electron` to build `external` list → Still returns undefined
+   - Removed all custom output settings → Still returns undefined
+
+**Working Theory:**
+
+The issue may be related to the npm workspace structure (`package.json` in root with workspaces). The module resolution might be different in a workspace context compared to a standalone project.
 
 ## Configuration
 

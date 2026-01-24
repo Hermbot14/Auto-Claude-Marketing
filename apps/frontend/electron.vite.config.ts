@@ -41,9 +41,9 @@ export default defineConfig({
         '@sentry/utils',
         '@opentelemetry/instrumentation',
         'debug',
-        'ms',
-        // Minimatch for glob pattern matching in worktree handlers
-        'minimatch'
+        'ms'
+        // NOTE: electron is NOT in exclude list - it must be externalized
+        // (left as require('electron') so Electron runtime provides it)
       ]
     })],
     build: {
@@ -51,11 +51,15 @@ export default defineConfig({
         input: {
           index: resolve(__dirname, 'src/main/index.ts')
         },
-        // Only node-pty needs to be external (native module rebuilt by electron-builder)
-        external: ['@lydell/node-pty'],
+        // These modules will be externalized (left as require() in output)
+        external: ['@lydell/node-pty', 'electron'],
         output: {
-          // Force CommonJS output for main process to avoid ESM import issues with electron
-          format: 'cjs'
+          // Force CommonJS output for main process
+          format: 'cjs',
+          // Ensure electron module references are preserved
+          interop: 'auto',
+          // Don't transform dynamic require calls
+          dynamicImportInCjs: false
         }
       }
     }
