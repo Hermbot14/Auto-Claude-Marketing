@@ -195,7 +195,33 @@ See [CLAUDE.md](CLAUDE.md) for detailed development instructions.
 
 ## Known Issues
 
-See [LAUNCH_ISSUE_ANALYSIS.md](LAUNCH_ISSUE_ANALYSIS.md) for complete troubleshooting details.
+### Electron Desktop App Launch
+
+**Status:** Fix applied (nohoist configuration in package.json)
+
+The Electron desktop app may encounter a workspace hoisting issue on first launch where `require("electron")` returns undefined. This is a known issue with monorepo workspace configuration.
+
+**Symptoms:**
+- Error: `require("electron")` returns undefined
+- Electron module not found in main process
+
+**Solution:**
+1. **Use Web UI** (recommended for development):
+   ```bash
+   npm run dev:web
+   # Access at http://localhost:3000
+   ```
+
+2. **For Electron desktop app:**
+   - The nohoist configuration has been applied to package.json
+   - Try running: `npm install` from root directory
+   - If issue persists, see [LAUNCH_ISSUE_ANALYSIS.md](LAUNCH_ISSUE_ANALYSIS.md) for detailed troubleshooting
+
+**Impact:**
+- Web UI: ✅ Fully functional, all features available
+- Electron Desktop: ⚠️ May require additional setup steps
+
+For complete troubleshooting details, see [LAUNCH_ISSUE_ANALYSIS.md](LAUNCH_ISSUE_ANALYSIS.md).
 
 ## Contributing
 
