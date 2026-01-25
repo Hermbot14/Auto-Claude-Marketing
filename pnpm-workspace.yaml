@@ -1,0 +1,7 @@
+packages:
+  - 'apps/*'
+  - 'libs/*'
+
+# pnpm-specific configuration to prevent hoisting issues
+# Note: pnpm doesn't support nohoist like npm/yarn, but it handles
+# dependencies differently by default which avoids most hoisting issues

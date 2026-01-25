@@ -19,7 +19,10 @@ autonomous-coding/
 │   │   ├── spec_agents/   # Spec creation agents
 │   │   ├── integrations/  # Graphiti, Linear, GitHub
 │   │   └── prompts/       # Agent system prompts
-│   └── frontend/          # Electron desktop UI
+│   └── frontend/          # React UI (Web + Electron desktop)
+│       ├── src/           # React components, TypeScript
+│       ├── electron/      # Electron main process
+│       └── vite.config.ts # Vite bundler config
 ├── guides/                # Documentation
 ├── tests/                 # Test suite
 └── scripts/               # Build and utility scripts
@@ -31,11 +34,14 @@ autonomous-coding/
 - Check `apps/backend/spec_agents/` for spec creation agent examples
 - NEVER use `anthropic.Anthropic()` directly - always use `create_client()` from `core.client`
 
-**Frontend (Electron Desktop App):**
-- Built with Electron, React, TypeScript
+**Frontend (Web + Electron Desktop):**
+- Built with React, TypeScript, Vite
+- **Two deployment modes:**
+  - **Web UI** (Primary Development): Browser-based development at http://localhost:3000
+  - **Electron Desktop** (Production): Standalone desktop application
 - AI agents can perform E2E testing using the Electron MCP server
 - When bug fixing or implementing features, use the Electron MCP server for automated testing
-- See "End-to-End Testing" section below for details
+- See "Web UI Development" and "End-to-End Testing" sections below for details
 
 ## Commands
 
@@ -131,6 +137,49 @@ npm run test:backend
 ### Spec Validation
 ```bash
 python apps/backend/validate_spec.py --spec-dir apps/backend/specs/001-feature --checkpoint all
+```
+
+### Web UI Development
+```bash
+# Start web development server (PRIMARY development method)
+npm run dev:web
+
+# Features:
+# - Hot Module Replacement (HMR) for instant updates
+# - Browser DevTools for debugging
+# - Faster iteration than Electron rebuild
+# - Access at http://localhost:3000
+# - Auto-reloads on file changes
+
+# The web UI is the RECOMMENDED way to develop frontend features.
+# Use Electron (npm run dev) only when testing:
+# - Native OS integrations (file system, tray, notifications)
+# - Electron-specific APIs (ipcRenderer, desktop capture)
+# - Final pre-release testing
+```
+
+### Electron Desktop Development
+```bash
+# Build and run desktop app (for Electron-specific features)
+npm start        # Build and run desktop app
+npm run dev      # Run in development mode (includes --remote-debugging-port=9222 for E2E testing)
+
+# Use this when testing:
+# - Native OS features
+# - Electron IPC communication
+# - Desktop-specific UI (tray, notifications)
+# - Final integration testing before release
+```
+
+### Backend Development
+```bash
+# Backend runs separately and can be used with both Web UI and Electron
+cd apps/backend
+
+# Create and run specs (see "Creating and Running Specs" section above)
+python run.py --spec 001
+
+# Backend API server will be available for frontend connections
 ```
 
 ### Releases
@@ -619,18 +668,167 @@ The client automatically enables Electron MCP tools for QA agents when:
 
 **Note:** Screenshots are automatically compressed (1280x720, quality 60, JPEG) to stay under Claude SDK's 1MB JSON message buffer limit.
 
-## Running the Application
+### Web UI Development
 
-**As a standalone CLI tool**:
+**IMPORTANT: The web UI is the PRIMARY and RECOMMENDED method for frontend development.**
+
+The web UI provides a fast, efficient development workflow with modern tooling:
+
+**Getting Started:**
 ```bash
-cd apps/backend
-python run.py --spec 001
+# Start the web development server
+npm run dev:web
+
+# Access the application
+# Open http://localhost:3000 in your browser
 ```
 
-**With the Electron frontend**:
+**Key Features:**
+
+1. **Hot Module Replacement (HMR)**
+   - Instant updates without full page reload
+   - Preserves application state during changes
+   - Dramatically faster development iteration
+   - Changes appear in milliseconds
+
+2. **Browser DevTools**
+   - Full Chrome DevTools for debugging
+   - React DevTools for component inspection
+   - Network tab for API debugging
+   - Performance profiling
+   - Console logging and breakpoints
+
+3. **Fast Refresh**
+   - Only reloads changed components
+   - Maintains component state
+   - Errors shown inline with overlay
+
+4. **Vite Optimizations**
+   - Lightning-fast cold starts
+   - Efficient module bundling
+   - Native ES modules support
+   - Optimized build output
+
+**When to Use Web UI vs Electron:**
+
+| Scenario | Use Web UI | Use Electron |
+|----------|------------|--------------|
+| **UI Components** | ✅ Preferred | ❌ Slower rebuild |
+| **Styling Changes** | ✅ Instant HMR | ❌ Full rebuild |
+| **State Management** | ✅ Faster iteration | ❌ Overhead |
+| **Routing** | ✅ Browser DevTools | ❌ Harder debugging |
+| **Native APIs** | ❌ Not available | ✅ Required |
+| **File System** | ❌ Not available | ✅ Required |
+| **Tray/Notifications** | ❌ Not available | ✅ Required |
+| **IPC Communication** | ❌ Not available | ✅ Required |
+| **Pre-release Testing** | ⚠️ Not sufficient | ✅ Final verification |
+
+**Development Workflow:**
+
 ```bash
+# 1. Start web dev server (terminal 1)
+npm run dev:web
+
+# 2. Start backend if needed (terminal 2)
+cd apps/backend
+python run.py --spec 001
+
+# 3. Open browser
+# Navigate to http://localhost:3000
+
+# 4. Develop with HMR
+# Make changes to React components
+# See updates instantly in browser
+# Use DevTools for debugging
+```
+
+**Browser Testing:**
+
+The web UI allows you to test across different browsers:
+- Chrome/Edge (Chromium)
+- Firefox
+- Safari (Webkit)
+
+This helps catch browser-specific issues early in development.
+
+**API Development:**
+
+When working with backend APIs:
+```bash
+# Backend runs on separate port
+# Web UI proxies requests to backend
+
+# API base URL: http://localhost:3000/api
+# (proxied to backend server)
+```
+
+**Performance Tips:**
+
+1. **Use React DevTools Profiler** - Identify performance bottlenecks
+2. **Check Network Tab** - Monitor API calls and payload sizes
+3. **Lighthouse Audits** - Run performance audits directly in browser
+4. **Console Warnings** - Fix React warnings and deprecations
+
+**Common Gotchas:**
+
+1. **CORS Issues** - Web UI may encounter CORS when accessing local resources
+   - Solution: Configure Vite proxy in `vite.config.ts`
+
+2. **Native Features Missing** - Some features only work in Electron
+   - File system access
+   - System tray
+   - Native notifications
+   - Solution: Use graceful degradation or feature detection
+
+3. **Environment Variables** - Different than Electron
+   - Web: Browser environment (use `import.meta.env`)
+   - Electron: Node.js environment (use `process.env`)
+   - Solution: Check environment before accessing features
+
+**Electron for Final Testing:**
+
+Before releasing, always test in Electron:
+```bash
+# Final integration testing
+npm run dev
+
+# Production build testing
+npm run build
+npm start
+```
+
+This ensures native features work correctly before distribution.
+
+**Summary:**
+
+- **Web UI (npm run dev:web)** - Use for 95% of development
+- **Electron (npm run dev)** - Use only for native features and final testing
+- The web UI provides faster iteration, better debugging, and modern tooling
+- Always test in Electron before releasing to ensure native features work
+
+## Running the Application
+
+**Primary Development Method - Web UI:**
+```bash
+# Start web development server (RECOMMENDED for development)
+npm run dev:web
+
+# Access at http://localhost:3000
+# Features: HMR, DevTools, fast iteration
+```
+
+**Electron Desktop App:**
+```bash
+# Build and run desktop app (for native features or final testing)
 npm start        # Build and run desktop app
 npm run dev      # Run in development mode (includes --remote-debugging-port=9222 for E2E testing)
+```
+
+**Backend CLI (Standalone):**
+```bash
+# Run backend without frontend
+cd apps/backend
+python run.py --spec 001
 ```
 
 **For E2E Testing with QA Agents:**
@@ -638,6 +836,11 @@ npm run dev      # Run in development mode (includes --remote-debugging-port=922
 2. Enable Electron MCP in `apps/backend/.env`: `ELECTRON_MCP_ENABLED=true`
 3. Run QA: `python run.py --spec 001 --qa`
 4. QA agents will automatically interact with the running app for testing
+
+**Recommendation:**
+- Use **Web UI** (`npm run dev:web`) for 95% of development
+- Use **Electron** only when testing native features or pre-release
+- See "Web UI Development" section above for detailed comparison
 
 **Project data storage:**
 - `.auto-claude/specs/` - Per-project data (specs, plans, QA reports, memory) - gitignored
