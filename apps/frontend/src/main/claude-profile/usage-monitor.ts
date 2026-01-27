@@ -1569,6 +1569,13 @@ export class UsageMonitor extends EventEmitter {
       nextMonth.setUTCHours(0, 0, 0, 0);
       const weeklyResetTimestamp = nextMonth.toISOString();
 
+      // For ZAI, prioritize token usage (sessionPercent) over tools quota (weeklyPercent/TIME_LIMIT)
+      // Users care more about their token usage than MCP tools quota
+      // TIME_LIMIT for ZAI represents monthly MCP tools quota, not token usage
+      const limitType = providerName === 'zai'
+        ? 'session'  // Always show token usage as primary for ZAI
+        : (weeklyPercent > sessionPercent ? 'weekly' : 'session');
+
       return {
         sessionPercent,
         weeklyPercent,
@@ -1581,7 +1588,7 @@ export class UsageMonitor extends EventEmitter {
         profileName,
         profileEmail,
         fetchedAt: new Date(),
-        limitType: weeklyPercent > sessionPercent ? 'weekly' : 'session',
+        limitType,
         usageWindows: {
           sessionWindowLabel: 'common:usage.window5HoursQuota',
           weeklyWindowLabel: 'common:usage.windowMonthlyToolsQuota'

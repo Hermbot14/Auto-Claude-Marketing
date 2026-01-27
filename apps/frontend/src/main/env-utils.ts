@@ -263,6 +263,33 @@ export function getAugmentedEnv(additionalPaths?: string[]): Record<string, stri
     existingPaths.add(npmPrefix);
   }
 
+  // On Windows, try to find Node.js automatically if not in standard locations
+  // This handles custom Node.js installations (nvm, custom paths, etc.)
+  if (isWindows()) {
+    try {
+      const nodeResult = execFileSync('where', ['node.exe'], {
+        encoding: 'utf-8',
+        timeout: 2000,
+        windowsHide: true,
+        shell: true,
+      }).trim();
+
+      if (nodeResult) {
+        // 'where' returns multiple lines, take the first one
+        const nodePath = nodeResult.split('\n')[0].trim();
+        const nodeDir = path.dirname(nodePath);
+
+        if (fs.existsSync(nodeDir) && !currentPathSet.has(nodeDir)) {
+          console.warn('[env-utils] Found Node.js at:', nodeDir);
+          existingPaths.add(nodeDir);
+        }
+      }
+    } catch (error) {
+      // Node.js not found in PATH, will rely on standard locations
+      console.debug('[env-utils] Node.js not found via where command');
+    }
+  }
+
   // Build final paths to add using shared helper
   const pathsToAdd = buildPathsToAdd(candidatePaths, currentPathSet, existingPaths, npmPrefix);
 
@@ -436,6 +463,34 @@ export async function getAugmentedEnvAsync(additionalPaths?: string[]): Promise<
   const npmPrefix = await getNpmGlobalPrefixAsync();
   if (npmPrefix && await existsAsync(npmPrefix)) {
     existingPaths.add(npmPrefix);
+  }
+
+  // On Windows, try to find Node.js automatically if not in standard locations
+  // This handles custom Node.js installations (nvm, custom paths, etc.)
+  if (isWindows()) {
+    try {
+      const { stdout } = await execFileAsync('where', ['node.exe'], {
+        encoding: 'utf-8',
+        timeout: 2000,
+        windowsHide: true,
+        shell: true,
+      });
+
+      const nodeResult = stdout.trim();
+      if (nodeResult) {
+        // 'where' returns multiple lines, take the first one
+        const nodePath = nodeResult.split('\n')[0].trim();
+        const nodeDir = path.dirname(nodePath);
+
+        if (await existsAsync(nodeDir) && !currentPathSet.has(nodeDir)) {
+          console.warn('[env-utils] Found Node.js at:', nodeDir);
+          existingPaths.add(nodeDir);
+        }
+      }
+    } catch (error) {
+      // Node.js not found in PATH, will rely on standard locations
+      console.debug('[env-utils] Node.js not found via where command');
+    }
   }
 
   // Build final paths to add using shared helper

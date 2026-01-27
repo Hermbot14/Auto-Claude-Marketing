@@ -48,7 +48,8 @@ import {
   createProfileDirectory as createProfileDirectoryImpl,
   isProfileAuthenticated as isProfileAuthenticatedImpl,
   hasValidToken,
-  expandHomePath
+  expandHomePath,
+  getEmailFromConfigDir
 } from './claude-profile/profile-utils';
 
 /**
@@ -111,8 +112,8 @@ export class ClaudeProfileManager {
         continue;
       }
 
-      // Import dynamically to avoid circular dependency issues
-      const { getEmailFromConfigDir } = require('./claude-profile/profile-utils');
+      // Use the already imported getEmailFromConfigDir function
+      // Note: Previously used require() to avoid circular dependency, but that causes bundling issues
       const configEmail = getEmailFromConfigDir(profile.configDir);
 
       if (configEmail && profile.email !== configEmail) {

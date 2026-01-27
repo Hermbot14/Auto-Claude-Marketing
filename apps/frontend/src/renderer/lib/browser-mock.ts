@@ -146,13 +146,60 @@ const browserMockAPI: ElectronAPI = {
     success: true
   }),
 
-  testConnection: async (_baseUrl: string, _apiKey: string, _signal?: AbortSignal) => ({
-    success: true,
-    data: {
-      success: true,
-      message: 'Connection successful (mock)'
+  testConnection: async (baseUrl: string, apiKey: string, _signal?: AbortSignal) => {
+    // Real API connection test (not mock)
+    console.log('[Browser] Testing real API connection to:', baseUrl);
+
+    try {
+      const response = await fetch(`${baseUrl}/v1/messages`, {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'glm-4.7',
+          max_tokens: 50,
+          messages: [{
+            role: 'user',
+            content: 'Connection test. Reply "OK".'
+          }]
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[Browser] Connection test SUCCESS:', data.id);
+        return {
+          success: true,
+          data: {
+            success: true,
+            message: `Connection successful! Model: ${data.model}`
+          }
+        };
+      } else {
+        const errorText = await response.text();
+        console.error('[Browser] Connection test FAILED:', response.status, errorText);
+        return {
+          success: true,
+          data: {
+            success: false,
+            message: `Connection failed: ${response.status} ${response.statusText}`
+          }
+        };
+      }
+    } catch (error) {
+      console.error('[Browser] Connection test ERROR:', error);
+      return {
+        success: true,
+        data: {
+          success: false,
+          message: `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`
+        }
+      };
     }
-  }),
+  },
 
   discoverModels: async (_baseUrl: string, _apiKey: string, _signal?: AbortSignal) => ({
     success: true,

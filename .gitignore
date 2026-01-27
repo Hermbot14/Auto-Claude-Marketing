@@ -159,6 +159,13 @@ playwright/.cache/
 *.tmp
 *.temp
 
+# ===========================
+# API Test Files (may contain credentials)
+# ===========================
+test_zai*.py
+test-real-api.mjs
+api-connection-test.mjs
+
 # Development
 dev/
 _bmad/

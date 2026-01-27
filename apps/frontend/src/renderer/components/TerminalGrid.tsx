@@ -250,7 +250,8 @@ export function TerminalGrid({ projectPath, onNewTaskClick, isActive = false }: 
     terminals.forEach((terminal) => {
       if (terminal.status === 'running' && !terminal.isClaudeMode) {
         setClaudeMode(terminal.id, true);
-        window.electronAPI.invokeClaudeInTerminal(terminal.id, projectPath);
+        // YOLO mode: skip permission prompts for all terminals
+        window.electronAPI.invokeClaudeInTerminal(terminal.id, projectPath, true);
       }
     });
   }, [terminals, setClaudeMode, projectPath]);

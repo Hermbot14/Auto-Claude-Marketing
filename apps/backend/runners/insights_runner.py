@@ -9,6 +9,7 @@ about a codebase. It can also suggest tasks based on the conversation.
 import argparse
 import asyncio
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -39,7 +40,7 @@ except ImportError:
     ClaudeAgentOptions = None
     ClaudeSDKClient = None
 
-from core.auth import ensure_claude_code_oauth_token, get_auth_token
+from core.auth import ensure_claude_code_oauth_token, get_auth_token, get_auth_token_source
 from debug import (
     debug,
     debug_detailed,
@@ -145,6 +146,16 @@ async def run_with_sdk(
     thinking_level: str = "medium",
 ) -> None:
     """Run the chat using Claude SDK with streaming."""
+    # DEBUG: Print environment for diagnosis
+    debug_env = {
+        k: (v[:10] + "..." if v and len(v) > 10 else v)
+        for k, v in os.environ.items()
+        if k.startswith('ANTHROPIC_') or k.startswith('CLAUDE_')
+    }
+    print(f"[DEBUG] Environment: {json.dumps(debug_env, indent=2)}", file=sys.stderr)
+    print(f"[DEBUG] Token source: {get_auth_token_source()}", file=sys.stderr)
+    print(f"[DEBUG] Has auth token: {bool(get_auth_token())}", file=sys.stderr)
+
     if not SDK_AVAILABLE:
         print("Claude SDK not available, falling back to simple mode", file=sys.stderr)
         run_simple(project_dir, message, history)
