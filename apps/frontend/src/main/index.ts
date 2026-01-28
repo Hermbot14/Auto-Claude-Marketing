@@ -38,8 +38,79 @@ for (const envPath of possibleEnvPaths) {
 import { app, BrowserWindow, shell, nativeImage, session, screen } from 'electron';
 import { join } from 'path';
 import { accessSync, readFileSync, writeFileSync, rmSync } from 'fs';
-import { electronApp, optimizer, is } from '@electron-toolkit/utils';
+// NOTE: Sentry and error logging are imported dynamically in app.whenReady()
+// to avoid module-level electron.app access
 import { setupIpcHandlers } from './ipc-setup';
+
+/**
+ * Safe implementation of development mode detection.
+ * Uses a function to safely access electron.app.isPackaged only when needed.
+ * This avoids the error when electron.app is not yet initialized at module load time.
+ */
+function isDev(): boolean {
+  try {
+    return app && typeof app.isPackaged === 'boolean' && !app.isPackaged;
+  } catch {
+    // Fallback: assume dev mode if app is not available
+    return true;
+  }
+}
+
+/**
+ * Compatibility object for @electron-toolkit/utils `is` API.
+ * Uses function-based access to safely check electron.app.isPackaged.
+ */
+const is = {
+  get dev(): boolean {
+    return isDev();
+  }
+};
+
+/**
+ * Electron app utilities (replaces @electron-toolkit/utils electronApp)
+ */
+const electronApp = {
+  setAppUserModelId(id: string): void {
+    if (process.platform === 'win32') {
+      app.setAppUserModelId(is.dev ? process.execPath : id);
+    }
+  }
+};
+
+/**
+ * Window optimizer utilities (replaces @electron-toolkit/utils optimizer)
+ */
+const optimizer = {
+  watchWindowShortcuts(window: Electron.BrowserWindow): void {
+    if (!window) return;
+
+    const { webContents } = window;
+
+    webContents.on('before-input-event', (_event, input) => {
+      if (input.type !== 'keyDown') return;
+
+      // In production, disable DevTools shortcuts and reload
+      if (!is.dev) {
+        if (input.code === 'KeyR' && (input.control || input.meta)) {
+          _event.preventDefault();
+        }
+        if (input.code === 'KeyI' && ((input.alt && input.meta) || (input.control && input.shift))) {
+          _event.preventDefault();
+        }
+      } else {
+        // In development, F12 toggles DevTools
+        if (input.code === 'F12') {
+          if (webContents.isDevToolsOpened()) {
+            webContents.closeDevTools();
+          } else {
+            webContents.openDevTools({ mode: 'undocked' });
+          }
+        }
+      }
+    });
+  }
+};
+
 import { AgentManager } from './agent';
 import { TerminalManager } from './terminal-manager';
 import { pythonEnvManager } from './python-env-manager';
@@ -71,11 +142,8 @@ const WINDOW_SCREEN_MARGIN: number = 20;
 const DEFAULT_SCREEN_WIDTH: number = 1920;
 const DEFAULT_SCREEN_HEIGHT: number = 1080;
 
-// Setup error logging early (captures uncaught exceptions)
-setupErrorLogging();
-
-// Initialize Sentry for error tracking (respects user's sentryEnabled setting)
-initSentryMain();
+// NOTE: Error logging and Sentry initialization are now done inside app.whenReady()
+// to ensure electron.app is fully initialized before accessing app properties
 
 /**
  * Load app settings synchronously (for use during startup).
@@ -258,7 +326,23 @@ if (process.platform === 'win32') {
 }
 
 // Initialize the application
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // Setup error logging early (now that app is ready - dynamic import)
+  try {
+    const { setupErrorLogging } = await import('./app-logger.js');
+    setupErrorLogging();
+  } catch (e) {
+    console.error('[main] Failed to setup error logging:', e);
+  }
+
+  // Initialize Sentry for error tracking (now that app is ready - dynamic import)
+  try {
+    const { initSentryMain } = await import('./sentry.js');
+    initSentryMain();
+  } catch (e) {
+    console.error('[main] Failed to initialize Sentry:', e);
+  }
+
   // Set app user model id for Windows
   electronApp.setAppUserModelId('com.autoclaude.ui');
 
@@ -273,26 +357,7 @@ app.whenReady().then(() => {
   // This prevents version display desync after electron-updater installs a new version
   cleanupStaleUpdateMetadata();
 
-  // Set dock icon on macOS
-  if (process.platform === 'darwin') {
-    const iconPath = getIconPath();
-    try {
-      const icon = nativeImage.createFromPath(iconPath);
-      if (!icon.isEmpty()) {
-        app.dock?.setIcon(icon);
-      }
-    } catch (e) {
-      console.warn('Could not set dock icon:', e);
-    }
-  }
-
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window);
-  });
-
-  // Initialize agent manager
+  // Initialize agent manager (MOVED from module level)
   agentManager = new AgentManager();
 
   // Load settings and configure agent manager with Python and auto-claude paths
@@ -341,16 +406,15 @@ app.whenReady().then(() => {
             // Save the corrected setting - we're the only process modifying settings at startup
             try {
               writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf-8');
-              console.log('[main] Successfully saved migrated autoBuildPath to settings');
             } catch (writeError) {
-              console.warn('[main] Failed to save migrated autoBuildPath:', writeError);
+              console.warn('[main] Failed to save migrated settings:', writeError);
             }
           }
         }
 
         if (!migrated) {
-          console.warn('[main] Configured autoBuildPath is invalid (missing runners/spec_runner.py), will use auto-detection:', validAutoBuildPath);
-          validAutoBuildPath = undefined; // Let auto-detection find the correct path
+          console.warn('[main] autoBuildPath validation failed - spec_runner.py not found at:', validAutoBuildPath);
+          validAutoBuildPath = null;
         }
       }
     }
@@ -371,7 +435,7 @@ app.whenReady().then(() => {
     }
   }
 
-  // Initialize terminal manager
+  // Initialize terminal manager (MOVED from module level)
   terminalManager = new TerminalManager(() => mainWindow);
 
   // Setup IPC handlers (pass pythonEnvManager for Python path management)
@@ -379,6 +443,25 @@ app.whenReady().then(() => {
 
   // Create window
   createWindow();
+
+  // Set dock icon on macOS
+  if (process.platform === 'darwin') {
+    const iconPath = getIconPath();
+    try {
+      const icon = nativeImage.createFromPath(iconPath);
+      if (!icon.isEmpty()) {
+        app.dock?.setIcon(icon);
+      }
+    } catch (e) {
+      console.warn('Could not set dock icon:', e);
+    }
+  }
+
+  // Default open or close DevTools by F12 in development
+  // and ignore CommandOrControl + R in production.
+  app.on('browser-window-created', (_, window) => {
+    optimizer.watchWindowShortcuts(window);
+  });
 
   // Pre-warm CLI tool cache in background (non-blocking)
   // This ensures CLI detection is done before user needs it

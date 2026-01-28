@@ -124,7 +124,14 @@ export class ChangelogService extends EventEmitter {
     const possiblePaths = [
       // Apps structure: from out/main -> apps/backend
       path.resolve(__dirname, '..', '..', '..', 'backend'),
-      path.resolve(app.getAppPath(), '..', 'backend'),
+      // Safely get app path if available
+      ...((() => {
+        try {
+          return [path.resolve(app.getAppPath(), '..', 'backend')];
+        } catch {
+          return []; // Skip if app is not ready
+        }
+      })()),
       path.resolve(process.cwd(), 'apps', 'backend')
     ];
 

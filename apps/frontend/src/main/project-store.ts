@@ -37,7 +37,15 @@ export class ProjectStore {
 
   constructor() {
     // Store in app's userData directory
-    const userDataPath = app.getPath('userData');
+    // Safely access app.getPath with fallback
+    const userDataPath = (() => {
+      try {
+        return app.getPath('userData');
+      } catch {
+        // Fallback if app is not ready yet
+        return path.join(process.env.HOME || process.env.USERPROFILE || '.', '.auto-claude');
+      }
+    })();
     const storeDir = path.join(userDataPath, 'store');
 
     // Ensure directory exists

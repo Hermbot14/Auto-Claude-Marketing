@@ -3,7 +3,20 @@ import { existsSync, writeFileSync, mkdirSync, statSync, readFileSync } from 'fs
 import { execFileSync } from 'node:child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { is } from '@electron-toolkit/utils';
+
+/**
+ * Safe development mode detection.
+ * Checks if app is available before accessing isPackaged.
+ */
+const is = {
+  get dev(): boolean {
+    try {
+      return app && !app.isPackaged;
+    } catch {
+      return true; // Fallback: assume dev mode
+    }
+  }
+};
 
 // ESM-compatible __dirname
 const __filename = fileURLToPath(import.meta.url);

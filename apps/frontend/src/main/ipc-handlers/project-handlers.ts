@@ -2,8 +2,21 @@ import { ipcMain, app } from 'electron';
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
 import { execFileSync } from 'child_process';
-import { is } from '@electron-toolkit/utils';
 import { IPC_CHANNELS } from '../../shared/constants';
+
+/**
+ * Safe development mode detection.
+ * Checks if app is available before accessing isPackaged.
+ */
+const is = {
+  get dev(): boolean {
+    try {
+      return app && !app.isPackaged;
+    } catch {
+      return true; // Fallback: assume dev mode
+    }
+  }
+};
 import type {
   Project,
   ProjectSettings,

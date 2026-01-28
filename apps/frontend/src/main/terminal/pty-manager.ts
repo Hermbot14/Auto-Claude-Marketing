@@ -12,6 +12,7 @@ import { IPC_CHANNELS } from '../../shared/constants';
 import { getClaudeProfileManager } from '../claude-profile-manager';
 import { readSettingsFile } from '../settings-utils';
 import { debugLog, debugError } from '../../shared/utils/debug-logger';
+import { getAugmentedEnv } from '../env-utils';
 import type { SupportedTerminal } from '../../shared/types/settings';
 
 // Windows shell paths are now imported from the platform module via getWindowsShellPaths()
@@ -130,18 +131,29 @@ export function spawnPtyProcess(
   let shell: string;
   let shellType: WindowsShellType | undefined;
 
+  let shellArgs: string[] = [];
+
   if (isWindows()) {
     const windowsShell = getWindowsShell(preferredTerminal);
     shell = windowsShell.shell;
     shellType = windowsShell.shellType;
+
+    // For Git Bash on Windows, add flags to prevent login shell and window issues
+    // Use --noprofile --norc to skip startup files and prevent interactive mode
+    if (shell.toLowerCase().includes('bash.exe')) {
+      shellArgs = ['--noprofile', '--norc'];
+    }
   } else {
     shell = process.env.SHELL || '/bin/zsh';
     shellType = undefined; // Not applicable on Unix
+    shellArgs = ['-l'];
   }
 
-  const shellArgs = isWindows() ? [] : ['-l'];
-
   debugLog('[PtyManager] Spawning shell:', shell, shellArgs, '(preferred:', preferredTerminal || 'system', ', shellType:', shellType, ')');
+
+  // Get augmented environment with all necessary paths (Node.js, Git, etc.)
+  // This ensures the terminal starts with the correct PATH without needing to set it in every command
+  const augmentedEnv = getAugmentedEnv();
 
   // Create a clean environment without DEBUG to prevent Claude Code from
   // enabling debug mode when the Electron app is run in development mode.
@@ -149,7 +161,7 @@ export function spawnPtyProcess(
   // (CLAUDE_CODE_OAUTH_TOKEN from profileEnv) instead of API keys that may
   // be present in the shell environment. Without this, Claude Code would
   // show "Claude API" instead of "Claude Max" when ANTHROPIC_API_KEY is set.
-  const { DEBUG: _DEBUG, ANTHROPIC_API_KEY: _ANTHROPIC_API_KEY, ...cleanEnv } = process.env;
+  const { DEBUG: _DEBUG, ANTHROPIC_API_KEY: _ANTHROPIC_API_KEY } = process.env;
 
   const ptyProcess = pty.spawn(shell, shellArgs, {
     name: 'xterm-256color',
@@ -157,12 +169,14 @@ export function spawnPtyProcess(
     rows,
     cwd: cwd || os.homedir(),
     env: {
-      ...cleanEnv,
-      ...profileEnv,
+      ...augmentedEnv, // Include augmented PATH with Node.js, Git, etc.
+      ...profileEnv, // Profile-specific environment overrides
       TERM: 'xterm-256color',
       COLORTERM: 'truecolor',
     },
-  });
+    // @ts-ignore - windowsHide is supported in node-pty
+    windowsHide: true,
+  } as any);
 
   return { pty: ptyProcess, shellType };
 }

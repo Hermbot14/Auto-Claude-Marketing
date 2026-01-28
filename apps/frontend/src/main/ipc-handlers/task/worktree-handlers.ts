@@ -1185,8 +1185,9 @@ async function openInIDE(dirPath: string, ide: SupportedIDE, customPath?: string
         const child = spawn(command, [dirPath], {
           shell: true,
           detached: true,
-          stdio: 'ignore'
-        });
+          stdio: 'ignore',
+          windowsHide: true, // Hide console window on Windows
+        } as any);
         child.unref();
         resolve({ success: true });
       });

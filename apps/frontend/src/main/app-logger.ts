@@ -42,6 +42,10 @@ log.transports.console.format = '[{h}:{i}:{s}] [{level}] {text}';
 // Determine if this is a beta version
 function isBetaVersion(): boolean {
   try {
+    // Check if app is available (might not be initialized at module import time)
+    if (!app || !app.getVersion) {
+      return false;
+    }
     const version = app.getVersion();
     return version.includes('-beta') || version.includes('-alpha') || version.includes('-rc');
   } catch (error) {
@@ -62,11 +66,41 @@ if (isBetaVersion()) {
  * Get system information for debug reports
  */
 export function getSystemInfo(): Record<string, string> {
+  // Safely get app properties, handling case where app is not yet initialized
+  const getAppVersion = () => {
+    try {
+      return app?.getVersion() ?? 'unknown';
+    } catch {
+      return 'unknown';
+    }
+  };
+  const getLocale = () => {
+    try {
+      return app?.getLocale() ?? 'unknown';
+    } catch {
+      return 'unknown';
+    }
+  };
+  const getIsPackaged = () => {
+    try {
+      return app?.isPackaged?.toString() ?? 'false';
+    } catch {
+      return 'false';
+    }
+  };
+  const getUserDataPath = () => {
+    try {
+      return app?.getPath('userData') ?? 'unknown';
+    } catch {
+      return 'unknown';
+    }
+  };
+
   return {
-    appVersion: app.getVersion(),
-    electronVersion: process.versions.electron,
-    nodeVersion: process.versions.node,
-    chromeVersion: process.versions.chrome,
+    appVersion: getAppVersion(),
+    electronVersion: process.versions.electron ?? 'unknown',
+    nodeVersion: process.versions.node ?? 'unknown',
+    chromeVersion: process.versions.chrome ?? 'unknown',
     platform: process.platform,
     arch: process.arch,
     osVersion: os.release(),
@@ -74,9 +108,9 @@ export function getSystemInfo(): Record<string, string> {
     totalMemory: `${Math.round(os.totalmem() / (1024 * 1024 * 1024))}GB`,
     freeMemory: `${Math.round(os.freemem() / (1024 * 1024 * 1024))}GB`,
     cpuCores: os.cpus().length.toString(),
-    locale: app.getLocale(),
-    isPackaged: app.isPackaged.toString(),
-    userData: app.getPath('userData'),
+    locale: getLocale(),
+    isPackaged: getIsPackaged(),
+    userData: getUserDataPath(),
   };
 }
 

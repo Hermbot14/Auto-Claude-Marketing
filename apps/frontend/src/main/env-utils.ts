@@ -13,12 +13,25 @@ import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
 import { promises as fsPromises } from 'fs';
-import { execFileSync, execFile } from 'child_process';
+import { execFileSync, execFile, spawn } from 'child_process';
 import { promisify } from 'util';
-import { getSentryEnvForSubprocess } from './sentry';
+// Sentry is imported dynamically to avoid module-level electron.app access
 import { isWindows, isUnix, getPathDelimiter, getNpmCommand } from './platform';
 
 const execFileAsync = promisify(execFile);
+
+/**
+ * Windows process creation flags to hide console windows
+ * CREATE_NO_WINDOW (0x08000000) prevents the subprocess from creating a console window
+ */
+const WINDOWS_HIDE_CONSOLE = 0x08000000;
+
+/**
+ * Get stdio options for hiding console windows on Windows
+ */
+function getHiddenWindowsStdio(): ['ignore', 'pipe' | 'ignore', 'pipe' | 'ignore'] {
+  return ['ignore', 'pipe', 'pipe'];
+}
 
 /**
  * Windows npm global fallback path
@@ -265,6 +278,7 @@ export function getAugmentedEnv(additionalPaths?: string[]): Record<string, stri
 
   // On Windows, try to find Node.js automatically if not in standard locations
   // This handles custom Node.js installations (nvm, custom paths, etc.)
+  // For NVM4W, we need to include both the symlink directory AND the actual version directory
   if (isWindows()) {
     try {
       const nodeResult = execFileSync('where', ['node.exe'], {
@@ -272,21 +286,43 @@ export function getAugmentedEnv(additionalPaths?: string[]): Record<string, stri
         timeout: 2000,
         windowsHide: true,
         shell: true,
-      }).trim();
+        stdio: ['ignore', 'pipe', 'ignore'],
+      } as any).trim();
+
+      console.warn('[env-utils] where node.exe returned (sync):', JSON.stringify(nodeResult));
 
       if (nodeResult) {
-        // 'where' returns multiple lines, take the first one
+        // 'where' returns multiple lines, take the first one (the actual resolved path)
         const nodePath = nodeResult.split('\n')[0].trim();
         const nodeDir = path.dirname(nodePath);
 
-        if (fs.existsSync(nodeDir) && !currentPathSet.has(nodeDir)) {
-          console.warn('[env-utils] Found Node.js at:', nodeDir);
+        console.warn('[env-utils] nodePath (sync):', nodePath, 'nodeDir:', nodeDir);
+
+        if (fs.existsSync(nodeDir)) {
+          // Add the actual Node.js directory (e.g., C:\nvm4w\nodejs\v20.14.0)
+          // ALWAYS add this, even if already in currentPathSet, to ensure it's at the front
+          console.warn('[env-utils] Adding Node.js directory to PATH (sync):', nodeDir);
           existingPaths.add(nodeDir);
+
+          // For NVM4W, also add the parent directory with symlinks (C:\nvm4w\nodejs)
+          // This ensures symlinks like 'node -> v20.14.0\node.exe' work correctly
+          const parentDir = path.dirname(nodeDir);
+          // Check if parent looks like an NVM4W structure (has 'nodejs' in name or contains version subdirs)
+          const isNvmStructure = parentDir.endsWith('nodejs') ||
+                               parentDir.toLowerCase().includes('nvm') ||
+                               parentDir.toLowerCase().includes('nodejs');
+
+          if (isNvmStructure && fs.existsSync(parentDir) && !currentPathSet.has(parentDir)) {
+            console.warn('[env-utils] Adding NVM parent directory for symlinks (sync):', parentDir);
+            existingPaths.add(parentDir);
+          }
+        } else {
+          console.warn('[env-utils] Node.js directory does not exist (sync):', nodeDir);
         }
       }
     } catch (error) {
       // Node.js not found in PATH, will rely on standard locations
-      console.debug('[env-utils] Node.js not found via where command');
+      console.debug('[env-utils] Node.js not found via where command (sync):', error);
     }
   }
 
@@ -294,12 +330,20 @@ export function getAugmentedEnv(additionalPaths?: string[]): Record<string, stri
   const pathsToAdd = buildPathsToAdd(candidatePaths, currentPathSet, existingPaths, npmPrefix);
 
   // Prepend new paths to PATH (prepend so they take priority)
-  env.PATH = [...pathsToAdd, currentPath].filter(Boolean).join(pathSeparator);
+  // existingPaths contains Node.js and other detected paths that should always be prepended
+  const allPathsToPrepend = [...new Set([...pathsToAdd, ...existingPaths])];
+  env.PATH = allPathsToPrepend.filter(Boolean).join(pathSeparator);
 
   // Add Sentry environment variables for Python subprocesses
   // These are embedded at build time and need to be passed explicitly
-  const sentryEnv = getSentryEnvForSubprocess();
-  Object.assign(env, sentryEnv);
+  try {
+    // Dynamic import to avoid module-level electron.app access
+    const sentry = require('./sentry.ts');
+    const sentryEnv = sentry.getSentryEnvForSubprocess?.() ?? {};
+    Object.assign(env, sentryEnv);
+  } catch {
+    // Sentry not available, skip
+  }
 
   return env;
 }
@@ -467,29 +511,53 @@ export async function getAugmentedEnvAsync(additionalPaths?: string[]): Promise<
 
   // On Windows, try to find Node.js automatically if not in standard locations
   // This handles custom Node.js installations (nvm, custom paths, etc.)
+  // For NVM4W, we need to include both the symlink directory AND the actual version directory
   if (isWindows()) {
     try {
       const { stdout } = await execFileAsync('where', ['node.exe'], {
         encoding: 'utf-8',
         timeout: 2000,
-        windowsHide: true,
         shell: true,
-      });
+        stdio: getHiddenWindowsStdio(),
+        // @ts-ignore - windowsHide is supported in Node.js
+        windowsHide: true,
+      } as any);
 
       const nodeResult = stdout.trim();
+      console.warn('[env-utils] where node.exe returned:', JSON.stringify(nodeResult));
+
       if (nodeResult) {
-        // 'where' returns multiple lines, take the first one
+        // 'where' returns multiple lines, take the first one (the actual resolved path)
         const nodePath = nodeResult.split('\n')[0].trim();
         const nodeDir = path.dirname(nodePath);
 
-        if (await existsAsync(nodeDir) && !currentPathSet.has(nodeDir)) {
-          console.warn('[env-utils] Found Node.js at:', nodeDir);
+        console.warn('[env-utils] nodePath:', nodePath, 'nodeDir:', nodeDir);
+
+        if (await existsAsync(nodeDir)) {
+          // Add the actual Node.js directory (e.g., C:\nvm4w\nodejs\v20.14.0)
+          // ALWAYS add this, even if already in currentPathSet, to ensure it's at the front
+          console.warn('[env-utils] Adding Node.js directory to PATH:', nodeDir);
           existingPaths.add(nodeDir);
+
+          // For NVM4W, also add the parent directory with symlinks (C:\nvm4w\nodejs)
+          // This ensures symlinks like 'node -> v20.14.0\node.exe' work correctly
+          const parentDir = path.dirname(nodeDir);
+          // Check if parent looks like an NVM4W structure (has 'nodejs' in name or contains version subdirs)
+          const isNvmStructure = parentDir.endsWith('nodejs') ||
+                               parentDir.toLowerCase().includes('nvm') ||
+                               parentDir.toLowerCase().includes('nodejs');
+
+          if (isNvmStructure && await existsAsync(parentDir) && !currentPathSet.has(parentDir)) {
+            console.warn('[env-utils] Adding NVM parent directory for symlinks:', parentDir);
+            existingPaths.add(parentDir);
+          }
+        } else {
+          console.warn('[env-utils] Node.js directory does not exist:', nodeDir);
         }
       }
     } catch (error) {
       // Node.js not found in PATH, will rely on standard locations
-      console.debug('[env-utils] Node.js not found via where command');
+      console.debug('[env-utils] Node.js not found via where command:', error);
     }
   }
 
@@ -497,12 +565,20 @@ export async function getAugmentedEnvAsync(additionalPaths?: string[]): Promise<
   const pathsToAdd = buildPathsToAdd(candidatePaths, currentPathSet, existingPaths, npmPrefix);
 
   // Prepend new paths to PATH (prepend so they take priority)
-  env.PATH = [...pathsToAdd, currentPath].filter(Boolean).join(pathSeparator);
+  // existingPaths contains Node.js and other detected paths that should always be prepended
+  const allPathsToPrepend = [...new Set([...pathsToAdd, ...existingPaths])];
+  env.PATH = allPathsToPrepend.filter(Boolean).join(pathSeparator);
 
   // Add Sentry environment variables for Python subprocesses
   // These are embedded at build time and need to be passed explicitly
-  const sentryEnv = getSentryEnvForSubprocess();
-  Object.assign(env, sentryEnv);
+  try {
+    // Dynamic import to avoid module-level electron.app access
+    const sentry = require('./sentry.ts');
+    const sentryEnv = sentry.getSentryEnvForSubprocess?.() ?? {};
+    Object.assign(env, sentryEnv);
+  } catch {
+    // Sentry not available, skip
+  }
 
   return env;
 }

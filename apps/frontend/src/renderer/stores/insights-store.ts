@@ -235,10 +235,11 @@ export function sendMessage(projectId: string, message: string, modelConfig?: In
   };
   store.addMessage(userMessage);
 
-  // Clear pending and set status
+  // Clear all previous state and set status
   store.setPendingMessage('');
   store.clearStreamingContent();
   store.clearToolsUsed(); // Clear tools from previous response
+  store.setCurrentTool(null); // Clear any active tool from previous response
   store.setStatus({
     phase: 'thinking',
     message: 'Processing your message...'

@@ -422,7 +422,9 @@ async function testCommandConnection(server: CustomMcpServer, startTime: number)
       stdio: ['pipe', 'pipe', 'pipe'],
       timeout: 15000, // OS-level timeout for reliable process termination
       shell: process.platform === 'win32', // Required for Windows to run npx.cmd
-    });
+      // @ts-ignore - windowsHide is supported in Node.js
+      windowsHide: true, // Hide console window on Windows
+    } as any);
 
     let stdout = '';
     let stderr = '';

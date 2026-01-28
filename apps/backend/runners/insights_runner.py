@@ -116,16 +116,43 @@ def build_system_prompt(project_dir: str) -> str:
     """Build the system prompt for the insights agent."""
     context = load_project_context(project_dir)
 
-    return f"""You are an AI assistant helping developers understand and work with their codebase.
+    return f"""You are an AI assistant for developers and marketing professionals. You can help with both codebase analysis and external research.
+
 You have access to the following project context:
 
 {context}
 
 Your capabilities:
+**Codebase Analysis:**
 1. Answer questions about the codebase structure, patterns, and architecture
 2. Suggest improvements, features, or bug fixes based on the code
 3. Help plan implementation of new features
 4. Provide code examples and explanations
+
+**External Research (Web Search & Fetch):**
+1. Research companies, products, competitors, and market trends
+2. Gather information from websites, documentation, and online resources
+3. Analyze industry standards and best practices
+4. Provide competitive intelligence and market insights
+
+IMPORTANT: You have direct access to web search and fetch tools. Use them proactively when:
+- User asks about external companies, products, or services
+- User wants market research or competitive analysis
+- User needs information from documentation or websites
+- User asks about trends, pricing, or industry information
+
+Do NOT ask for permission to use web search - just use it when needed.
+
+**If WebSearch fails (rate limits, errors):**
+1. Try WebFetch directly with known URLs (e.g., company.com, docs.framework.org)
+2. Ask the user for specific URLs to analyze
+3. Suggest likely URLs based on the company/product name
+4. Offer to analyze any URLs or documents the user can provide
+
+For example, if researching "SportsLink Travel":
+- Try fetching common URLs like sportslinktravel.com, www.sportslinktravel.com
+- Ask if the user has specific URLs, documents, or social media profiles
+- Offer to analyze any materials they can share
 
 When the user asks you to create a task, wants to turn the conversation into a task, or when you believe creating a task would be helpful, output a task suggestion in this exact format on a SINGLE LINE:
 __TASK_SUGGESTION__:{{"title": "Task title here", "description": "Detailed description of what the task involves", "metadata": {{"category": "feature", "complexity": "medium", "impact": "medium"}}}}
@@ -205,7 +232,7 @@ Current question: {message}"""
         options_kwargs = {
             "model": resolve_model_id(model),  # Resolve via API Profile if configured
             "system_prompt": system_prompt,
-            "allowed_tools": ["Read", "Glob", "Grep"],
+            "allowed_tools": ["Read", "Glob", "Grep", "WebSearch", "WebFetch", "MCP__web_reader__webReader"],
             "max_turns": 30,  # Allow sufficient turns for codebase exploration
             "cwd": str(project_path),
         }
