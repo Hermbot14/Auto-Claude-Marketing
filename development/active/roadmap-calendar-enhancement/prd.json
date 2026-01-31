@@ -1,0 +1,645 @@
+{
+  "id": "roadmap-calendar-enhancement",
+  "title": "Roadmap and Calendar Feature Enhancement for Auto-Marketing",
+  "description": "Comprehensive enhancement to the Roadmap feature with active progress logs, interactive chat interface, branding updates, and a new Calendar feature for marketing teams.",
+  "metadata": {
+    "createdAt": "2026-01-31T10:00:00Z",
+    "version": "1.0.0",
+    "gitBranch": "prd/roadmap-calendar-enhancement",
+    "prdType": "feature-enhancement",
+    "priority": "high",
+    "estimatedDuration": "2-3 weeks",
+    "team": "solo-marketing-team"
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Active Progress Logs for Roadmap Generation",
+      "status": "completed",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "Real-time log display appears below 'Discovering' loading UI",
+        "Tool usage indicators show (WebSearch, Bash, Read, etc.) with icons",
+        "Progress bar dynamically updates from 0% to 100% based on actual workflow progress",
+        "Logs are organized with timestamps and severity levels (info, success, error)",
+        "Log panel is collapsible and has a clean, readable design",
+        "Progress estimation is accurate based on phase completion (discovery, research, analysis, generation)",
+        "No static jumps (e.g., 40% → 70%) - smooth incremental updates"
+      ],
+      "dependencies": [],
+      "subtasks": [
+        {
+          "id": "TASK-001-01",
+          "title": "Design Progress Log UI Component",
+          "microtasks": [
+            "Create collapsible log panel component",
+            "Add tool usage icons (WebSearch, Bash, Read, Write, etc.)",
+            "Implement timestamp formatting",
+            "Add severity level styling (info, success, error, warning)",
+            "Design log entry animations"
+          ]
+        },
+        {
+          "id": "TASK-001-02",
+          "title": "Implement Progress Bar Calculation",
+          "microtasks": [
+            "Define roadmap generation phases (discovery, research, analysis, generation, finalization)",
+            "Assign weights to each phase for accurate progress",
+            "Calculate progress based on completed steps within each phase",
+            "Update progress incrementally as steps complete",
+            "Add progress smoothing to avoid jumps"
+          ]
+        },
+        {
+          "id": "TASK-001-03",
+          "title": "Integrate with Roadmap Generation IPC",
+          "microtasks": [
+            "Hook into roadmap generation progress events",
+            "Stream log messages from backend to frontend",
+            "Update progress bar in real-time",
+            "Handle error states with visual feedback"
+          ]
+        },
+        {
+          "id": "TASK-001-04",
+          "title": "Add Polish and Animations",
+          "microtasks": [
+            "Add smooth progress bar transitions",
+            "Add log entry fade-in animations",
+            "Add auto-scroll to latest log entry",
+            "Add copy-to-clipboard for log entries",
+            "Ensure responsive design for mobile"
+          ]
+        }
+      ],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/components/roadmap/RoadmapGenerator.tsx",
+        "apps/frontend/src/renderer/components/roadmap/ProgressLogs.tsx (new)",
+        "apps/frontend/src/renderer/components/roadmap/ProgressBar.tsx (new)",
+        "apps/frontend/src/main/ipc-handlers/roadmap.ts",
+        "apps/frontend/src/preload/api/roadmap.ts"
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Replace Auto-Claude Branding with Auto-Marketing",
+      "status": "completed",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "All user-facing references to 'Auto-Claude' replaced with 'Auto-Marketing'",
+        "All internal references updated consistently",
+        "No remaining 'Auto-Claude' in UI text, documentation, or code comments",
+        "App name updated in window title and about screen",
+        "i18n translation keys updated for all languages"
+      ],
+      "dependencies": [],
+      "subtasks": [
+        {
+          "id": "TASK-002-01",
+          "title": "Update Frontend Branding",
+          "microtasks": [
+            "Search and replace 'Auto-Claude' in all React components",
+            "Update i18n translation files (en, fr, others)",
+            "Update window title in Electron main process",
+            "Update about screen and welcome screen",
+            "Update package.json display name"
+          ]
+        },
+        {
+          "id": "TASK-002-02",
+          "title": "Update Backend Branding",
+          "microtasks": [
+            "Search and replace 'Auto-Claude' in Python files",
+            "Update agent prompts",
+            "Update spec templates",
+            "Update CLI output messages"
+          ]
+        },
+        {
+          "id": "TASK-002-03",
+          "title": "Update Documentation",
+          "microtasks": [
+            "Update README.md",
+            "Update CLAUDE.md",
+            "Update guides/ documentation",
+            "Update package.json descriptions"
+          ]
+        }
+      ],
+      "filesInvolved": [
+        "apps/frontend/package.json",
+        "apps/frontend/src/main/index.ts",
+        "apps/frontend/src/renderer/components/**/*",
+        "apps/frontend/src/shared/i18n/locales/**/*.json",
+        "apps/backend/agents/**/*.py",
+        "apps/backend/prompts/**/*.md",
+        "README.md",
+        "CLAUDE.md"
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Interactive Chat Interface for Roadmap Manipulation",
+      "status": "completed",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "Chat panel integrated into Roadmap view",
+        "Users can add context to phases/tasks conversationally",
+        "Users can redefine phases and tasks via chat",
+        "Users can update status of items via chat commands",
+        "Users can re-arrange priority list via chat",
+        "Chat supports natural language processing for roadmap operations",
+        "Changes reflect immediately in the roadmap UI",
+        "Planning board aesthetic suitable for solo marketing team"
+      ],
+      "dependencies": [],
+      "subtasks": [
+        {
+          "id": "TASK-003-01",
+          "title": "Design Chat Interface",
+          "microtasks": [
+            "Create chat panel component with message history",
+            "Add input field with send button",
+            "Design message bubbles (user vs assistant)",
+            "Add support for markdown in messages",
+            "Add suggestion chips for common actions"
+          ]
+        },
+        {
+          "id": "TASK-003-02",
+          "title": "Implement Roadmap Manipulation Commands",
+          "microtasks": [
+            "Add task context: 'add more context to Q1 planning'",
+            "Redefine phase: 'change Q1 to Q1 2026 - Product Launch'",
+            "Update status: 'mark SEO audit as complete'",
+            "Re-arrange: 'move social media strategy to top priority'",
+            "Parse natural language for roadmap operations"
+          ]
+        },
+        {
+          "id": "TASK-003-03",
+          "title": "Integrate AI for Natural Language Processing",
+          "microtasks": [
+            "Connect to Claude SDK for intent parsing",
+            "Extract roadmap operations from chat messages",
+            "Validate operations against roadmap schema",
+            "Execute operations and reflect changes in UI"
+          ]
+        },
+        {
+          "id": "TASK-003-04",
+          "title": "Add Planning Board Features",
+          "microtasks": [
+            "Add drag-and-drop support in roadmap",
+            "Add inline editing for task titles and descriptions",
+            "Add context menu for quick actions",
+            "Add status badges with color coding",
+            "Add priority indicators with reordering"
+          ]
+        },
+        {
+          "id": "TASK-003-05",
+          "title": "Implement State Management",
+          "microtasks": [
+            "Create Zustand store for roadmap state",
+            "Add optimistic updates for chat operations",
+            "Add undo/redo support",
+            "Persist roadmap changes to disk"
+          ]
+        }
+      ],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/components/roadmap/RoadmapView.tsx",
+        "apps/frontend/src/renderer/components/roadmap/RoadmapChat.tsx (new)",
+        "apps/frontend/src/renderer/components/roadmap/RoadmapPlanningBoard.tsx (new)",
+        "apps/frontend/src/renderer/stores/roadmap-store.ts (updated)",
+        "apps/frontend/src/main/ipc-handlers/roadmap-handlers.ts (updated)",
+        "apps/frontend/src/shared/constants/ipc.ts (updated)",
+        "apps/frontend/src/shared/types/roadmap.ts (updated)",
+        "apps/frontend/src/preload/api/modules/roadmap-api.ts (updated)",
+        "apps/frontend/src/shared/i18n/locales/en/roadmap.json (new)",
+        "apps/backend/agents/roadmap_chat_agent.py (new)"
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Update Roadmap Prompts for Marketing Focus",
+      "status": "completed",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "All roadmap generation prompts are marketing-focused",
+        "Phases are marketing-specific (campaigns, content, SEO, social, etc.)",
+        "Tasks are relevant to marketing workflows",
+        "Examples and templates are marketing-related",
+        "No generic coding/development terminology"
+      ],
+      "dependencies": [],
+      "subtasks": [
+        {
+          "id": "TASK-004-01",
+          "title": "Audit Current Roadmap Prompts",
+          "microtasks": [
+            "Read all existing roadmap prompt templates",
+            "Identify non-marketing content",
+            "List areas needing marketing focus"
+          ]
+        },
+        {
+          "id": "TASK-004-02",
+          "title": "Create Marketing Phase Templates",
+          "microtasks": [
+            "Campaign Planning phase template",
+            "Content Strategy phase template",
+            "SEO Audit phase template",
+            "Social Media Strategy phase template",
+            "Email Marketing phase template",
+            "Analytics & Reporting phase template"
+          ]
+        },
+        {
+          "id": "TASK-004-03",
+          "title": "Create Marketing Task Templates",
+          "microtasks": [
+            "Market research tasks",
+            "Competitor analysis tasks",
+            "Content creation tasks",
+            "Campaign execution tasks",
+            "Performance tracking tasks"
+          ]
+        },
+        {
+          "id": "TASK-004-04",
+          "title": "Update System Prompts",
+          "microtasks": [
+            "Update roadmap generation system prompt",
+            "Add marketing domain knowledge",
+            "Add marketing terminology glossary",
+            "Add marketing best practices guidelines"
+          ]
+        }
+      ],
+      "filesInvolved": [
+        "apps/backend/prompts/roadmap.md",
+        "apps/backend/prompts/roadmap_marketing.md (new)",
+        "apps/backend/prompts/roadmap_phases.md (new)"
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Calendar Feature - Side-Scrolling View",
+      "status": "completed",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "Calendar view appears below Roadmap",
+        "Side-scrolling timeline with months/weeks",
+        "Combines data from: Roadmap phases, Project files, Connected calendars",
+        "Color-coded items by type (campaigns, content, events, deadlines)",
+        "Responsive design for different screen sizes",
+        "Smooth horizontal scrolling with snap-to-period"
+      ],
+      "dependencies": [],
+      "subtasks": [
+        {
+          "id": "TASK-005-01",
+          "title": "Design Calendar UI Component",
+          "microtasks": [
+            "Create side-scrolling timeline component",
+            "Add month/week header row",
+            "Add item lanes for different categories",
+            "Implement smooth horizontal scrolling",
+            "Add snap-to-month/week functionality",
+            "Add zoom controls (day/week/month view)"
+          ]
+        },
+        {
+          "id": "TASK-005-02",
+          "title": "Implement Calendar Data Layer",
+          "microtasks": [
+            "Create calendar data store",
+            "Aggregate roadmap phases with dates",
+            "Scan project files for date-related items",
+            "Parse markdown files for deadlines and events",
+            "Support external calendar integration (Google Calendar, iCal)"
+          ]
+        },
+        {
+          "id": "TASK-005-03",
+          "title": "Add Color Coding System",
+          "microtasks": [
+            "Define color scheme for item types",
+            "Campaigns: Purple gradient",
+            "Content: Blue gradient",
+            "Social Media: Pink gradient",
+            "Email: Green gradient",
+            "SEO: Orange gradient",
+            "Deadlines: Red gradient",
+            "Add legend with color explanations"
+          ]
+        },
+        {
+          "id": "TASK-005-04",
+          "title": "Add Calendar Interactions",
+          "microtasks": [
+            "Click item to view details",
+            "Drag item to reschedule",
+            "Right-click for context menu",
+            "Filter by item type",
+            "Search for specific items"
+          ]
+        },
+        {
+          "id": "TASK-005-05",
+          "title": "Integrate with Roadmap",
+          "microtasks": [
+            "Sync roadmap phases to calendar",
+            "Bidirectional updates (roadmap ↔ calendar)",
+            "Highlight current date",
+            "Show upcoming deadlines"
+          ]
+        }
+      ],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/components/calendar/CalendarView.tsx (new)",
+        "apps/frontend/src/renderer/components/calendar/CalendarTimeline.tsx (new)",
+        "apps/frontend/src/renderer/components/calendar/CalendarItem.tsx (new)",
+        "apps/frontend/src/stores/calendarStore.ts (new)",
+        "apps/frontend/src/main/ipc-handlers/calendar.ts (new)",
+        "apps/frontend/src/preload/api/calendar.ts (new)"
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Calendar UX Features for Marketing Teams",
+      "status": "completed",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "Calendar includes marketing-specific features",
+        "Features are useful for solo marketing teams",
+        "Macro view of upcoming marketing activities",
+        "Integration with marketing workflows"
+      ],
+      "dependencies": ["TASK-005"],
+      "subtasks": [
+        {
+          "id": "TASK-006-01",
+          "title": "Content Publishing Calendar",
+          "microtasks": [
+            "Show scheduled content with publish dates",
+            "Content status indicators (draft, scheduled, published)",
+            "Bulk rescheduling support",
+            "Content type badges (blog, social, email, video)",
+            "Channel-specific views (Instagram, LinkedIn, Blog, etc.)"
+          ]
+        },
+        {
+          "id": "TASK-006-02",
+          "title": "Campaign Timeline View",
+          "microtasks": [
+            "Show campaign phases with visual grouping",
+            "Campaign milestones with markers",
+            "Dependency lines between related items",
+            "Campaign health indicators",
+            "Budget spend over time visualization"
+          ]
+        },
+        {
+          "id": "TASK-006-03",
+          "title": "Marketing Event Reminders",
+          "microtasks": [
+            "Holidays and seasonal events",
+            "Industry conferences and events",
+            "Product launch dates",
+            "Competitor announcement tracking",
+            "Custom event types with reminders"
+          ]
+        },
+        {
+          "id": "TASK-006-04",
+          "title": "Analytics Due Dates",
+          "microtasks": [
+            "Monthly report deadlines",
+            "QA review schedules",
+            "Performance review dates",
+            "SEO audit schedules",
+            "Content audit schedules"
+          ]
+        },
+        {
+          "id": "TASK-006-05",
+          "title": "Collaboration Features",
+          "microtasks": [
+            "Share calendar view (export to image/PDF)",
+            "Calendar feed URL for external integration",
+            "Comment threads on calendar items",
+            "Assignment indicators for team members",
+            "Approval workflow indicators"
+          ]
+        },
+        {
+          "id": "TASK-006-06",
+          "title": "Quick Actions",
+          "microtasks": [
+            "Quick-add button for new items",
+            "Templates for common marketing events",
+            "Duplicate item with offset (recurring campaigns)",
+            "Bulk edit dates",
+            "Drag to create time range"
+          ]
+        },
+        {
+          "id": "TASK-006-07",
+          "title": "Marketing Metrics Overlay",
+          "microtasks": [
+            "Show key metrics on calendar dates",
+            "Click to reveal detailed metrics",
+            "Compare periods (week-over-week, month-over-month)",
+            "Goal progress indicators",
+            "Alert for missed KPIs"
+          ]
+        },
+        {
+          "id": "TASK-006-08",
+          "title": "External Integrations",
+          "microtasks": [
+            "Google Calendar sync",
+            "Outlook Calendar sync",
+            "Social media scheduling tools (Hootsuite, Buffer)",
+            "Email marketing platforms (Mailchimp, SendGrid)",
+            "Analytics platforms (GA4, Mixpanel)"
+          ]
+        }
+      ],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/components/calendar/features/*",
+        "apps/frontend/src/renderer/components/calendar/ContentCalendar.tsx (new)",
+        "apps/frontend/src/renderer/components/calendar/CampaignTimeline.tsx (new)",
+        "apps/frontend/src/renderer/components/calendar/EventReminders.tsx (new)",
+        "apps/frontend/src/renderer/components/calendar/MetricsOverlay.tsx (new)",
+        "apps/backend/integrations/calendar/google.py (new)",
+        "apps/backend/integrations/calendar/social.py (new)"
+      ]
+    },
+    {
+      "id": "TASK-007",
+      "title": "Testing and Quality Assurance",
+      "status": "completed",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "All features tested manually",
+        "Unit tests for critical components",
+        "E2E tests for key workflows",
+        "No regressions in existing features",
+        "Performance benchmarks met"
+      ],
+      "dependencies": ["TASK-001", "TASK-002", "TASK-003", "TASK-004", "TASK-005", "TASK-006"],
+      "subtasks": [
+        {
+          "id": "TASK-007-01",
+          "title": "Test Progress Logs",
+          "microtasks": [
+            "Verify progress bar accuracy",
+            "Test log message streaming",
+            "Test error state handling",
+            "Test collapsible panel"
+          ]
+        },
+        {
+          "id": "TASK-007-02",
+          "title": "Test Branding Changes",
+          "microtasks": [
+            "Verify all Auto-Claude references replaced",
+            "Test all UI screens",
+            "Test i18n translations"
+          ]
+        },
+        {
+          "id": "TASK-007-03",
+          "title": "Test Chat Interface",
+          "microtasks": [
+            "Test natural language commands",
+            "Test roadmap updates",
+            "Test state persistence",
+            "Test undo/redo"
+          ]
+        },
+        {
+          "id": "TASK-007-04",
+          "title": "Test Calendar",
+          "microtasks": [
+            "Test side-scrolling behavior",
+            "Test color coding",
+            "Test item interactions",
+            "Test external integrations"
+          ]
+        }
+      ],
+      "filesInvolved": [
+        "apps/frontend/e2e/**/*.spec.ts",
+        "apps/frontend/src/**/__tests__/**/*"
+      ]
+    },
+    {
+      "id": "TASK-008",
+      "title": "Documentation and Handoff",
+      "status": "completed",
+      "priority": "low",
+      "acceptanceCriteria": [
+        "User documentation updated",
+        "Developer documentation updated",
+        "Changelog entry created",
+        "Screenshots and demos prepared"
+      ],
+      "dependencies": ["TASK-007"],
+      "subtasks": [
+        {
+          "id": "TASK-008-01",
+          "title": "Update User Documentation",
+          "microtasks": [
+            "Add Roadmap chat commands reference",
+            "Add Calendar feature guide",
+            "Update screenshots"
+          ]
+        },
+        {
+          "id": "TASK-008-02",
+          "title": "Update Developer Documentation",
+          "microtasks": [
+            "Document new components",
+            "Document new IPC handlers",
+            "Update architecture diagrams"
+          ]
+        },
+        {
+          "id": "TASK-008-03",
+          "title": "Create Changelog",
+          "microtasks": [
+            "Document all changes",
+            "Categorize by feature",
+            "Add migration notes"
+          ]
+        }
+      ],
+      "filesInvolved": [
+        "guides/**/*",
+        "CHANGELOG.md",
+        "docs/**/*"
+      ]
+    }
+  ],
+  "uiDesignReference": {
+    "colorScheme": {
+      "roadmap": {
+        "phases": "#8B5CF6 (purple-500)",
+        "tasks": "#A78BFA (purple-400)",
+        "completed": "#10B981 (emerald-500)",
+        "inProgress": "#F59E0B (amber-500)",
+        "pending": "#6B7280 (gray-500)"
+      },
+      "calendar": {
+        "campaigns": "linear-gradient(135deg, #8B5CF6, #A78BFA)",
+        "content": "linear-gradient(135deg, #3B82F6, #60A5FA)",
+        "socialMedia": "linear-gradient(135deg, #EC4899, #F472B6)",
+        "email": "linear-gradient(135deg, #10B981, #34D399)",
+        "seo": "linear-gradient(135deg, #F59E0B, #FBBF24)",
+        "deadlines": "linear-gradient(135deg, #EF4444, #F87171)",
+        "events": "linear-gradient(135deg, #6366F1, #818CF8)"
+      }
+    },
+    "fonts": {
+      "primary": "Inter, system-ui, sans-serif",
+      "headings": "Inter Tight, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "animations": {
+      "progressBar": "300ms ease-out",
+      "logEntry": "200ms fade-in",
+      "calendarScroll": "smooth",
+      "chatMessage": "250ms bounce-in"
+    }
+  },
+  "technicalNotes": {
+    "stateManagement": "Use Zustand for roadmap and calendar state stores",
+    "aiIntegration": "Use Claude Agent SDK for chat interface NLP",
+    "calendarParsing": "Use date-fns for date manipulation and parsing",
+    "ipcCommunication": "Dedicated IPC handlers for roadmap and calendar operations",
+    "dataPersistence": "JSON file storage for roadmap and calendar data",
+    "externalCalendars": "Support Google Calendar API and iCal format"
+  },
+  "successMetrics": {
+    "userEngagement": [
+      "Increased time spent in Roadmap view",
+      "Higher roadmap completion rates",
+      "Regular calendar usage"
+    ],
+    "featureAdoption": [
+      "Chat interface usage rate",
+      "Calendar item creation rate",
+      "Roadmap manipulation frequency"
+    ],
+    "quality": [
+      "Progress bar accuracy ±5%",
+      "Chat command success rate >90%",
+      "Calendar sync reliability >95%"
+    ]
+  }
+}

@@ -17,6 +17,7 @@ import { pythonEnvManager } from '../python-env-manager';
 import { transformIdeaFromSnakeCase, transformSessionFromSnakeCase } from '../ipc-handlers/ideation/transformers';
 import { transformRoadmapFromSnakeCase } from '../ipc-handlers/roadmap/transformers';
 import type { RawIdea } from '../ipc-handlers/ideation/types';
+import type { RoadmapProgressLog, RoadmapToolType, RoadmapLogSeverity } from '../../shared/types';
 
 /** Maximum length for status messages displayed in progress UI */
 const STATUS_MESSAGE_MAX_LENGTH = 200;
@@ -661,13 +662,57 @@ export class AgentQueueManager {
     // Collect output for rate limit detection
     let allRoadmapOutput = '';
 
+    // Helper to parse tool type from log message
+    const parseToolType = (log: string): RoadmapToolType | undefined => {
+      const lowerLog = log.toLowerCase();
+      if (lowerLog.includes('websearch') || lowerLog.includes('searching')) return 'WebSearch';
+      if (lowerLog.includes('bash') || lowerLog.includes('command') || lowerLog.includes('terminal')) return 'Bash';
+      if (lowerLog.includes('read file') || lowerLog.includes('reading')) return 'Read';
+      if (lowerLog.includes('write file') || lowerLog.includes('writing')) return 'Write';
+      if (lowerLog.includes('edit file') || lowerLog.includes('editing')) return 'Edit';
+      if (lowerLog.includes('grep') || lowerLog.includes('search')) return 'Grep';
+      if (lowerLog.includes('glob') || lowerLog.includes('files matching')) return 'Glob';
+      if (lowerLog.includes('database') || lowerLog.includes('query')) return 'Database';
+      if (lowerLog.includes('git') || lowerLog.includes('commit') || lowerLog.includes('branch')) return 'Git';
+      if (lowerLog.includes('agent') || lowerLog.includes('subtask')) return 'Agent';
+      return undefined;
+    };
+
+    // Helper to parse severity from log message
+    const parseSeverity = (log: string): RoadmapLogSeverity => {
+      const lowerLog = log.toLowerCase();
+      if (lowerLog.includes('error') || lowerLog.includes('failed') || lowerLog.includes('exception')) return 'error';
+      if (lowerLog.includes('warning') || lowerLog.includes('warn')) return 'warning';
+      if (lowerLog.includes('success') || lowerLog.includes('completed') || lowerLog.includes('done')) return 'success';
+      return 'info';
+    };
+
+    // Helper to get current phase from progress phase
+    const getLogPhase = (phase: string): RoadmapProgressLog['phase'] => {
+      const phaseMap: Record<string, RoadmapProgressLog['phase']> = {
+        'analyzing': 'discovery',
+        'discovering': 'discovery',
+        'generating': 'generation',
+        'complete': 'finalization',
+      };
+      return phaseMap[phase] || 'discovery';
+    };
+
     // Helper to emit logs - split multi-line output into individual log lines
-    const emitLogs = (log: string) => {
+    const emitLogs = (log: string, currentPhase: string) => {
       const lines = log.split('\n').filter(line => line.trim().length > 0);
       for (const line of lines) {
         const trimmed = line.trim();
         if (trimmed.length > 0) {
-          this.emitter.emit('roadmap-log', projectId, trimmed);
+          const structuredLog: RoadmapProgressLog = {
+            id: `${Date.now()}-${Math.random().toString(36).substring(7)}`,
+            timestamp: new Date().toISOString(),
+            tool: parseToolType(trimmed),
+            severity: parseSeverity(trimmed),
+            message: trimmed,
+            phase: getLogPhase(currentPhase),
+          };
+          this.emitter.emit('roadmap-log', projectId, structuredLog);
         }
       }
     };
@@ -679,7 +724,7 @@ export class AgentQueueManager {
       allRoadmapOutput = (allRoadmapOutput + log).slice(-10000);
 
       // Emit all log lines for debugging
-      emitLogs(log);
+      emitLogs(log, progressPhase);
 
       // Parse progress using AgentEvents
       const progressUpdate = this.events.parseRoadmapProgress(log, progressPhase, progressPercent);
@@ -700,7 +745,7 @@ export class AgentQueueManager {
       // Collect stderr for rate limit detection too
       allRoadmapOutput = (allRoadmapOutput + log).slice(-10000);
       console.error('[Roadmap STDERR]', log);
-      emitLogs(log);
+      emitLogs(log, progressPhase);
       this.emitter.emit('roadmap-progress', projectId, {
         phase: progressPhase,
         progress: progressPercent,

@@ -3,6 +3,7 @@ import type {
   Roadmap,
   RoadmapFeatureStatus,
   RoadmapGenerationStatus,
+  RoadmapProgressLog,
   Task,
   IPCResult
 } from '../../../shared/types';
@@ -28,10 +29,17 @@ export interface RoadmapAPI {
     projectId: string,
     featureId: string
   ) => Promise<IPCResult<Task>>;
+  processRoadmapChat: (
+    projectId: string,
+    message: string
+  ) => Promise<IPCResult<{ response: string; operations: unknown[] }>>;
 
   // Event Listeners
   onRoadmapProgress: (
     callback: (projectId: string, status: RoadmapGenerationStatus) => void
+  ) => IpcListenerCleanup;
+  onRoadmapLog: (
+    callback: (projectId: string, log: RoadmapProgressLog) => void
   ) => IpcListenerCleanup;
   onRoadmapComplete: (
     callback: (projectId: string, roadmap: Roadmap) => void
@@ -80,11 +88,22 @@ export const createRoadmapAPI = (): RoadmapAPI => ({
   ): Promise<IPCResult<Task>> =>
     invokeIpc(IPC_CHANNELS.ROADMAP_CONVERT_TO_SPEC, projectId, featureId),
 
+  processRoadmapChat: (
+    projectId: string,
+    message: string
+  ): Promise<IPCResult<{ response: string; operations: unknown[] }>> =>
+    invokeIpc(IPC_CHANNELS.ROADMAP_CHAT, projectId, message),
+
   // Event Listeners
   onRoadmapProgress: (
     callback: (projectId: string, status: RoadmapGenerationStatus) => void
   ): IpcListenerCleanup =>
     createIpcListener(IPC_CHANNELS.ROADMAP_PROGRESS, callback),
+
+  onRoadmapLog: (
+    callback: (projectId: string, log: RoadmapProgressLog) => void
+  ): IpcListenerCleanup =>
+    createIpcListener(IPC_CHANNELS.ROADMAP_LOG, callback),
 
   onRoadmapComplete: (
     callback: (projectId: string, roadmap: Roadmap) => void

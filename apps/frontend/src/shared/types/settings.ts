@@ -289,7 +289,7 @@ export interface AppSettings {
   seenVersionWarnings?: string[];
 }
 
-// Auto-Claude Source Environment Configuration (for auto-claude repo .env)
+// Auto-Marketing Source Environment Configuration (for auto-marketing repo .env)
 export interface SourceEnvConfig {
   // Claude Authentication (required for ideation, roadmap generation, etc.)
   hasClaudeToken: boolean;

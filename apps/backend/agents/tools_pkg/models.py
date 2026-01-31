@@ -2,7 +2,7 @@
 Tool Models and Constants
 ==========================
 
-Defines tool name constants and configuration for auto-claude MCP tools.
+Defines tool name constants and configuration for auto-marketing MCP tools.
 
 This module is the single source of truth for all tool definitions used by
 the Claude Agent SDK client. Tool lists are organized by category:
@@ -28,10 +28,10 @@ BASE_WRITE_TOOLS = ["Write", "Edit", "Bash"]
 WEB_TOOLS = ["WebFetch", "WebSearch"]
 
 # =============================================================================
-# Auto-Claude MCP Tools (Custom build management)
+# Auto-Marketing MCP Tools (Custom build management)
 # =============================================================================
 
-# Auto-Claude MCP tool names (prefixed with mcp__auto-claude__)
+# Auto-Marketing MCP tool names (prefixed with mcp__auto-marketing__)
 TOOL_UPDATE_SUBTASK_STATUS = "mcp__auto-claude__update_subtask_status"
 TOOL_GET_BUILD_PROGRESS = "mcp__auto-claude__get_build_progress"
 TOOL_RECORD_DISCOVERY = "mcp__auto-claude__record_discovery"

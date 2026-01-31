@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-01-31T03:04:46.800Z",
+  "tests": [
+    {
+      "name": "Button Interactions",
+      "status": "fail",
+      "duration": 59995,
+      "details": {},
+      "error": "page.goto: Test timeout of 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"networkidle\"\u001b[22m\n"
+    }
+  ]
+}

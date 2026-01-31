@@ -5,6 +5,8 @@ import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { cn } from '../lib/utils';
 import type { RoadmapGenerationStatus } from '../../shared/types/roadmap';
+import { ProgressBar, usePhaseProgress, type RoadmapPhase } from './roadmap/ProgressBar';
+import { ProgressLogs, type ProgressLog } from './roadmap/ProgressLogs';
 
 /**
  * Hook to detect user's reduced motion preference.
@@ -39,6 +41,7 @@ interface RoadmapGenerationProgressProps {
   generationStatus: RoadmapGenerationStatus;
   className?: string;
   onStop?: () => void | Promise<void>;
+  progressLogs?: ProgressLog[];
 }
 
 // Type for generation phases (excluding idle)
@@ -98,6 +101,18 @@ const STEP_PHASES: { key: GenerationPhase; label: string }[] = [
   { key: 'discovering', label: 'Discover' },
   { key: 'generating', label: 'Generate' },
 ];
+
+// Map generation phase to roadmap phase for progress tracking
+const mapToRoadmapPhase = (phase: GenerationPhase): RoadmapPhase => {
+  const phaseMap: Record<GenerationPhase, RoadmapPhase> = {
+    'analyzing': 'discovery',
+    'discovering': 'discovery',
+    'generating': 'generation',
+    'complete': 'finalization',
+    'error': 'finalization',
+  };
+  return phaseMap[phase] || 'discovery';
+};
 
 /**
  * Internal component for showing phase steps indicator
@@ -188,16 +203,30 @@ function PhaseStepsIndicator({
 /**
  * Animated progress component for roadmap generation.
  * Displays the current generation phase with animated transitions,
- * progress visualization, and step indicators.
+ * progress visualization, step indicators, activity logs, and detailed progress bar.
  */
 export function RoadmapGenerationProgress({
   generationStatus,
   className,
-  onStop
+  onStop,
+  progressLogs = []
 }: RoadmapGenerationProgressProps) {
   const { phase, progress, message, error } = generationStatus;
   const reducedMotion = useReducedMotion();
   const [isStopping, setIsStopping] = useState(false);
+
+  // Initialize phase progress state
+  const { phaseProgress, currentPhase, setCurrentPhase, updatePhaseProgress } = usePhaseProgress();
+
+  // Update phase progress when generation status changes
+  useEffect(() => {
+    const mappedPhase = mapToRoadmapPhase(phase);
+    setCurrentPhase(mappedPhase);
+
+    // Update phase step based on progress percentage
+    const progressValue = Math.floor(progress / 10); // 0-10 steps
+    updatePhaseProgress(mappedPhase, progressValue, message);
+  }, [phase, progress, message, setCurrentPhase, updatePhaseProgress]);
 
   /**
    * Handle stop button click with error handling and double-click prevention
@@ -267,8 +296,10 @@ export function RoadmapGenerationProgress({
         ease: 'easeInOut' as const,
       };
 
+  const roadmapPhase = mapToRoadmapPhase(phase);
+
   return (
-    <div className={cn('space-y-4 p-6 rounded-xl bg-card border', className)}>
+    <div className={cn('space-y-4 p-6 rounded-xl bg-card border max-w-2xl mx-auto', className)}>
       {/* Header with Stop button */}
       {isActivePhase && onStop && (
         <div className="flex justify-end mb-2">
@@ -329,36 +360,31 @@ export function RoadmapGenerationProgress({
         </AnimatePresence>
       </div>
 
-      {/* Progress bar */}
+      {/* Detailed Progress Bar with phase tracking */}
       {isActivePhase && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Progress</span>
-            <span className="text-xs font-medium">{progress}%</span>
-          </div>
-          <div className="relative h-2 w-full overflow-hidden rounded-full bg-border">
-            {progress > 0 ? (
-              // Determinate progress bar
-              <motion.div
-                className={cn('h-full rounded-full', config.color)}
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
-              />
-            ) : (
-              // Indeterminate progress bar when progress is 0
-              <motion.div
-                className={cn('absolute h-full w-1/3 rounded-full', config.color)}
-                animate={indeterminateAnimation}
-                transition={indeterminateTransition}
-              />
-            )}
-          </div>
-        </div>
+        <ProgressBar
+          currentPhase={roadmapPhase}
+          phaseProgress={phaseProgress}
+          showPhaseLabels={true}
+        />
       )}
 
       {/* Phase steps indicator */}
       <PhaseStepsIndicator currentPhase={phase} reducedMotion={reducedMotion} />
+
+      {/* Progress Logs - show below progress indicator */}
+      <AnimatePresence>
+        {progressLogs.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ProgressLogs logs={progressLogs} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Error display - shows whenever error is present, regardless of phase */}
       <AnimatePresence mode="wait">

@@ -2,14 +2,14 @@
   "name": "auto-claude-marketing",
   "version": "1.0.0",
   "type": "module",
-  "description": "Marketing website for Auto Claude autonomous coding framework",
+  "description": "Marketing website for Auto-Marketing autonomous AI framework",
   "homepage": "https://github.com/AndyMik90/Auto-Claude-Marketing",
   "repository": {
     "type": "git",
     "url": "https://github.com/AndyMik90/Auto-Claude-Marketing.git"
   },
   "author": {
-    "name": "Auto Claude Team",
+    "name": "Auto-Marketing Team",
     "email": "119136210+AndyMik90@users.noreply.github.com"
   },
   "license": "MIT",
@@ -37,8 +37,8 @@
     "package:win": "node scripts/package-with-python.cjs --win",
     "package:linux": "node scripts/package-with-python.cjs --linux",
     "package:flatpak": "node scripts/package-with-python.cjs --linux flatpak",
-    "start:packaged:mac": "open dist/mac-arm64/Auto-Claude.app || open dist/mac/Auto-Claude.app",
-    "start:packaged:win": "start \"\" \"dist\\win-unpacked\\Auto-Claude.exe\"",
+    "start:packaged:mac": "open dist/mac-arm64/Auto-Marketing.app || open dist/mac/Auto-Marketing.app",
+    "start:packaged:win": "start \"\" \"dist\\win-unpacked\\Auto-Marketing.exe\"",
     "start:packaged:linux": "./dist/linux-unpacked/auto-claude",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -142,15 +142,15 @@
     "@electron/rebuild": "4.0.2"
   },
   "build": {
-    "appId": "com.autoclaude.ui",
-    "productName": "Auto-Claude",
+    "appId": "com.automarketing.ui",
+    "productName": "Auto-Marketing",
     "npmRebuild": false,
     "artifactName": "${productName}-${version}-${platform}-${arch}.${ext}",
     "publish": [
       {
         "provider": "github",
         "owner": "AndyMik90",
-        "repo": "Auto-Claude"
+        "repo": "Auto-Claude-Marketing"
       }
     ],
     "directories": {

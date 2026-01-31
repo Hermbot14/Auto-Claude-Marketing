@@ -175,12 +175,23 @@ export const IPC_CHANNELS = {
   ROADMAP_STOP: 'roadmap:stop',
   ROADMAP_UPDATE_FEATURE: 'roadmap:updateFeature',
   ROADMAP_CONVERT_TO_SPEC: 'roadmap:convertToSpec',
+  ROADMAP_CHAT: 'roadmap:chat',  // Natural language chat for roadmap manipulation
 
   // Roadmap events (main -> renderer)
   ROADMAP_PROGRESS: 'roadmap:progress',
+  ROADMAP_LOG: 'roadmap:log',  // Streaming progress log entries
   ROADMAP_COMPLETE: 'roadmap:complete',
   ROADMAP_ERROR: 'roadmap:error',
   ROADMAP_STOPPED: 'roadmap:stopped',
+
+  // Calendar operations
+  CALENDAR_GET_DATA: 'calendar:getData',
+  CALENDAR_SAVE_DATA: 'calendar:saveData',
+  CALENDAR_ADD_ITEM: 'calendar:addItem',
+  CALENDAR_UPDATE_ITEM: 'calendar:updateItem',
+  CALENDAR_DELETE_ITEM: 'calendar:deleteItem',
+  CALENDAR_SYNC_ROADMAP: 'calendar:syncRoadmap',
+  CALENDAR_SCAN_FILES: 'calendar:scanFiles',
 
   // Context operations
   CONTEXT_GET: 'context:get',

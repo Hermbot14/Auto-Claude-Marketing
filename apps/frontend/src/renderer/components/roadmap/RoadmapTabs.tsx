@@ -1,10 +1,11 @@
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Calendar } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Card } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { PhaseCard } from './PhaseCard';
 import { FeatureCard } from './FeatureCard';
 import { RoadmapKanbanView } from '../RoadmapKanbanView';
+import { CalendarView } from '../calendar';
 import { getFeaturesByPhase } from '../../stores/roadmap-store';
 import {
   ROADMAP_PRIORITY_COLORS,
@@ -24,6 +25,7 @@ export function RoadmapTabs({
   onConvertToSpec,
   onGoToTask,
   onSave,
+  projectId,
 }: RoadmapTabsProps) {
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="h-full flex flex-col">
@@ -32,6 +34,10 @@ export function RoadmapTabs({
         <TabsTrigger value="phases">Phases</TabsTrigger>
         <TabsTrigger value="features">All Features</TabsTrigger>
         <TabsTrigger value="priorities">By Priority</TabsTrigger>
+        <TabsTrigger value="calendar">
+          <Calendar className="h-4 w-4 mr-1" />
+          Calendar
+        </TabsTrigger>
       </TabsList>
 
       {/* Kanban View */}
@@ -127,6 +133,11 @@ export function RoadmapTabs({
             );
           })}
         </div>
+      </TabsContent>
+
+      {/* Calendar View */}
+      <TabsContent value="calendar" className="flex-1 overflow-hidden">
+        <CalendarView projectId={projectId} roadmap={roadmap} />
       </TabsContent>
     </Tabs>
   );

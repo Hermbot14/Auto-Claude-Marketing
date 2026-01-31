@@ -21,7 +21,7 @@ export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
   const [showCompetitorViewer, setShowCompetitorViewer] = useState(false);
 
   // Custom hooks
-  const { roadmap, competitorAnalysis, generationStatus } = useRoadmapData(projectId);
+  const { roadmap, competitorAnalysis, generationStatus, progressLogs } = useRoadmapData(projectId);
   const { convertFeatureToSpec } = useFeatureActions();
   const { saveRoadmap } = useRoadmapSave(projectId);
   const { deleteFeature } = useFeatureDelete(projectId);
@@ -60,6 +60,7 @@ export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
       <div className="flex h-full items-center justify-center">
         <RoadmapGenerationProgress
           generationStatus={generationStatus}
+          progressLogs={progressLogs}
           className="w-full max-w-md"
           onStop={handleStop}
         />
@@ -114,6 +115,7 @@ export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
           onConvertToSpec={handleConvertToSpec}
           onGoToTask={handleGoToTask}
           onSave={saveRoadmap}
+          projectId={projectId}
         />
       </div>
 

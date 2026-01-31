@@ -12,6 +12,7 @@
  */
 
 import { createRoadmapAPI, RoadmapAPI } from './modules/roadmap-api';
+import { createCalendarAPI, CalendarAPI } from './modules/calendar-api';
 import { createIdeationAPI, IdeationAPI } from './modules/ideation-api';
 import { createInsightsAPI, InsightsAPI } from './modules/insights-api';
 import { createChangelogAPI, ChangelogAPI } from './modules/changelog-api';
@@ -26,6 +27,7 @@ import { createShellAPI, ShellAPI } from './modules/shell-api';
  */
 export interface AgentAPI extends
   RoadmapAPI,
+  CalendarAPI,
   IdeationAPI,
   InsightsAPI,
   ChangelogAPI,
@@ -41,6 +43,7 @@ export interface AgentAPI extends
  */
 export const createAgentAPI = (): AgentAPI => {
   const roadmapAPI = createRoadmapAPI();
+  const calendarAPI = createCalendarAPI();
   const ideationAPI = createIdeationAPI();
   const insightsAPI = createInsightsAPI();
   const changelogAPI = createChangelogAPI();
@@ -52,6 +55,9 @@ export const createAgentAPI = (): AgentAPI => {
   return {
     // Roadmap API
     ...roadmapAPI,
+
+    // Calendar API
+    ...calendarAPI,
 
     // Ideation API
     ...ideationAPI,
@@ -79,6 +85,7 @@ export const createAgentAPI = (): AgentAPI => {
 // Re-export individual API interfaces for consumers who need them
 export type {
   RoadmapAPI,
+  CalendarAPI,
   IdeationAPI,
   InsightsAPI,
   ChangelogAPI,

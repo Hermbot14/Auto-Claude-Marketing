@@ -180,4 +180,74 @@ export interface RoadmapGenerationStatus {
   progress: number;
   message: string;
   error?: string;
+  // Detailed progress tracking
+  currentSubPhase?: 'discovery' | 'research' | 'analysis' | 'generation' | 'finalization';
+  subPhaseProgress?: number;
+  subPhaseTotal?: number;
+  subPhaseStepName?: string;
+}
+
+/**
+ * Tool usage types for roadmap generation progress logs
+ */
+export type RoadmapToolType =
+  | 'WebSearch'
+  | 'Bash'
+  | 'Read'
+  | 'Write'
+  | 'Edit'
+  | 'Grep'
+  | 'Glob'
+  | 'Database'
+  | 'Git'
+  | 'Agent'
+  | 'Other';
+
+/**
+ * Log severity levels for roadmap progress logs
+ */
+export type RoadmapLogSeverity = 'info' | 'success' | 'warning' | 'error';
+
+/**
+ * Single progress log entry for roadmap generation
+ */
+export interface RoadmapProgressLog {
+  id: string;
+  timestamp: string; // ISO string
+  tool?: RoadmapToolType;
+  severity: RoadmapLogSeverity;
+  message: string;
+  phase: 'discovery' | 'research' | 'analysis' | 'generation' | 'finalization';
+  details?: string;
+}
+
+// ============================================
+// Roadmap Chat Types
+// ============================================
+
+export type RoadmapChatMessageRole = 'user' | 'assistant' | 'system';
+
+export type RoadmapOperationType =
+  | 'add_context'
+  | 'redefine_phase'
+  | 'redefine_task'
+  | 'update_status'
+  | 'rearrange_priority'
+  | 'add_task'
+  | 'delete_task'
+  | 'move_task';
+
+export interface RoadmapOperation {
+  type: RoadmapOperationType;
+  targetId?: string;
+  data: Record<string, unknown>;
+  description: string;
+}
+
+export interface RoadmapChatMessage {
+  id: string;
+  role: RoadmapChatMessageRole;
+  content: string;
+  timestamp: Date;
+  operations?: RoadmapOperation[];
 }

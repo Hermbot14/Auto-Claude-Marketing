@@ -287,14 +287,14 @@ class WorktreeManager:
 
         # 2. Always unstage .auto-claude directory files - these are project-specific
         # and should never be merged from the worktree branch
-        auto_claude_patterns = [".auto-claude/", "auto-claude/specs/"]
+        auto_marketing_patterns = [".auto-claude/", "auto-claude/specs/"]
         for file in staged_files:
             file = file.strip()
             if not file:
                 continue
             # Normalize path separators for cross-platform (Windows backslash support)
             normalized = file.replace("\\", "/")
-            for pattern in auto_claude_patterns:
+            for pattern in auto_marketing_patterns:
                 if normalized.startswith(pattern) or f"/{pattern}" in normalized:
                     files_to_unstage.add(file)
                     break

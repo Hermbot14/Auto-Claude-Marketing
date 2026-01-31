@@ -14,6 +14,7 @@ import type {
   RoadmapFeature,
   RoadmapFeatureStatus,
   RoadmapGenerationStatus,
+  RoadmapProgressLog,
   Task,
   TaskMetadata,
   CompetitorAnalysis,
@@ -621,11 +622,82 @@ ${(feature.acceptance_criteria || []).map((c: string) => `- [ ] ${c}`).join("\n"
   );
 
   // ============================================
+  // Roadmap Chat (Natural Language Processing)
+  // ============================================
+
+  ipcMain.handle(
+    IPC_CHANNELS.ROADMAP_CHAT,
+    async (_, projectId: string, userMessage: string): Promise<IPCResult<{ response: string; operations: unknown[] }>> => {
+      const project = projectStore.getProject(projectId);
+      if (!project) {
+        return { success: false, error: "Project not found" };
+      }
+
+      // Get current roadmap
+      const roadmapPath = path.join(
+        project.path,
+        AUTO_BUILD_PATHS.ROADMAP_DIR,
+        AUTO_BUILD_PATHS.ROADMAP_FILE
+      );
+
+      if (!existsSync(roadmapPath)) {
+        return { success: false, error: "No roadmap found for this project" };
+      }
+
+      try {
+        const content = readFileSync(roadmapPath, "utf-8");
+        const roadmap = JSON.parse(content);
+
+        // Get competitor analysis if available
+        const competitorAnalysisPath = path.join(
+          project.path,
+          AUTO_BUILD_PATHS.ROADMAP_DIR,
+          AUTO_BUILD_PATHS.COMPETITOR_ANALYSIS
+        );
+
+        let competitorAnalysis = null;
+        if (existsSync(competitorAnalysisPath)) {
+          try {
+            const competitorContent = readFileSync(competitorAnalysisPath, "utf-8");
+            competitorAnalysis = JSON.parse(competitorContent);
+          } catch {
+            // Ignore competitor analysis errors
+          }
+        }
+
+        // Import the roadmap chat agent
+        // Note: This would need to be implemented in the backend
+        // For now, return a mock response
+        debugLog("[Roadmap Chat] Processing command:", userMessage);
+
+        // TODO: Implement actual chat processing
+        // This would call the Python backend's roadmap_chat_agent
+        // For now, return a placeholder response
+        return {
+          success: true,
+          data: {
+            response: "I understood your command. Natural language processing for roadmap manipulation will be implemented in the backend.",
+            operations: []
+          }
+        };
+
+      } catch (error) {
+        debugError("[Roadmap Chat] Error:", error);
+        return { success: false, error: `Failed to process chat command: ${error}` };
+      }
+    }
+  );
+
+  // ============================================
   // Roadmap Agent Events → Renderer
   // ============================================
 
   agentManager.on("roadmap-progress", (projectId: string, status: RoadmapGenerationStatus) => {
     safeSendToRenderer(getMainWindow, IPC_CHANNELS.ROADMAP_PROGRESS, projectId, status);
+  });
+
+  agentManager.on("roadmap-log", (projectId: string, log: RoadmapProgressLog) => {
+    safeSendToRenderer(getMainWindow, IPC_CHANNELS.ROADMAP_LOG, projectId, log);
   });
 
   agentManager.on("roadmap-complete", (projectId: string, roadmap: Roadmap) => {

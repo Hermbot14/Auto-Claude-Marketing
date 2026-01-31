@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useRoadmapStore, loadRoadmap, generateRoadmap, refreshRoadmap, stopRoadmap } from '../../stores/roadmap-store';
+import { useRoadmapStore, loadRoadmap, generateRoadmap, refreshRoadmap, stopRoadmap, setupRoadmapListeners } from '../../stores/roadmap-store';
 import { useTaskStore } from '../../stores/task-store';
 import type { RoadmapFeature } from '../../../shared/types';
 
@@ -18,18 +18,26 @@ export function useRoadmapData(projectId: string) {
   const roadmap = useRoadmapStore((state) => state.roadmap);
   const competitorAnalysis = useRoadmapStore((state) => state.competitorAnalysis);
   const generationStatus = useRoadmapStore((state) => state.generationStatus);
+  const progressLogs = useRoadmapStore((state) => state.progressLogs);
 
   useEffect(() => {
+    // Set up IPC listeners for roadmap events
+    const cleanup = setupRoadmapListeners();
+
     // Load roadmap data and query generation status for this project
     // The loadRoadmap function handles checking if generation is running
     // and restores the UI state accordingly
     loadRoadmap(projectId);
+
+    // Cleanup listeners on unmount
+    return cleanup;
   }, [projectId]);
 
   return {
     roadmap,
     competitorAnalysis,
     generationStatus,
+    progressLogs,
   };
 }
 

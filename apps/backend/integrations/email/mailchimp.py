@@ -109,7 +109,7 @@ class MailchimpProvider(EmailProvider):
     def _get_default_headers(self) -> dict[str, str]:
         """Get default HTTP headers for Mailchimp requests."""
         return {
-            "User-Agent": "Auto-Claude-Marketing/1.0",
+            "User-Agent": "Auto-Marketing/1.0",
         }
 
     async def _request(

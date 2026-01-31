@@ -1,9 +1,9 @@
 {
-  "name": "auto-claude",
+  "name": "auto-marketing",
   "version": "2.7.5",
-  "description": "Autonomous multi-agent coding framework powered by Claude AI",
+  "description": "Autonomous multi-agent marketing AI framework powered by Claude",
   "license": "AGPL-3.0",
-  "author": "Auto Claude Team",
+  "author": "Auto-Marketing Team",
   "workspaces": {
     "packages": [
       "apps/*",

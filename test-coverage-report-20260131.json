@@ -1,0 +1,581 @@
+{
+  "timestamp": "2026-01-31T00:00:00Z",
+  "summary": {
+    "total_test_files": 144,
+    "total_source_files": 1100,
+    "overall_coverage_percentage": "13.1%",
+    "frontend_test_files": 87,
+    "frontend_source_files": 700,
+    "frontend_coverage_percentage": "12.4%",
+    "backend_test_files": 50,
+    "backend_source_files": 447,
+    "backend_coverage_percentage": "11.2%",
+    "e2e_test_files": 7
+  },
+  "frontend": {
+    "main_process": {
+      "source_files": 186,
+      "test_files": 46,
+      "coverage_percentage": "24.7%",
+      "well_covered_modules": [
+        "agent-events",
+        "app-logger",
+        "claude-cli-utils",
+        "cli-tool-manager",
+        "config-path-validator",
+        "env-handlers-claude-cli",
+        "env-utils",
+        "insights-config",
+        "ipc-handlers",
+        "long-lived-auth",
+        "ndjson-parser",
+        "package-with-python",
+        "parsers",
+        "phase-event-parser",
+        "phase-event-schema",
+        "project-store",
+        "python-env-manager",
+        "rate-limit-auto-recovery",
+        "rate-limit-detector",
+        "terminal-session-store",
+        "utils",
+        "version-manager"
+      ],
+      "modules_without_tests": [
+        "changelog/* (8 files)",
+        "changelog-service",
+        "app-updater",
+        "api-validation-service",
+        "insights-service",
+        "insights/* (6 files)",
+        "file-watcher",
+        "fs-utils",
+        "config-paths"
+      ],
+      "ipc_handlers": {
+        "github": {
+          "has_tests": true,
+          "test_coverage": "Partial (oauth-handlers, runner-env-handlers, runner-env)",
+          "missing_tests": [
+            "autofix-handlers",
+            "import-handlers",
+            "investigation-handlers",
+            "issue-handlers",
+            "pr-handlers",
+            "release-handlers",
+            "repository-handlers",
+            "spec-utils",
+            "triage-handlers",
+            "utils/* (5 files)"
+          ]
+        },
+        "gitlab": {
+          "has_tests": true,
+          "test_coverage": "Good (6 handler files tested)",
+          "missing_tests": [
+            "import-handlers",
+            "investigation-handlers",
+            "release-handlers",
+            "repository-handlers",
+            "spec-utils",
+            "triage-handlers",
+            "utils"
+          ]
+        },
+        "context": {
+          "has_tests": false,
+          "missing_tests": [
+            "memory-data-handlers",
+            "memory-status-handlers",
+            "project-context-handlers",
+            "utils"
+          ]
+        },
+        "ideation": {
+          "has_tests": false,
+          "missing_tests": [
+            "generation-handlers",
+            "idea-manager",
+            "session-manager",
+            "task-converter",
+            "transformers"
+          ]
+        },
+        "task": {
+          "has_tests": false,
+          "missing_tests": [
+            "crud-handlers",
+            "execution-handlers",
+            "logs-handlers",
+            "worktree-handlers"
+          ]
+        }
+      },
+      "claude_profile": {
+        "source_files": 12,
+        "test_files": 2,
+        "coverage_percentage": "16.7%",
+        "tested_files": [
+          "credential-utils",
+          "usage-monitor"
+        ],
+        "missing_tests": [
+          "profile-scorer",
+          "profile-storage",
+          "profile-utils",
+          "rate-limit-manager",
+          "session-utils",
+          "token-encryption",
+          "usage-parser"
+        ]
+      },
+      "platform": {
+        "has_tests": true,
+        "test_coverage": "Good (platform.test.ts, process-kill.test.ts)"
+      },
+      "services": {
+        "has_tests": true,
+        "test_coverage": "Partial (profile-service, profile-manager)"
+      },
+      "terminal": {
+        "has_tests": true,
+        "test_coverage": "Good (claude-integration-handler, output-parser)"
+      }
+    },
+    "renderer": {
+      "source_files": 294,
+      "test_files": 32,
+      "coverage_percentage": "10.9%",
+      "component_tests": {
+        "tested_components": [
+          "AgentTools",
+          "ProjectTabBar",
+          "RoadmapGenerationProgress",
+          "SortableProjectTab",
+          "Terminal.drop",
+          "OllamaModelSelector.progress",
+          "AuthStatusIndicator",
+          "PRDetail (3 tests)",
+          "ReviewStatusTree",
+          "OnboardingWizard (2 tests)",
+          "ModelSearchableSelect",
+          "ProfileEditDialog",
+          "ProfileList",
+          "CreatePRDialog",
+          "ViewStateContext"
+        ],
+        "count": 19
+      },
+      "hook_tests": {
+        "tested_hooks": [
+          "useGitHubPRs",
+          "useIdeation (2 tests)",
+          "useImageUpload.fileref",
+          "useXterm",
+          "useGlobalTerminalListeners",
+          "useVirtualizedTree"
+        ],
+        "count": 7
+      },
+      "store_tests": {
+        "tested_stores": [
+          "task-store",
+          "roadmap-store",
+          "project-store-tabs",
+          "task-order",
+          "terminal-store.callbacks"
+        ],
+        "count": 5
+      },
+      "components_without_tests": [
+        "AddFeatureDialog",
+        "AddProjectModal",
+        "AgentProfileSelector",
+        "AgentProfiles",
+        "AppSettings",
+        "AppUpdateNotification",
+        "AuthFailureModal",
+        "BulkPRDialog",
+        "Changelog/* (10 components)",
+        "ChatHistorySidebar",
+        "ClaudeCodeStatusBadge",
+        "CompetitorAnalysisDialog",
+        "CompetitorAnalysisViewer",
+        "Context/* (7 components)",
+        "CustomMcpDialog",
+        "CustomModelModal",
+        "EnvConfigModal",
+        "ExistingCompetitorAnalysisDialog",
+        "FileAutocomplete",
+        "FileExplorerPanel",
+        "FileTree* (2 components)",
+        "GitHubIssues/* (6 components)",
+        "GitHubSetupModal",
+        "GitLabIssues/* (5 components)",
+        "GitLabMergeRequests/* (6 components)",
+        "GitSetupModal",
+        "GlobalDownloadIndicator",
+        "Ideation",
+        "ImageUpload",
+        "InsightsModelSelector",
+        "LinearTaskImportModal",
+        "LinearImport/* (10 components)",
+        "PhaseProgressIndicator",
+        "ProactiveSwapListener",
+        "QueueSettingsModal",
+        "RateLimitIndicator",
+        "RateLimitModal",
+        "ReferencedFilesSection",
+        "Roadmap/* (4 components)",
+        "RoadmapKanbanView",
+        "SDKRateLimitModal",
+        "ScreenshotCapture",
+        "Sidebar",
+        "SortableFeatureCard",
+        "SortableTaskCard",
+        "SortableTerminalWrapper",
+        "TaskCard",
+        "TaskCreationWizard",
+        "TaskEditDialog",
+        "TaskFileExplorerDrawer",
+        "TaskDetail/* (6 components)",
+        "TaskForm/* (6 components)",
+        "UpdateBanner",
+        "UsageIndicator",
+        "VersionWarningModal",
+        "WelcomeScreen",
+        "WorktreeCleanupDialog",
+        "Worktrees",
+        "Settings/* (15 components)"
+      ],
+      "hooks_without_tests": [
+        "useChangelog",
+        "useImageUpload",
+        "useAnalyzePreview",
+        "useAutoFix",
+        "useGitHubInvestigation",
+        "useGitHubIssues",
+        "useIssueFiltering",
+        "useFindingSelection",
+        "usePRFiltering",
+        "useGitLabInvestigation",
+        "useGitLabIssues",
+        "useGitLabMRs",
+        "useIssueSelection (Linear)",
+        "useLinearImport",
+        "useLinearImportModal",
+        "useLinearIssues",
+        "useLinearProjects",
+        "useLinearTeams",
+        "useProjectSettings",
+        "useSettings",
+        "useTaskDetail",
+        "useTerminalEvents",
+        "useAutoNaming",
+        "usePtyProcess",
+        "useTerminalFileDrop",
+        "use-toast"
+      ],
+      "integration_tests": {
+        "count": 6,
+        "files": [
+          "claude-profile-ipc",
+          "file-watcher",
+          "ipc-bridge",
+          "subprocess-spawn",
+          "task-lifecycle",
+          "terminal-copy-paste"
+        ]
+      }
+    },
+    "shared": {
+      "test_files": 4,
+      "tested_modules": [
+        "progress",
+        "ansi-sanitizer",
+        "provider-detection"
+      ]
+    },
+    "e2e": {
+      "test_files": 7,
+      "electron_tests": [
+        "task-workflow.spec.ts",
+        "claude-accounts.e2e.ts",
+        "flows.e2e.ts",
+        "terminal-copy-paste.e2e.ts"
+      ],
+      "web_tests": [
+        "basic-ui-exploration.spec.ts",
+        "basic-test.spec.ts",
+        "visual-test.spec.ts"
+      ],
+      "coverage": "Minimal - only basic workflows tested"
+    }
+  },
+  "backend": {
+    "python_files": {
+      "total_source": 447,
+      "total_tests": 50,
+      "coverage_percentage": "11.2%"
+    },
+    "test_categories": {
+      "agent_tests": [
+        "test_agent_architecture.py",
+        "test_agent_configs.py"
+      ],
+      "analysis_tests": [
+        "test_analyzer_port_detection.py",
+        "test_ci_discovery.py",
+        "test_project_analyzer.py",
+        "test_risk_classifier.py",
+        "test_security_scanner.py",
+        "test_security.py"
+      ],
+      "auth_tests": [
+        "test_auth.py"
+      ],
+      "client_tests": [
+        "test_client.py"
+      ],
+      "context_tests": [
+        "test_context_gatherer.py",
+        "test_discovery.py",
+        "test_graphiti.py",
+        "test_graphiti_search.py"
+      ],
+      "critique_tests": [
+        "test_critique_integration.py",
+        "test_followup.py",
+        "test_review_*.py (7 files)"
+      ],
+      "github_tests": [
+        "test_github_bot_detection.py",
+        "test_github_pr_e2e.py",
+        "test_github_pr_review.py",
+        "test_pr_worktree_manager.py"
+      ],
+      "merge_tests": [
+        "test_merge_*.py (8 files)"
+      ],
+      "qa_tests": [
+        "test_qa_*.py (10 files)",
+        "test_qa_loop.py",
+        "test_qa_report_*.py (7 files)"
+      ],
+      "security_tests": [
+        "test_scan_secrets.py",
+        "test_security.py",
+        "test_security_cache.py",
+        "test_security_scanner.py"
+      ],
+      "spec_tests": [
+        "test_spec_*.py (5 files)",
+        "test_spec_pipeline.py",
+        "test_spec_phases.py"
+      ],
+      "validation_tests": [
+        "test_dependency_validator.py",
+        "test_finding_validation.py",
+        "test_output_validator.py",
+        "test_validation_strategy.py"
+      ],
+      "workspace_tests": [
+        "test_workspace.py",
+        "test_worktree.py"
+      ],
+      "other_tests": [
+        "test_check_encoding.py",
+        "test_fixtures.py",
+        "test_git_executable.py",
+        "test_implementation_plan.py",
+        "test_model_resolution.py",
+        "test_phase_event.py",
+        "test_platform.py",
+        "test_recovery.py",
+        "test_roadmap_validation.py",
+        "test_sdk_structured_output.py",
+        "test_service_orchestrator.py",
+        "test_structured_outputs.py",
+        "test_thinking_level_validation.py"
+      ]
+    },
+    "modules_without_tests": {
+      "agents": [
+        "content_creator.py",
+        "email_agent.py",
+        "marketing_analytics.py",
+        "seo_agent.py",
+        "social_media_agent.py"
+      ],
+      "analysis": [
+        "analyzer.py",
+        "analyzers/base.py",
+        "analyzers/context/* (7 detectors)",
+        "analyzers/context_analyzer.py",
+        "analyzers/database_detector.py",
+        "analyzers/framework_analyzer.py",
+        "analyzers/project_analyzer_module.py",
+        "analyzers/route_detector.py",
+        "analyzers/service_analyzer.py",
+        "ci_discovery.py",
+        "insight_extractor.py",
+        "project_analyzer.py",
+        "risk_classifier.py",
+        "test_discovery.py"
+      ],
+      "cli": [
+        "batch_commands.py",
+        "build_commands.py",
+        "followup_commands.py",
+        "input_handlers.py",
+        "main.py",
+        "qa_commands.py",
+        "recovery.py",
+        "spec_commands.py",
+        "workspace_commands.py"
+      ],
+      "context": [
+        "builder.py",
+        "categorizer.py",
+        "constants.py",
+        "graphiti_integration.py",
+        "keyword_extractor.py",
+        "main.py",
+        "models.py",
+        "pattern_discovery.py",
+        "search.py",
+        "serialization.py",
+        "service_matcher.py"
+      ],
+      "core": [
+        "agent.py",
+        "debug.py",
+        "dependency_validator.py",
+        "file_utils.py",
+        "gh_executable.py",
+        "git_executable.py",
+        "io_utils.py",
+        "model_config.py",
+        "phase_event.py",
+        "plan_normalization.py",
+        "progress.py",
+        "sentry.py",
+        "simple_client.py",
+        "workspace/* (5 files)",
+        "worktree.py"
+      ],
+      "ideation": [
+        "analyzer.py",
+        "config.py",
+        "formatter.py",
+        "generators/* (5 files)",
+        "types.py"
+      ],
+      "integrations": [
+        "graphiti/* (15 files)",
+        "linear/* (10 files)"
+      ],
+      "reviewers": [
+        "qa_reviewer.py",
+        "qa_fixer.py"
+      ],
+      "runners": [
+        "github/* (10 files)"
+      ],
+      "spec_agents": [
+        "critic.py",
+        "gatherer.py",
+        "researcher.py",
+        "writer.py"
+      ]
+    }
+  },
+  "critical_gaps": {
+    "priority_1_critical_paths": [
+      "Authentication flows - No E2E tests for OAuth",
+      "Profile management - 16.7% coverage (2/12 files)",
+      "Changelog service - 0% coverage (8 files)",
+      "IPC handlers - Majority untested (90+ files missing tests)",
+      "Ideation workflow - 0% test coverage",
+      "Task execution - 0% test coverage",
+      "Content creation agents - 0% test coverage",
+      "Marketing analytics - 0% test coverage",
+      "SEO agent - 0% test coverage",
+      "Social media agent - 0% test coverage"
+    ],
+    "priority_2_high_value": [
+      "Context/insights handlers - 0% coverage",
+      "GitHub integration handlers - Partial coverage",
+      "GitLab integration handlers - Partial coverage",
+      "Linear integration - 0% coverage",
+      "Renderer components - Only 19/273 components tested (7%)",
+      "Renderer hooks - Only 7/31 hooks tested (23%)",
+      "Analysis modules - Partial coverage",
+      "CLI commands - 0% coverage",
+      "Core workspace logic - 0% coverage"
+    ],
+    "priority_3_medium_value": [
+      "Agent queue management - 0% coverage",
+      "Agent state management - 0% coverage",
+      "Phase parsers - 0% coverage",
+      "Settings components - 0% coverage",
+      "File watcher - 0% coverage",
+      "App updater - 0% coverage",
+      "Rate limit management - Partial coverage"
+    ]
+  },
+  "recommendations": {
+    "immediate_actions": [
+      "Add E2E tests for OAuth authentication flow",
+      "Add unit tests for profile management (10 files missing)",
+      "Add unit tests for changelog service (8 files)",
+      "Add unit tests for ideation workflow (5 files)",
+      "Add E2E tests for task creation and execution"
+    ],
+    "short_term_goals": [
+      "Achieve 50% test coverage for IPC handlers (test 45+ files)",
+      "Add component tests for top 20 most-used UI components",
+      "Add integration tests for GitHub/GitLab workflows",
+      "Add tests for CLI commands (9 files)",
+      "Add tests for core workspace logic (5 files)"
+    ],
+    "long_term_goals": [
+      "Achieve 70% overall test coverage",
+      "Add E2E tests for all critical user flows",
+      "Implement visual regression testing",
+      "Add performance testing",
+      "Add security testing for all authentication paths"
+    ],
+    "testing_strategy": [
+      "Prioritize testing critical paths (auth, task execution, data persistence)",
+      "Use integration tests over unit tests for complex workflows",
+      "Add visual regression tests for UI components",
+      "Implement test-driven development for new features",
+      "Set up coverage thresholds in CI (minimum 60% for new code)",
+      "Add mutation testing to verify test quality"
+    ]
+  },
+  "metrics": {
+    "test_to_source_ratio": {
+      "frontend": "1:8",
+      "backend": "1:9",
+      "overall": "1:7.6"
+    },
+    "coverage_by_type": {
+      "unit_tests": "75% of all tests",
+      "integration_tests": "15% of all tests",
+      "e2e_tests": "10% of all tests"
+    },
+    "test_framework_usage": {
+      "frontend": {
+        "vitest": "Primary framework",
+        "playwright": "E2E testing",
+        "testing-library": "Component testing"
+      },
+      "backend": {
+        "pytest": "Primary framework",
+        "fixtures": "Extensive fixture setup"
+      }
+    }
+  }
+}

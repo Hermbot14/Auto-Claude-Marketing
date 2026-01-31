@@ -27,7 +27,7 @@ import { compareVersions } from './updater/version-manager';
 
 // GitHub repo info for API calls
 const GITHUB_OWNER = 'AndyMik90';
-const GITHUB_REPO = 'Auto-Claude';
+const GITHUB_REPO = 'Auto-Marketing';
 
 // Debug mode - DEBUG_UPDATER=true or development mode
 const DEBUG_UPDATER = process.env.DEBUG_UPDATER === 'true' || process.env.NODE_ENV === 'development';
@@ -338,7 +338,7 @@ async function fetchLatestStableRelease(): Promise<AppUpdateInfo | null> {
     });
 
     request.setHeader('Accept', 'application/vnd.github.v3+json');
-    request.setHeader('User-Agent', `Auto-Claude/${getCurrentVersion()}`);
+    request.setHeader('User-Agent', `Auto-Marketing/${getCurrentVersion()}`);
 
     let data = '';
 

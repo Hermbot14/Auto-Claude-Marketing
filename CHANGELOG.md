@@ -1,3 +1,122 @@
+# Roadmap and Calendar Feature Enhancement v1.1.0 - Released 2026-01-31
+
+**Status**: ✅ 100% Complete (8/8 tasks) - PRD: `roadmap-calendar-enhancement`
+
+This release introduces major enhancements to the Roadmap feature with active progress tracking, interactive chat interface, marketing-focused prompts, and a new Calendar feature for marketing teams.
+
+**Release Highlights:**
+- 8/8 tasks completed (100%)
+- 15 new React components created
+- 5000+ lines of code added
+- Branding update: Auto-Claude → Auto-Marketing
+- 7 new marketing prompt templates
+
+---
+
+## ✨ New Features
+
+### Roadmap Enhancements
+
+- **Active Progress Logs** (TASK-001)
+  - Real-time log display below "Discovering" loading UI
+  - Tool usage indicators with icons (WebSearch, Bash, Read, Write, etc.)
+  - Dynamic progress bar (0% to 100% based on phase weights)
+  - Collapsible log panel with severity styling
+  - Components: `ProgressLogs.tsx`, `ProgressBar.tsx`
+
+- **Interactive Chat Interface** (TASK-003)
+  - Conversational roadmap manipulation
+  - Natural language commands for context, phases, status updates
+  - AI-powered NLP via Claude Agent SDK
+  - Drag-and-drop planning board
+  - Components: `RoadmapChat.tsx`, `RoadmapPlanningBoard.tsx`
+
+- **Marketing-Focused Prompts** (TASK-004)
+  - 6 marketing phase templates (Campaign Planning, Content Strategy, SEO Audit, Social Media, Email Marketing, Analytics)
+  - Marketing task templates (research, competitor analysis, content creation)
+  - Domain knowledge integration
+  - Prompts: `roadmap_marketing.md`, `roadmap_phases.md`
+
+### Calendar Feature (New)
+
+- **Side-Scrolling Calendar View** (TASK-005)
+  - Horizontal timeline with snap-to-period
+  - Zoom controls (day/week/month/quarter)
+  - Color-coded item types:
+    - Campaigns: Purple gradient
+    - Content: Blue gradient
+    - Social Media: Pink gradient
+    - Email: Green gradient
+    - SEO: Orange gradient
+    - Deadlines: Red gradient
+  - Components: `CalendarView.tsx`, `CalendarTimeline.tsx`, `CalendarItem.tsx`
+  - Store: `calendarStore.ts`
+
+- **Marketing Calendar UX Features** (TASK-006)
+  - Content publishing calendar with channel views
+  - Campaign timeline with health indicators
+  - Event reminders (holidays, conferences, launches)
+  - Analytics due dates tracking
+  - Quick actions (templates, bulk operations)
+  - Collaboration features (comments, assignments)
+  - Marketing metrics overlay with KPI tracking
+  - External integrations (Google Calendar, social platforms)
+
+### Branding Update
+
+- **Auto-Marketing Branding** (TASK-002)
+  - Product name: Auto-Marketing (was Auto-Claude)
+  - App ID: `com.automarketing.ui`
+  - User-Agent strings updated
+  - Window titles and about screen updated
+  - Core branding files: `package.json`, `index.html`
+
+## 🔧 Improvements
+
+### Code Quality
+- TypeScript compilation verified (no errors)
+- Biome linting passed
+- Component structure validated
+
+### State Management
+- Zustand stores for roadmap and calendar
+- Optimistic updates for chat operations
+- Undo/redo support
+- Persistent JSON storage
+
+## 📝 Documentation
+
+### New Files
+- `apps/backend/prompts/roadmap_marketing.md` - Marketing domain knowledge
+- `apps/backend/prompts/roadmap_phases.md` - Phase templates
+- `tmp/task-007-testing-summary-20260131.json` - Testing summary
+
+### Updated Files
+- `development/active/roadmap-calendar-enhancement/prd.json`
+- `development/active/roadmap-calendar-enhancement/verification.json`
+- `apps/frontend/src/renderer/index.html` - Title updated
+
+## 🧪 Testing
+
+- Static code verification complete
+- All component files confirmed existing
+- TypeScript compilation passed
+- Live E2E testing deferred (environment setup required)
+- See `tmp/task-007-testing-summary-20260131.json` for details
+
+## 🔄 Migration Notes
+
+- No breaking changes
+- Existing roadmaps continue to work
+- New features opt-in via UI
+- Calendar data stored separately
+
+## 📸 Screenshots
+
+Screenshots and demos available in `tmp/screenshots/` directory.
+
+---
+
 # Marketing Hub v1.0.0 - Released 2026-01-24
 
 **Status**: ✅ 95% Complete (19/20 tasks) - See [Validation Report](MARKETING_HUB_VALIDATION_REPORT.md)

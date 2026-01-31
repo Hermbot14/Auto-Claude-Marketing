@@ -1,6 +1,6 @@
 """
-Auto-Claude MCP Tools
-=====================
+Auto-Marketing MCP Tools
+========================
 
 Individual tool implementations organized by functionality.
 """

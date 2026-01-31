@@ -1,0 +1,36 @@
+{
+  "chat": {
+    "title": "Roadmap Assistant",
+    "welcome": "I'm your roadmap assistant. Ask me to help you organize and manipulate your roadmap using natural language.",
+    "examples": {
+      "title": "Try these examples"
+    },
+    "placeholder": "Ask me to update your roadmap... (e.g., 'Mark SEO audit as complete')",
+    "hint": "Press Enter to send, Shift+Enter for new line",
+    "processing": "Processing your request...",
+    "operationsPerformed": "Operations performed"
+  },
+  "status": {
+    "planned": "Planned",
+    "in_progress": "In Progress",
+    "done": "Done",
+    "under_review": "Under Review"
+  },
+  "priority": {
+    "must": "Must",
+    "should": "Should",
+    "could": "Could",
+    "wont": "Won't"
+  },
+  "noRoadmap": "No roadmap found. Generate one to get started.",
+  "noFeatures": "No features in this phase yet.",
+  "featuresCount": "{{count}} features",
+  "completed": "completed",
+  "addFeature": "Add Feature",
+  "newFeature": "New Feature",
+  "confirmDeleteFeature": "Are you sure you want to delete this feature?",
+  " phases": {
+    "collapse": "Collapse phase",
+    "expand": "Expand phase"
+  }
+}

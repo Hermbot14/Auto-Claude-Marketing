@@ -1,0 +1,311 @@
+{
+  "timestamp": "2026-01-27T12:08:52.593Z",
+  "url": "http://localhost:3000",
+  "tests": [
+    {
+      "test": "Page Load",
+      "status": "pass",
+      "details": {
+        "screenshot": "C:\\Projects\\Auto-Claude-Marketing\\apps\\frontend\\e2e\\web-tests\\screenshots\\api-01-load.png"
+      },
+      "time": "2026-01-27T12:08:58.375Z"
+    },
+    {
+      "test": "Settings Button Found",
+      "status": "pass",
+      "details": {
+        "count": 2
+      },
+      "time": "2026-01-27T12:08:58.384Z"
+    },
+    {
+      "test": "Test Suite",
+      "status": "fail",
+      "details": {
+        "error": "elementHandle.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"flex h-full flex-col items-center justify-center px-8 py-6\">…</div> from <div role=\"dialog\" tabindex=\"-1\" id=\"radix-_r_18_\" data-state=\"open\" aria-labelledby=\"radix-_r_19_\" aria-describedby=\"radix-_r_1a_\" class=\"fixed inset-4 z-50 flex flex-col bg-card border border-border rounded-2xl shadow-2xl overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-98 data-[state=open]:zoom-in-98 duration-200\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"flex h-full flex-col items-center justify-center px-8 py-6\">…</div> from <div role=\"dialog\" tabindex=\"-1\" id=\"radix-_r_18_\" data-state=\"open\" aria-labelledby=\"radix-_r_19_\" aria-describedby=\"radix-_r_1a_\" class=\"fixed inset-4 z-50 flex flex-col bg-card border border-border rounded-2xl shadow-2xl overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-98 data-[state=open]:zoom-in-98 duration-200\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    58 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"flex h-full flex-col items-center justify-center px-8 py-6\">…</div> from <div role=\"dialog\" tabindex=\"-1\" id=\"radix-_r_18_\" data-state=\"open\" aria-labelledby=\"radix-_r_19_\" aria-describedby=\"radix-_r_1a_\" class=\"fixed inset-4 z-50 flex flex-col bg-card border border-border rounded-2xl shadow-2xl overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-98 data-[state=open]:zoom-in-98 duration-200\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+        "stack": "elementHandle.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"flex h-full flex-col items-center justify-center px-8 py-6\">…</div> from <div role=\"dialog\" tabindex=\"-1\" id=\"radix-_r_18_\" data-state=\"open\" aria-labelledby=\"radix-_r_19_\" aria-describedby=\"radix-_r_1a_\" class=\"fixed inset-4 z-50 flex flex-col bg-card border border-border rounded-2xl shadow-2xl overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-98 data-[state=open]:zoom-in-98 duration-200\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"flex h-full flex-col items-center justify-center px-8 py-6\">…</div> from <div role=\"dialog\" tabindex=\"-1\" id=\"radix-_r_18_\" data-state=\"open\" aria-labelledby=\"radix-_r_19_\" aria-describedby=\"radix-_r_1a_\" class=\"fixed inset-4 z-50 flex flex-col bg-card border border-border rounded-2xl shadow-2xl overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-98 data-[state=open]:zoom-in-98 duration-200\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    58 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"flex h-full flex-col items-center justify-center px-8 py-6\">…</div> from <div role=\"dialog\" tabindex=\"-1\" id=\"radix-_r_18_\" data-state=\"open\" aria-labelledby=\"radix-_r_19_\" aria-describedby=\"radix-_r_1a_\" class=\"fixed inset-4 z-50 flex flex-col bg-card border border-border rounded-2xl shadow-2xl overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-98 data-[state=open]:zoom-in-98 duration-200\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at run (C:\\Projects\\Auto-Claude-Marketing\\apps\\frontend\\api-connection-test.mjs:89:32)"
+      },
+      "time": "2026-01-27T12:09:28.898Z"
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "http://localhost:3000/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "hasData": false
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:3000/stores/claude-profile-store.ts",
+      "headers": {
+        "origin": "http://localhost:3000",
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "http://localhost:3000/App.tsx",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "hasData": false
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:3000/lib/mocks/claude-profile-mock.ts",
+      "headers": {
+        "origin": "http://localhost:3000",
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "http://localhost:3000/lib/mocks/index.ts",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "hasData": false
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:3000/stores/claude-profile-store.ts",
+      "headers": {
+        "cache-control": "no-cache",
+        "etag": "W/\"7be-VhHyxSDPp1an2zXpTOx+1uQac9I\"",
+        "connection": "keep-alive",
+        "access-control-allow-origin": "http://localhost:3000",
+        "keep-alive": "timeout=5",
+        "content-length": "8189",
+        "date": "Tue, 27 Jan 2026 12:08:52 GMT",
+        "content-type": "text/javascript",
+        "vary": "Origin"
+      }
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:3000/lib/mocks/claude-profile-mock.ts",
+      "headers": {
+        "cache-control": "no-cache",
+        "etag": "W/\"8ca-N4wH3mSuaK5NsM37oGc93sadqsM\"",
+        "connection": "keep-alive",
+        "access-control-allow-origin": "http://localhost:3000",
+        "keep-alive": "timeout=5",
+        "content-length": "8225",
+        "date": "Tue, 27 Jan 2026 12:08:52 GMT",
+        "content-type": "text/javascript",
+        "vary": "Origin"
+      }
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:3000/features/api-settings/index.ts",
+      "headers": {
+        "origin": "http://localhost:3000",
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "http://localhost:3000/components/settings/AppSettings.tsx",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "hasData": false
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:3000/features/api-settings/index.ts",
+      "headers": {
+        "cache-control": "no-cache",
+        "etag": "W/\"149-uRSnoatcwQv1JksWGbf5deE06oc\"",
+        "connection": "keep-alive",
+        "access-control-allow-origin": "http://localhost:3000",
+        "keep-alive": "timeout=5",
+        "content-length": "1200",
+        "date": "Tue, 27 Jan 2026 12:08:52 GMT",
+        "content-type": "text/javascript",
+        "vary": "Origin"
+      }
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:3000/features/api-settings/ApiSettings.tsx",
+      "headers": {
+        "origin": "http://localhost:3000",
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "http://localhost:3000/features/api-settings/index.ts",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "hasData": false
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:3000/features/api-settings/ApiSettingsStore.ts",
+      "headers": {
+        "origin": "http://localhost:3000",
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "http://localhost:3000/features/api-settings/index.ts",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "hasData": false
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:3000/features/api-settings/ModelSelector.tsx",
+      "headers": {
+        "origin": "http://localhost:3000",
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "http://localhost:3000/features/api-settings/index.ts",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "hasData": false
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:3000/features/api-settings/ConnectionTest.tsx",
+      "headers": {
+        "origin": "http://localhost:3000",
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "http://localhost:3000/features/api-settings/index.ts",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "hasData": false
+    },
+    {
+      "type": "request",
+      "method": "GET",
+      "url": "http://localhost:3000/@fs/C:/Projects/Auto-Claude-Marketing/apps/frontend/src/shared/constants/api-profiles.ts",
+      "headers": {
+        "origin": "http://localhost:3000",
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "http://localhost:3000/@fs/C:/Projects/Auto-Claude-Marketing/apps/frontend/src/shared/constants/index.ts",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "hasData": false
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:3000/features/api-settings/ModelSelector.tsx",
+      "headers": {
+        "cache-control": "no-cache",
+        "etag": "W/\"2c44-WJFaZD1k0AxeKZR9jhozinbUxdo\"",
+        "connection": "keep-alive",
+        "access-control-allow-origin": "http://localhost:3000",
+        "keep-alive": "timeout=5",
+        "content-length": "26083",
+        "date": "Tue, 27 Jan 2026 12:08:53 GMT",
+        "content-type": "text/javascript",
+        "vary": "Origin"
+      }
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:3000/features/api-settings/ConnectionTest.tsx",
+      "headers": {
+        "cache-control": "no-cache",
+        "etag": "W/\"1dfb-5WElEiZfehOgd40WZC4tXx0pmuI\"",
+        "connection": "keep-alive",
+        "access-control-allow-origin": "http://localhost:3000",
+        "keep-alive": "timeout=5",
+        "content-length": "15722",
+        "date": "Tue, 27 Jan 2026 12:08:53 GMT",
+        "content-type": "text/javascript",
+        "vary": "Origin"
+      }
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:3000/features/api-settings/ApiSettingsStore.ts",
+      "headers": {
+        "cache-control": "no-cache",
+        "etag": "W/\"103e-YNNO2ts3z51jO3fiYvIjL4U4gT8\"",
+        "connection": "keep-alive",
+        "access-control-allow-origin": "http://localhost:3000",
+        "keep-alive": "timeout=5",
+        "content-length": "16213",
+        "date": "Tue, 27 Jan 2026 12:08:53 GMT",
+        "content-type": "text/javascript",
+        "vary": "Origin"
+      }
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:3000/features/api-settings/ApiSettings.tsx",
+      "headers": {
+        "cache-control": "no-cache",
+        "etag": "W/\"46ef-C4hlvHg7nmMyQmJOuUjgaMe9hZQ\"",
+        "connection": "keep-alive",
+        "access-control-allow-origin": "http://localhost:3000",
+        "keep-alive": "timeout=5",
+        "content-length": "36822",
+        "date": "Tue, 27 Jan 2026 12:08:53 GMT",
+        "content-type": "text/javascript",
+        "vary": "Origin"
+      }
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "http://localhost:3000/@fs/C:/Projects/Auto-Claude-Marketing/apps/frontend/src/shared/constants/api-profiles.ts",
+      "headers": {
+        "cache-control": "no-cache",
+        "etag": "W/\"2b0-M7jpimqccELlD1C9T8JDWK2EmAw\"",
+        "connection": "keep-alive",
+        "access-control-allow-origin": "http://localhost:3000",
+        "keep-alive": "timeout=5",
+        "content-length": "2535",
+        "date": "Tue, 27 Jan 2026 12:08:53 GMT",
+        "content-type": "text/javascript",
+        "vary": "Origin"
+      }
+    },
+    {
+      "type": "response",
+      "status": 200,
+      "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap",
+      "headers": {
+        "content-encoding": "gzip",
+        "x-content-type-options": "nosniff",
+        "expires": "Tue, 27 Jan 2026 12:08:53 GMT",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "date": "Tue, 27 Jan 2026 12:08:53 GMT",
+        "content-type": "text/css; charset=utf-8",
+        "vary": "Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site",
+        "last-modified": "Tue, 27 Jan 2026 11:40:59 GMT",
+        "x-frame-options": "SAMEORIGIN",
+        "strict-transport-security": "max-age=31536000",
+        "link": "<https://fonts.gstatic.com>; rel=preconnect; crossorigin",
+        "cache-control": "private, max-age=86400, stale-while-revalidate=604800",
+        "timing-allow-origin": "*",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "cross-origin-resource-policy": "cross-origin",
+        "access-control-allow-origin": "*",
+        "x-xss-protection": "0",
+        "server": "ESF"
+      }
+    }
+  ]
+}
