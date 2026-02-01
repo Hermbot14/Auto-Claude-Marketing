@@ -32,7 +32,7 @@ import {
   ChevronRight,
   Search,
 } from 'lucide-react';
-import { useCalendarStore } from '../../../stores/calendarStore';
+import { useCalendarStore } from '../../stores/calendarStore';
 import type { CalendarItem } from '../../../shared/types';
 
 // Event reminder types

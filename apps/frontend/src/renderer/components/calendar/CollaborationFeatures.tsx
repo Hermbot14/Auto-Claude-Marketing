@@ -20,7 +20,7 @@ import {
   MoreVertical,
   Reply,
 } from 'lucide-react';
-import { useCalendarStore } from '../../../stores/calendarStore';
+import { useCalendarStore } from '../../stores/calendarStore';
 import type { CalendarItem } from '../../../shared/types';
 
 // Comment interface

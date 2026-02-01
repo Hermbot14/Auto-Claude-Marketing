@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-01-28T10:45:00Z",
+  "summary": "Fixed Git Bash console window appearing when 'Invoke Claude All' is clicked. The issue was that: 1) User had gitbash set as preferred terminal, 2) node-pty was spawning bash.exe without windowsHide option, 3) bash was starting with --login -i flags which opened visible window. Fixed by: 1) Adding windowsHide:true to pty.spawn options, 2) Adding --noprofile --norc flags to bash to prevent login shell, 3) Adding detached mode and proper stdio to where command spawns.",
+  "current_status": "All shell spawns now include window hiding. Git Bash will spawn with --noprofile --norc to prevent interactive window.",
+  "files_modified": [
+    "apps/frontend/src/main/terminal/pty-manager.ts",
+    "apps/frontend/src/main/env-utils.ts",
+    "apps/frontend/src/main/ipc-handlers/mcp-handlers.ts",
+    "apps/frontend/src/main/ipc-handlers/task/worktree-handlers.ts"
+  ],
+  "context_files": [
+    "@apps/frontend/src/main/terminal/pty-manager.ts",
+    "@apps/frontend/src/main/platform/paths.ts"
+  ],
+  "next_steps": [
+    "User must run: npm run build",
+    "Then restart: npm run dev",
+    "Test 'Invoke Claude All' - should work without Git Bash window",
+    "If user wants cmd.exe instead of gitbash, they can change in settings",
+    "Verify YOLO mode works correctly"
+  ],
+  "blockers": []
+}

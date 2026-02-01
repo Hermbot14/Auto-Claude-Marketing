@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-01-28T14:00:00Z",
+  "summary": "Fixed Marketing Intelligence status display bug. Issue: 'sometimes bugs out and loads and doesnt display any text of what its doing whether thinking or researching'. Root cause: When sending a new message, the store cleared streamingContent and toolsUsed but NOT currentTool. The UI condition for showing 'Thinking...' requires !currentTool, so stale tool state from previous message prevented the status indicator from displaying. Fix: Added store.setCurrentTool(null) in sendMessage() to ensure all previous state is cleared.",
+  "current_status": "COMPLETE - Marketing Intelligence status display fixed",
+  "files_modified": [
+    "apps/frontend/src/renderer/stores/insights-store.ts (added setCurrentTool(null) in sendMessage)"
+  ],
+  "context_files": [
+    "@apps/frontend/src/renderer/stores/insights-store.ts",
+    "@apps/frontend/src/renderer/components/Insights.tsx"
+  ],
+  "next_steps": [],
+  "blockers": []
+}

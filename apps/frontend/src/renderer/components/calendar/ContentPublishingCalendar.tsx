@@ -31,7 +31,7 @@ import {
   Copy,
   CalendarClock,
 } from 'lucide-react';
-import { useCalendarStore } from '../../../stores/calendarStore';
+import { useCalendarStore } from '../../stores/calendarStore';
 import { CALENDAR_COLORS, CALENDAR_ITEM_TYPE_LABELS } from '../../../shared/constants';
 import type { CalendarItem, CalendarItemType } from '../../../shared/types';
 

@@ -1,0 +1,72 @@
+{
+  "taskId": "TASK-004",
+  "taskTitle": "Update Roadmap Prompts for Marketing Focus",
+  "timestamp": "2026-01-31T12:00:00Z",
+  "summary": "Successfully transformed all roadmap generation prompts from software development focus to marketing focus. Created comprehensive marketing domain knowledge base with terminology glossary, persona definitions, and best practices. All roadmap phases are now marketing-specific (Campaign Planning, Content Strategy, SEO Audit, Social Media Strategy, Email Marketing, Analytics & Reporting). Removed all coding/development terminology and replaced with marketing workflows and deliverables.",
+  "currentStatus": "TASK-004 completed. Roadmap prompts are now fully marketing-focused and ready for use in generating marketing roadmaps. The system can now generate strategic marketing roadmaps with appropriate phases, tasks, and terminology for marketing professionals.",
+  "filesModified": [
+    "apps/backend/prompts/roadmap_marketing.md (NEW)",
+    "apps/backend/prompts/roadmap_phases.md (NEW)",
+    "apps/backend/prompts/roadmap_discovery.md (MODIFIED)",
+    "apps/backend/prompts/roadmap_features.md (MODIFIED)",
+    "development/active/roadmap-calendar-enhancement/prd.json (MODIFIED)",
+    "development/active/roadmap-calendar-enhancement/verification.json (MODIFIED)"
+  ],
+  "contextFiles": [
+    "@apps/backend/prompts/content_creator.md",
+    "@apps/backend/prompts/social_media.md",
+    "@apps/backend/prompts/email_marketing.md",
+    "@apps/backend/prompts/seo.md",
+    "@apps/backend/prompts/marketing_analytics.md"
+  ],
+  "nextSteps": [
+    "Proceed with TASK-001 (Active Progress Logs) or TASK-002 (Branding) depending on priority",
+    "Test the new marketing roadmap generation with a sample marketing project",
+    "Consider creating example marketing roadmaps using the new phase templates"
+  ],
+  "blockers": [],
+  "acceptanceCriteriaMet": [
+    "✓ All roadmap generation prompts are marketing-focused",
+    "✓ Phases are marketing-specific (Campaign Planning, Content Strategy, SEO Audit, Social Media Strategy, Email Marketing, Analytics & Reporting)",
+    "✓ Tasks are relevant to marketing workflows",
+    "✓ Examples and templates are marketing-related",
+    "✓ No generic coding/development terminology"
+  ],
+  "keyAchievements": [
+    "Created roadmap_marketing.md with 50+ marketing terms and definitions",
+    "Created roadmap_phases.md with 6 complete marketing phase templates (JSON format)",
+    "Updated roadmap_discovery.md to use marketing project types and personas",
+    "Updated roadmap_features.md to generate marketing initiatives instead of software features",
+    "Replaced all technical terminology with marketing terminology throughout"
+  ],
+  "marketingPhasesCreated": [
+    "Phase 1: Campaign Planning (goals, audience, research, messaging, budget)",
+    "Phase 2: Content Strategy (audit, themes, calendar, SEO, workflow)",
+    "Phase 3: SEO Audit (technical, on-page, keywords, backlinks, content gaps)",
+    "Phase 4: Social Media Strategy (platforms, content calendar, hashtags, engagement)",
+    "Phase 5: Email Marketing (segmentation, campaigns, automation, compliance)",
+    "Phase 6: Analytics & Reporting (tracking, dashboards, KPIs, optimization)"
+  ],
+  "marketingTerminologyAdded": [
+    "CTA, Funnel, Lead, Conversion, Reach, Impressions, Engagement Rate",
+    "CTR, CPA, ROI, KPI, Segmentation, Personalization, A/B Testing",
+    "Buyer Persona, Value Proposition, USP",
+    "SEO: SERP, Backlink, Keyword, Organic Reach",
+    "Social: DM, Story, Reel, Hashtag, UGC, Social Proof",
+    "Email: Open Rate, Click Rate, Drip Campaign, CAN-SPAM, GDPR"
+  ],
+  "subtasksCompleted": [
+    "TASK-004-01: Audited current roadmap prompts - identified all non-marketing content",
+    "TASK-004-02: Created 6 marketing phase templates with detailed tasks and success criteria",
+    "TASK-004-03: Created marketing task templates (research, competitor analysis, content creation, campaign execution, performance tracking)",
+    "TASK-004-04: Updated system prompts with comprehensive marketing domain knowledge and glossary"
+  ],
+  "verification": {
+    "prdUpdated": true,
+    "verificationJsonUpdated": true,
+    "acceptanceCriteriaVerified": true,
+    "filesCreated": 2,
+    "filesModified": 4,
+    "totalChanges": 6
+  }
+}

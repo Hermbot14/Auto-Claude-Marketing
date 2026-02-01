@@ -27,7 +27,7 @@ import {
   Edit2,
   Trash2,
 } from 'lucide-react';
-import { useCalendarStore } from '../../../stores/calendarStore';
+import { useCalendarStore } from '../../stores/calendarStore';
 import type { CalendarItem } from '../../../shared/types';
 
 // Analytics task types

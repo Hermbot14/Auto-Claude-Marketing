@@ -1,0 +1,1178 @@
+{
+  "timestamp": "2026-01-31T00:00:00Z",
+  "summary": "Identified and documented 10 critical user workflows requiring E2E testing for the Auto-Claude-Marketing frontend application. Each workflow includes step-by-step user flows, test scenarios (happy path and edge cases), test approach recommendations, and priority levels.",
+  "current_status": "Critical paths analysis complete. Document saved to tmp/critical-paths-analysis-20260131-000000.json",
+  "files_modified": [],
+  "context_files": [
+    "@apps/frontend/src/renderer/App.tsx",
+    "@apps/frontend/src/renderer/components/TaskCreationWizard.tsx",
+    "@apps/frontend/src/renderer/components/Roadmap.tsx",
+    "@apps/frontend/src/renderer/components/AddProjectModal.tsx",
+    "@apps/frontend/src/renderer/components/settings/AppSettings.tsx",
+    "@apps/frontend/src/renderer/components/GitHubIssues.tsx",
+    "@apps/frontend/src/renderer/components/GitHubSetupModal.tsx",
+    "@apps/frontend/src/renderer/components/Terminal.tsx"
+  ],
+  "next_steps": [
+    "Review critical paths and prioritize based on business value",
+    "Implement E2E tests starting with P0 workflows",
+    "Set up test infrastructure (Playwright/Test fixtures)",
+    "Create test data management strategy"
+  ],
+  "blockers": [],
+  "critical_paths": [
+    {
+      "id": "CP-001",
+      "name": "Roadmap Generation Flow",
+      "priority": "P0",
+      "description": "Users create a new marketing roadmap by entering a task description and generating AI-powered features organized in phases",
+      "entry_point": "apps/frontend/src/renderer/components/Roadmap.tsx",
+      "steps": [
+        {
+          "order": 1,
+          "action": "Navigate to Roadmap view",
+          "element": "Sidebar navigation item",
+          "selector": "navigation:items.roadmap",
+          "expected_result": "Roadmap view loads, shows empty state or existing roadmap"
+        },
+        {
+          "order": 2,
+          "action": "Click 'Generate Roadmap' button",
+          "element": "Generate button in empty state",
+          "selector": "Button with text matching roadmap generation",
+          "expected_result": "Competitor analysis dialog appears (if no existing analysis)"
+        },
+        {
+          "order": 3,
+          "action": "Accept or skip competitor analysis",
+          "element": "CompetitorAnalysisDialog buttons",
+          "selector": "Accept/Decline buttons",
+          "expected_result": "Dialog closes, roadmap generation starts"
+        },
+        {
+          "order": 4,
+          "action": "Wait for generation to complete",
+          "element": "RoadmapGenerationProgress component",
+          "selector": "Progress indicator with phases",
+          "expected_result": "Progress shows phases completing (Ideation → Roadmap → complete)"
+        },
+        {
+          "order": 5,
+          "action": "View generated roadmap",
+          "element": "RoadmapTabs component",
+          "selector": "Kanban/List/Timeline tabs",
+          "expected_result": "Roadmap displays with features organized by phases"
+        }
+      ],
+      "test_scenarios": [
+        {
+          "name": "Happy path - Generate roadmap with competitor analysis",
+          "type": "happy_path",
+          "steps": "1-5 with accepting competitor analysis",
+          "expected_outcome": "Roadmap generated with competitor insights integrated",
+          "test_data": "Valid project initialized, Claude API authenticated"
+        },
+        {
+          "name": "Happy path - Generate roadmap without competitor analysis",
+          "type": "happy_path",
+          "steps": "1-5 with declining competitor analysis",
+          "expected_outcome": "Roadmap generated based solely on task description",
+          "test_data": "Valid project initialized"
+        },
+        {
+          "name": "Error - Unauthenticated Claude API",
+          "type": "error_case",
+          "steps": "1-3 without valid auth",
+          "expected_outcome": "Error message shown, user redirected to settings",
+          "test_data": "No Claude authentication configured"
+        },
+        {
+          "name": "Error - Generation timeout/failure",
+          "type": "error_case",
+          "steps": "1-4 with mocked backend timeout",
+          "expected_outcome": "Progress indicator stops, retry option shown",
+          "test_data": "Backend timeout simulation"
+        },
+        {
+          "name": "Edge - Use existing competitor analysis",
+          "type": "edge_case",
+          "steps": "1-5 with existing analysis present",
+          "expected_outcome": "ExistingAnalysisDialog shown, can use existing or run new",
+          "test_data": "Project with existing competitor_analysis.json"
+        },
+        {
+          "name": "Edge - Stop generation in progress",
+          "type": "edge_case",
+          "steps": "1-4, click Stop button",
+          "expected_outcome": "Generation halts, partial results saved",
+          "test_data": "Valid project"
+        }
+      ],
+      "test_approach": {
+        "tool": "Electron MCP (primary) + Playwright (fallback for web UI)",
+        "automation_level": "High - Full end-to-end flow can be automated",
+        "considerations": [
+          "Roadmap generation is async - need to wait for completion",
+          "Competitor analysis adds ~30-60 seconds - tests should mock or skip for speed",
+          "Screenshot capture at each phase for visual regression",
+          "Test with different task complexities (simple vs complex descriptions)"
+        ],
+        "setup_requirements": [
+          "Test project with valid .auto-claude directory",
+          "Claude API credentials (test account)",
+          "Mock backend for competitor analysis (optional, for faster tests)"
+        ]
+      }
+    },
+    {
+      "id": "CP-002",
+      "name": "Task Creation with File References",
+      "priority": "P0",
+      "description": "Users create new tasks with optional file references using @ mentions and git branch selection",
+      "entry_point": "apps/frontend/src/renderer/components/TaskCreationWizard.tsx",
+      "steps": [
+        {
+          "order": 1,
+          "action": "Open Task Creation dialog",
+          "element": "New Task button",
+          "selector": "Sidebar 'New Task' button or keyboard shortcut",
+          "expected_result": "TaskCreationWizard dialog opens"
+        },
+        {
+          "order": 2,
+          "action": "Enter task description",
+          "element": "Description textarea",
+          "selector": "textarea with placeholder",
+          "expected_result": "Text entered, @ mention detection activates"
+        },
+        {
+          "order": 3,
+          "action": "Add file references via @ mentions or drag-drop",
+          "element": "FileAutocomplete or FileTreeItem",
+          "selector": "Autocomplete popup or file tree sidebar",
+          "expected_result": "Files shown as @filename in description with highlighting"
+        },
+        {
+          "order": 4,
+          "action": "Configure git options (optional)",
+          "element": "Git options toggle",
+          "selector": "Expandable 'Git Options' section",
+          "expected_result": "Branch selector shown, can select base branch"
+        },
+        {
+          "order": 5,
+          "action": "Submit task",
+          "element": "Create Task button",
+          "selector": "Primary action button",
+          "expected_result": "Dialog closes, task appears in Kanban board"
+        }
+      ],
+      "test_scenarios": [
+        {
+          "name": "Happy path - Create task with @ mention autocomplete",
+          "type": "happy_path",
+          "steps": "1-5 using @ autocomplete",
+          "expected_outcome": "Task created with file references in metadata",
+          "test_data": "Project with source files"
+        },
+        {
+          "name": "Happy path - Create task with drag-drop file reference",
+          "type": "happy_path",
+          "steps": "1-5 using drag-drop from file explorer",
+          "expected_outcome": "Task created with file references",
+          "test_data": "Project with source files, file explorer open"
+        },
+        {
+          "name": "Happy path - Create task with custom git branch",
+          "type": "happy_path",
+          "steps": "1-5 with git options expanded, branch selected",
+          "expected_outcome": "Task created with baseBranch metadata",
+          "test_data": "Project with multiple git branches"
+        },
+        {
+          "name": "Error - Empty description",
+          "type": "error_case",
+          "steps": "1-2 (skip description), 5",
+          "expected_outcome": "Validation error shown, submit disabled",
+          "test_data": "Any project"
+        },
+        {
+          "name": "Edge - Draft persistence",
+          "type": "edge_case",
+          "steps": "1-3, close dialog, reopen",
+          "expected_outcome": "Draft restored, can discard or continue",
+          "test_data": "Project with previous draft"
+        },
+        {
+          "name": "Edge - File reference via @ (no autocomplete)",
+          "type": "edge_case",
+          "steps": "1-5 manually typing @filename.ts",
+          "expected_outcome": "File reference parsed and included",
+          "test_data": "Project with known file names"
+        }
+      ],
+      "test_approach": {
+        "tool": "Electron MCP for drag-drop testing, Playwright for standard flow",
+        "automation_level": "High - Most steps automatable, drag-drop may need Electron",
+        "considerations": [
+          "File autocomplete requires actual project files - use test fixture project",
+          "Drag-drop testing needs Electron MCP (can't test in web UI)",
+          "@ mention highlighting needs visual verification (screenshots)",
+          "Draft persistence requires localStorage testing across reloads"
+        ],
+        "setup_requirements": [
+          "Test project with known file structure",
+          "Multiple git branches for branch selection test",
+          "Test fixture project path configuration"
+        ]
+      }
+    },
+    {
+      "id": "CP-003",
+      "name": "Project Management (Create/Switch/Delete)",
+      "priority": "P0",
+      "description": "Users manage multiple projects by adding new ones, switching between them, and removing from app",
+      "entry_point": "apps/frontend/src/renderer/components/AddProjectModal.tsx, ProjectTabBar",
+      "steps": [
+        {
+          "order": 1,
+          "action": "Open Add Project modal",
+          "element": "Add Project button",
+          "selector": "ProjectTabBar '+' button or Cmd/Ctrl+T",
+          "expected_result": "AddProjectModal opens with options"
+        },
+        {
+          "order": 2,
+          "action": "Choose 'Open Existing' or 'Create New'",
+          "element": "Choice buttons",
+          "selector": "FolderOpen or FolderPlus buttons",
+          "expected_result": "File picker dialog OR create form shown"
+        },
+        {
+          "order": 3,
+          "action": "Select project path or enter project details",
+          "element": "File picker OR form inputs",
+          "selector": "Directory dialog OR name/location/git inputs",
+          "expected_result": "Path selected OR details entered"
+        },
+        {
+          "order": 4,
+          "action": "Confirm project addition",
+          "element": "Confirm button",
+          "selector": "Primary action button",
+          "expected_result": "Project added, tab appears, init dialog may show"
+        },
+        {
+          "order": 5,
+          "action": "Switch between project tabs",
+          "element": "ProjectTabBar tabs",
+          "selector": "Clickable project tabs",
+          "expected_result": "Active project changes, content updates"
+        },
+        {
+          "order": 6,
+          "action": "Remove project (optional)",
+          "element": "Close tab button",
+          "selector": "X button on project tab",
+          "expected_result": "Confirmation dialog, then project removed"
+        }
+      ],
+      "test_scenarios": [
+        {
+          "name": "Happy path - Add existing project",
+          "type": "happy_path",
+          "steps": "1-4 using 'Open Existing'",
+          "expected_outcome": "Project added, auto-detected main branch",
+          "test_data": "Existing git repository path"
+        },
+        {
+          "name": "Happy path - Create new project",
+          "type": "happy_path",
+          "steps": "1-4 using 'Create New' with git init",
+          "expected_outcome": "Project folder created, git initialized, project added",
+          "test_data": "Valid parent directory path"
+        },
+        {
+          "name": "Happy path - Switch between projects",
+          "type": "happy_path",
+          "steps": "1-5 with multiple projects",
+          "expected_outcome": "Content updates to selected project",
+          "test_data": "Multiple projects added"
+        },
+        {
+          "name": "Error - Invalid project path",
+          "type": "error_case",
+          "steps": "1-4 with non-existent path",
+          "expected_outcome": "Error message, dialog stays open",
+          "test_data": "Invalid path string"
+        },
+        {
+          "name": "Error - Create project fails (permissions)",
+          "type": "error_case",
+          "steps": "1-4 with read-only directory",
+          "expected_outcome": "Permission error shown",
+          "test_data": "Read-only directory path"
+        },
+        {
+          "name": "Edge - Project requires initialization",
+          "type": "edge_case",
+          "steps": "1-4 with un-initialized project",
+          "expected_outcome": "Init dialog shown after adding",
+          "test_data": "Existing project without .auto-claude"
+        },
+        {
+          "name": "Edge - Drag-reorder project tabs",
+          "type": "edge_case",
+          "steps": "1-5 with drag-drop on tabs",
+          "expected_outcome": "Tabs reorder, order persists",
+          "test_data": "Multiple projects"
+        }
+      ],
+      "test_approach": {
+        "tool": "Electron MCP (for file dialogs) + Playwright",
+        "automation_level": "Medium - File dialogs require Electron or mocking",
+        "considerations": [
+          "Native file picker dialogs need Electron MCP",
+          "Project folder creation requires filesystem access",
+          "Git init adds external dependency - may need to mock",
+          "Tab drag-drop needs dnd-kit event simulation"
+        ],
+        "setup_requirements": [
+          "Test directory structure with sample projects",
+          "Read-only directory for permission error test",
+          "Uninitialized project for init dialog test"
+        ]
+      }
+    },
+    {
+      "id": "CP-004",
+      "name": "Settings Management (App & Project)",
+      "priority": "P1",
+      "description": "Users configure application settings (theme, language, profiles) and project-specific settings (GitHub, memory, env)",
+      "entry_point": "apps/frontend/src/renderer/components/settings/AppSettings.tsx",
+      "steps": [
+        {
+          "order": 1,
+          "action": "Open Settings dialog",
+          "element": "Settings button",
+          "selector": "Sidebar gear icon or button",
+          "expected_result": "AppSettings dialog opens with navigation"
+        },
+        {
+          "order": 2,
+          "action": "Navigate to app settings section",
+          "element": "App nav items",
+          "selector": "Appearance/Display/Language/etc. buttons",
+          "expected_result": "Section content loads"
+        },
+        {
+          "order": 3,
+          "action": "Modify app setting",
+          "element": "Section inputs/controls",
+          "selector": "Theme selector, language dropdown, etc.",
+          "expected_result": "Setting updates in UI (not yet saved)"
+        },
+        {
+          "order": 4,
+          "action": "Navigate to project settings section",
+          "element": "Project selector + nav items",
+          "selector": "Project dropdown + GitHub/Linear/etc. buttons",
+          "expected_result": "Project settings load"
+        },
+        {
+          "order": 5,
+          "action": "Modify project setting",
+          "element": "Project setting inputs",
+          "selector": "Env vars, GitHub tokens, etc.",
+          "expected_result": "Setting updates in UI"
+        },
+        {
+          "order": 6,
+          "action": "Save settings",
+          "element": "Save button",
+          "selector": "Primary save button in footer",
+          "expected_result": "Settings persisted, dialog closes"
+        },
+        {
+          "order": 7,
+          "action": "Cancel changes (optional)",
+          "element": "Cancel button",
+          "selector": "Cancel button in footer",
+          "expected_result": "Dialog closes, changes discarded"
+        }
+      ],
+      "test_scenarios": [
+        {
+          "name": "Happy path - Change app theme",
+          "type": "happy_path",
+          "steps": "1-3, 6 with theme selection",
+          "expected_outcome": "Theme applied to UI, persisted",
+          "test_data": "None"
+        },
+        {
+          "name": "Happy path - Configure GitHub integration",
+          "type": "happy_path",
+          "steps": "1-2, 4-6 with GitHub section",
+          "expected_outcome": "GitHub settings saved, issues sync enabled",
+          "test_data": "Valid GitHub token (test account)"
+        },
+        {
+          "name": "Happy path - Configure API profile",
+          "type": "happy_path",
+          "steps": "1-2 with Accounts section, add profile",
+          "expected_outcome": "API profile added, usable in tasks",
+          "test_data": "Valid API credentials"
+        },
+        {
+          "name": "Error - Invalid API key",
+          "type": "error_case",
+          "steps": "1-2 with Accounts section, invalid key",
+          "expected_outcome": "Validation error shown, save prevented",
+          "test_data": "Invalid API key format"
+        },
+        {
+          "name": "Edge - Cancel reverts theme",
+          "type": "edge_case",
+          "steps": "1-3, 7 with theme change",
+          "expected_outcome": "Theme reverts to original",
+          "test_data": "None"
+        },
+        {
+          "name": "Edge - Settings validation (project without init)",
+          "type": "edge_case",
+          "steps": "1-2 with project settings on un-initialized project",
+          "expected_outcome": "Init guard shown, blocks edits",
+          "test_data": "Uninitialized project"
+        }
+      ],
+      "test_approach": {
+        "tool": "Playwright (web UI) or Electron MCP",
+        "automation_level": "High - Most settings are form-based",
+        "considerations": [
+          "Theme changes require visual verification (screenshots)",
+          "Project settings need test projects with different states",
+          "API key validation may need mocking",
+          "Settings persistence requires checking storage/files"
+        ],
+        "setup_requirements": [
+          "Test API credentials (or mock validation)",
+          "Initialized and un-initialized test projects",
+          "Multiple GitHub tokens for testing"
+        ]
+      }
+    },
+    {
+      "id": "CP-005",
+      "name": "GitHub Integration Setup",
+      "priority": "P0",
+      "description": "Users authenticate with GitHub and Claude, then configure repository and branch for task operations",
+      "entry_point": "apps/frontend/src/renderer/components/GitHubSetupModal.tsx",
+      "steps": [
+        {
+          "order": 1,
+          "action": "Trigger GitHub setup",
+          "element": "Init dialog completion OR manual trigger",
+          "selector": "After initialization or settings",
+          "expected_result": "GitHubSetupModal opens at GitHub auth step"
+        },
+        {
+          "order": 2,
+          "action": "Authenticate with GitHub (OAuth)",
+          "element": "GitHubOAuthFlow component",
+          "selector": "'Authorize with GitHub' button",
+          "expected_result": "OAuth flow completes, token received"
+        },
+        {
+          "order": 3,
+          "action": "Authenticate with Claude (OAuth)",
+          "element": "ClaudeOAuthFlow component",
+          "selector": "'Authorize with Claude' button",
+          "expected_outcome": "OAuth flow completes, token saved to profile"
+        },
+        {
+          "order": 4,
+          "action": "Confirm or select repository",
+          "element": "Repo detection OR create/link forms",
+          "selector": "Detected repo confirm OR create/link inputs",
+          "expected_result": "Repository configured (detected/created/linked)"
+        },
+        {
+          "order": 5,
+          "action": "Select base branch",
+          "element": "Branch selector",
+          "selector": "Branch dropdown with recommended badge",
+          "expected_result": "Branch selected, ready for tasks"
+        },
+        {
+          "order": 6,
+          "action": "Complete setup",
+          "element": "Complete button",
+          "selector": "Primary action in branch step",
+          "expected_result": "Setup complete, modal closes, settings saved"
+        }
+      ],
+      "test_scenarios": [
+        {
+          "name": "Happy path - Full setup with detected repo",
+          "type": "happy_path",
+          "steps": "1-6 with existing git remote",
+          "expected_outcome": "Complete setup, repo detected, branch selected",
+          "test_data": "Project with GitHub remote"
+        },
+        {
+          "name": "Happy path - Create new repo",
+          "type": "happy_path",
+          "steps": "1-6 with 'create new repo' option",
+          "expected_outcome": "Repo created on GitHub, remote added",
+          "test_data": "Project without remote, valid GitHub account"
+        },
+        {
+          "name": "Happy path - Link existing repo",
+          "type": "happy_path",
+          "steps": "1-6 with 'link existing' option",
+          "expected_outcome": "Remote added to local project",
+          "test_data": "Valid owner/repo string"
+        },
+        {
+          "name": "Error - OAuth failure",
+          "type": "error_case",
+          "steps": "1-3 with OAuth denied/error",
+          "expected_outcome": "Error shown, can retry or skip",
+          "test_data": "OAuth failure simulation"
+        },
+        {
+          "name": "Error - Invalid repo format",
+          "type": "error_case",
+          "steps": "1-4 with invalid owner/repo",
+          "expected_outcome": "Validation error, format guidance shown",
+          "test_data": "Malformed repo string"
+        },
+        {
+          "name": "Edge - Already authenticated",
+          "type": "edge_case",
+          "steps": "1-6 with existing tokens",
+          "expected_outcome": "Auth steps skipped, goes to repo detection",
+          "test_data": "Existing GitHub and Claude tokens"
+        },
+        {
+          "name": "Edge - Organization owner selection",
+          "type": "edge_case",
+          "steps": "1-6 with org repo creation",
+          "expected_outcome": "Can select org as owner, repo created under org",
+          "test_data": "GitHub account with organizations"
+        }
+      ],
+      "test_approach": {
+        "tool": "Electron MCP (for OAuth) + Playwright (UI flow)",
+        "automation_level": "Medium - OAuth flows need real browser or mocking",
+        "considerations": [
+          "OAuth flows require real GitHub/Claude auth or test accounts",
+          "Repo creation requires GitHub API access - use test org",
+          "Branch detection needs git repository - use test fixtures",
+          "Modal state persistence across steps needs verification"
+        ],
+        "setup_requirements": [
+          "Test GitHub account with OAuth app configured",
+          "Test Claude account",
+          "Test GitHub organization (for org owner test)",
+          "Sample projects with and without git remotes"
+        ]
+      }
+    },
+    {
+      "id": "CP-006",
+      "name": "GitHub Issues Sync and Management",
+      "priority": "P1",
+      "description": "Users view GitHub issues, investigate them, create tasks from issues, and configure auto-fix",
+      "entry_point": "apps/frontend/src/renderer/components/GitHubIssues.tsx",
+      "steps": [
+        {
+          "order": 1,
+          "action": "Navigate to GitHub Issues view",
+          "element": "Sidebar navigation",
+          "selector": "'GitHub Issues' navigation item",
+          "expected_result": "Issues list loads (or not connected state)"
+        },
+        {
+          "order": 2,
+          "action": "Connect GitHub (if not connected)",
+          "element": "NotConnectedState or settings",
+          "selector": "Settings button or configure prompt",
+          "expected_result": "GitHub integration configured, issues load"
+        },
+        {
+          "order": 3,
+          "action": "Select issue from list",
+          "element": "IssueList item",
+          "selector": "Issue card/list item",
+          "expected_result": "Issue detail panel shows content"
+        },
+        {
+          "order": 4,
+          "action": "Investigate issue (optional)",
+          "element": "Investigate button/dialog",
+          "selector": "'Investigate' button in issue detail",
+          "expected_result": "Investigation dialog shows AI analysis"
+        },
+        {
+          "order": 5,
+          "action": "Create task from issue",
+          "element": "'Create Task' button in issue detail",
+          "selector": "Button to create task from issue",
+          "expected_result": "Task created, linked to issue number"
+        },
+        {
+          "order": 6,
+          "action": "Enable auto-fix (optional)",
+          "element": "Auto-fix toggle",
+          "selector": "Toggle switch in header",
+          "expected_result": "Auto-fix enabled, issues processed automatically"
+        }
+      ],
+      "test_scenarios": [
+        {
+          "name": "Happy path - View and select issues",
+          "type": "happy_path",
+          "steps": "1-3",
+          "expected_outcome": "Issues load, can browse and select",
+          "test_data": "Project with GitHub connected, repo with issues"
+        },
+        {
+          "name": "Happy path - Investigate and create task",
+          "type": "happy_path",
+          "steps": "1-5",
+          "expected_outcome": "Investigation completes, task created and linked",
+          "test_data": "Valid issue, investigation module installed"
+        },
+        {
+          "name": "Happy path - Enable auto-fix",
+          "type": "happy_path",
+          "steps": "1-2, 6",
+          "expected_outcome": "Auto-fix processes issues, creates tasks",
+          "test_data": "Connected repo, auto-fix module installed"
+        },
+        {
+          "name": "Error - GitHub not connected",
+          "type": "error_case",
+          "steps": "1",
+          "expected_outcome": "NotConnectedState shown, guidance to settings",
+          "test_data": "Project without GitHub integration"
+        },
+        {
+          "name": "Error - Investigation module not installed",
+          "type": "error_case",
+          "steps": "1-4 without module",
+          "expected_outcome": "Error with install guidance",
+          "test_data": "Project missing investigation module"
+        },
+        {
+          "name": "Edge - Filter and search issues",
+          "type": "edge_case",
+          "steps": "1-3 with filters/search",
+          "expected_outcome": "List filters correctly",
+          "test_data": "Repo with many issues"
+        },
+        {
+          "name": "Edge - Load more issues (pagination)",
+          "type": "edge_case",
+          "steps": "1-3, scroll to bottom",
+          "expected_outcome": "More issues load",
+          "test_data": "Repo with 50+ issues"
+        }
+      ],
+      "test_approach": {
+        "tool": "Playwright (primary) + Electron MCP (for module checks)",
+        "automation_level": "High - Mostly UI interactions",
+        "considerations": [
+          "Issue loading requires GitHub API - use test repo",
+          "Investigation needs backend AI module - may need mocking",
+          "Auto-fix creates real tasks - need cleanup strategy",
+          "Pagination needs test repo with many issues"
+        ],
+        "setup_requirements": [
+          "Test GitHub repository with sample issues",
+          "Investigation module installed (or mocked)",
+          "Auto-fix module installed (or mocked)",
+          "Test repo with 50+ issues for pagination test"
+        ]
+      }
+    },
+    {
+      "id": "CP-007",
+      "name": "Terminal Creation and Management",
+      "priority": "P1",
+      "description": "Users create agent terminals, switch between worktrees, run commands, and manage terminal sessions",
+      "entry_point": "apps/frontend/src/renderer/components/Terminal.tsx, TerminalGrid",
+      "steps": [
+        {
+          "order": 1,
+          "action": "Navigate to Terminals view",
+          "element": "Sidebar navigation",
+          "selector": "'Agent Terminals' navigation item",
+          "expected_result": "TerminalGrid shown, may have existing terminals"
+        },
+        {
+          "order": 2,
+          "action": "Create new terminal",
+          "element": "'New Terminal' button",
+          "selector": "Add terminal button",
+          "expected_result": "New terminal created, PTY starts"
+        },
+        {
+          "order": 3,
+          "action": "Enter command",
+          "element": "Terminal xterm input",
+          "selector": "Terminal text area (auto-focused)",
+          "expected_result": "Command echoed, output displayed"
+        },
+        {
+          "order": 4,
+          "action": "Switch worktree (optional)",
+          "element": "Worktree selector or create dialog",
+          "selector": "Worktree dropdown or 'Create Worktree' button",
+          "expected_result": "Terminal switches to worktree directory"
+        },
+        {
+          "order": 5,
+          "action": "Close terminal",
+          "element": "Close button",
+          "selector": "X button on terminal tab",
+          "expected_result": "Terminal removed, PTY destroyed"
+        }
+      ],
+      "test_scenarios": [
+        {
+          "name": "Happy path - Create and run command",
+          "type": "happy_path",
+          "steps": "1-3 with simple command (ls, pwd)",
+          "expected_outcome": "Command executes, output shown",
+          "test_data": "Valid project directory"
+        },
+        {
+          "name": "Happy path - Create worktree",
+          "type": "happy_path",
+          "steps": "1-4 with worktree creation",
+          "expected_outcome": "Worktree created, terminal switches directory",
+          "test_data": "Valid task with spec"
+        },
+        {
+          "name": "Happy path - Multiple terminals",
+          "type": "happy_path",
+          "steps": "1-3 repeated (up to max)",
+          "expected_outcome": "Multiple terminals run independently",
+          "test_data": "Project with multiple worktrees"
+        },
+        {
+          "name": "Error - Max terminals reached",
+          "type": "error_case",
+          "steps": "1-2 at limit",
+          "expected_outcome": "Error message, terminal not created",
+          "test_data": "Project at terminal limit"
+        },
+        {
+          "name": "Error - Worktree creation fails",
+          "type": "error_case",
+          "steps": "1-4 with invalid task",
+          "expected_outcome": "Error shown, stays in current directory",
+          "test_data": "Invalid or missing task spec"
+        },
+        {
+          "name": "Edge - Terminal auto-naming",
+          "type": "edge_case",
+          "steps": "1-3 with git commands",
+          "expected_outcome": "Terminal name updates based on context",
+          "test_data": "Any terminal"
+        },
+        {
+          "name": "Edge - Drag-drop terminal",
+          "type": "edge_case",
+          "steps": "1-2 with drag-drop reorder",
+          "expected_outcome": "Terminals reorder, layout persists",
+          "test_data": "Multiple terminals"
+        }
+      ],
+      "test_approach": {
+        "tool": "Electron MCP (required for PTY testing)",
+        "automation_level": "Medium - PTY output capture needs backend",
+        "considerations": [
+          "Terminal output is async - need to wait for command completion",
+          "PTY creation requires backend process - test with real or mock",
+          "Worktree creation needs git repository - use test fixtures",
+          "Auto-naming requires command parsing - verify with git commands"
+        ],
+        "setup_requirements": [
+          "Test project with git repository",
+          "Valid task specs for worktree creation",
+          "Terminal output parser for verification"
+        ]
+      }
+    },
+    {
+      "id": "CP-008",
+      "name": "Kanban Board Task Operations",
+      "priority": "P1",
+      "description": "Users view tasks in Kanban board, filter/sort, and perform bulk operations",
+      "entry_point": "apps/frontend/src/renderer/components/KanbanBoard.tsx (referenced in App.tsx)",
+      "steps": [
+        {
+          "order": 1,
+          "action": "View Kanban board",
+          "element": "Default view",
+          "selector": "Kanban board (default view)",
+          "expected_result": "Tasks shown in columns by status"
+        },
+        {
+          "order": 2,
+          "action": "Filter tasks",
+          "element": "Filter controls",
+          "selector": "Status/category/priority filters",
+          "expected_result": "Tasks list updates to match filters"
+        },
+        {
+          "order": 3,
+          "action": "Sort tasks",
+          "element": "Sort controls",
+          "selector": "Sort dropdown (date/priority/etc.)",
+          "expected_result": "Tasks reorder within columns"
+        },
+        {
+          "order": 4,
+          "action": "Search tasks",
+          "element": "Search input",
+          "selector": "Search box",
+          "expected_result": "Tasks filtered by search query"
+        },
+        {
+          "order": 5,
+          "action": "Select task",
+          "element": "Task card",
+          "selector": "Clickable task card",
+          "expected_result": "Task detail modal opens"
+        }
+      ],
+      "test_scenarios": [
+        {
+          "name": "Happy path - View and filter tasks",
+          "type": "happy_path",
+          "steps": "1-2",
+          "expected_outcome": "Board loads, filters work",
+          "test_data": "Project with multiple tasks"
+        },
+        {
+          "name": "Happy path - Search and select",
+          "type": "happy_path",
+          "steps": "1-5",
+          "expected_outcome": "Search finds task, detail opens",
+          "test_data": "Project with searchable tasks"
+        },
+        {
+          "name": "Edge - Empty board state",
+          "type": "edge_case",
+          "steps": "1 with no tasks",
+          "expected_outcome": "Empty state shown, CTA to create task",
+          "test_data": "Project with no tasks"
+        },
+        {
+          "name": "Edge - Filter with no matches",
+          "type": "edge_case",
+          "steps": "1-2 with impossible filter",
+          "expected_outcome": "'No tasks' message shown",
+          "test_data": "Project with tasks"
+        }
+      ],
+      "test_approach": {
+        "tool": "Playwright or Electron MCP",
+        "automation_level": "High - Pure UI interactions",
+        "considerations": [
+          "Task loading requires backend store - use test data",
+          "Filters combine (AND logic) - test combinations",
+          "Search is debounced - may need to wait",
+          "Drag-drop between columns (if implemented)"
+        ],
+        "setup_requirements": [
+          "Test projects with various task states",
+          "Tasks with different categories/priorities",
+          "Searchable task titles/descriptions"
+        ]
+      }
+    },
+    {
+      "id": "CP-009",
+      "name": "Onboarding Wizard Flow",
+      "priority": "P2",
+      "description": "First-time users complete onboarding wizard to configure Claude authentication",
+      "entry_point": "apps/frontend/src/renderer/components/onboarding (referenced in App.tsx)",
+      "steps": [
+        {
+          "order": 1,
+          "action": "Launch app for first time",
+          "element": "App startup",
+          "selector": "Window load",
+          "expected_result": "OnboardingWizard opens automatically"
+        },
+        {
+          "order": 2,
+          "action": "Go through wizard steps",
+          "element": "Wizard steps",
+          "selector": "Next/Back buttons, step content",
+          "expected_result": "Each step validates, advances to next"
+        },
+        {
+          "order": 3,
+          "action": "Complete authentication",
+          "element": "Auth step",
+          "selector": "OAuth flow or API key input",
+          "expected_result": "Authentication successful, token saved"
+        },
+        {
+          "order": 4,
+          "action": "Finish wizard",
+          "element": "Complete button",
+          "selector": "Final step action",
+          "expected_result": "Wizard closes, main app shown, onboardingCompleted = true"
+        }
+      ],
+      "test_scenarios": [
+        {
+          "name": "Happy path - Complete onboarding",
+          "type": "happy_path",
+          "steps": "1-4",
+          "expected_outcome": "User authenticated, ready to use app",
+          "test_data": "Fresh app install (settings.onboardingCompleted = false)"
+        },
+        {
+          "name": "Edge - Skip onboarding",
+          "type": "edge_case",
+          "steps": "1-2 with skip option",
+          "expected_outcome": "Wizard closes, app usable with limited features",
+          "test_data": "Fresh install"
+        },
+        {
+          "name": "Edge - Re-run onboarding from settings",
+          "type": "edge_case",
+          "steps": "Settings → Re-run Wizard → 1-4",
+          "expected_outcome": "Wizard shows again, can reconfigure",
+          "test_data": "App with existing config"
+        }
+      ],
+      "test_approach": {
+        "tool": "Playwright or Electron MCP",
+        "automation_level": "Medium - OAuth flow needs setup",
+        "considerations": [
+          "Fresh install state needs localStorage/settings reset",
+          "OAuth requires test account or mocking",
+          "Wizard state persistence if closed mid-flow"
+        ],
+        "setup_requirements": [
+          "Clean app state (onboardingCompleted = false)",
+          "Test Claude account or mocked auth"
+        ]
+      }
+    },
+    {
+      "id": "CP-010",
+      "name": "Task Execution and Monitoring",
+      "priority": "P1",
+      "description": "Users start task execution, monitor progress, view logs, and handle completion/errors",
+      "entry_point": "apps/frontend/src/renderer/components/task-detail/TaskDetailModal.tsx (referenced in App.tsx)",
+      "steps": [
+        {
+          "order": 1,
+          "action": "Open task detail",
+          "element": "Task card or list",
+          "selector": "Clickable task",
+          "expected_result": "TaskDetailModal opens with task info"
+        },
+        {
+          "order": 2,
+          "action": "Start task execution",
+          "element": "Start/Run button",
+          "selector": "Primary action button",
+          "expected_result": "Task status changes to running, progress shows"
+        },
+        {
+          "order": 3,
+          "action": "Monitor execution",
+          "element": "Progress indicators, logs",
+          "selector": "Phase progress, log output",
+          "expected_result": "Real-time updates as execution progresses"
+        },
+        {
+          "order": 4,
+          "action": "Handle completion or error",
+          "element": "Result state",
+          "selector": "Success/error state, QA results",
+          "expected_result": "Task completes with status, can view results"
+        },
+        {
+          "order": 5,
+          "action": "View in terminal (optional)",
+          "element": "'Open in Terminal' button",
+          "selector": "Button to switch to terminals view",
+          "expected_result": "Switches to terminal with task context"
+        }
+      ],
+      "test_scenarios": [
+        {
+          "name": "Happy path - Successful execution",
+          "type": "happy_path",
+          "steps": "1-4",
+          "expected_outcome": "Task completes successfully, results shown",
+          "test_data": "Valid task spec, backend available"
+        },
+        {
+          "name": "Happy path - Monitor with logs",
+          "type": "happy_path",
+          "steps": "1-3 with log viewing",
+          "expected_outcome": "Logs stream in real-time",
+          "test_data": "Task with verbose output"
+        },
+        {
+          "name": "Error - Execution failure",
+          "type": "error_case",
+          "steps": "1-4 with failing task",
+          "expected_outcome": "Error state shown, logs indicate failure",
+          "test_data": "Task with intentional error"
+        },
+        {
+          "name": "Edge - Stop execution",
+          "type": "edge_case",
+          "steps": "1-3, click Stop",
+          "expected_outcome": "Execution halts, partial results saved",
+          "test_data": "Long-running task"
+        },
+        {
+          "name": "Edge - QA review required",
+          "type": "edge_case",
+          "steps": "1-4 with QA rejection",
+          "expected_outcome": "QA report shown, can fix issues",
+          "test_data": "Task that fails QA"
+        }
+      ],
+      "test_approach": {
+        "tool": "Electron MCP (for terminal) + Playwright",
+        "automation_level": "Medium - Execution requires backend",
+        "considerations": [
+          "Real execution needs backend - may need to mock for speed",
+          "Log streaming is async - test real-time updates",
+          "QA flow adds complexity - needs test fixtures",
+          "Terminal integration requires PTY creation"
+        ],
+        "setup_requirements": [
+          "Test task specs (passing and failing)",
+          "Backend agent system or mocking",
+          "QA test fixtures for rejection scenarios"
+        ]
+      }
+    }
+  ],
+  "summary_statistics": {
+    "total_critical_paths": 10,
+    "priority_breakdown": {
+      "P0": 4,
+      "P1": 5,
+      "P2": 1
+    },
+    "test_scenarios_total": 60,
+    "automation_feasibility": {
+      "high": 6,
+      "medium": 4,
+      "low": 0
+    }
+  },
+  "implementation_roadmap": {
+    "phase_1": {
+      "name": "Foundation (Week 1-2)",
+      "goals": "Set up test infrastructure, implement P0 happy paths",
+      "critical_paths": ["CP-001", "CP-002", "CP-003", "CP-005"],
+      "deliverables": [
+        "Test framework setup (Playwright + Electron MCP)",
+        "Test fixtures and data management",
+        "CI/CD integration for automated tests",
+        "4 P0 critical paths with happy path tests"
+      ]
+    },
+    "phase_2": {
+      "name": "Coverage Expansion (Week 3-4)",
+      "goals": "Add error cases and edge cases, implement P1 paths",
+      "critical_paths": ["CP-004", "CP-006", "CP-007", "CP-008", "CP-010"],
+      "deliverables": [
+        "Error case tests for all P0 paths",
+        "Happy path tests for all P1 paths",
+        "Visual regression testing setup",
+        "Test execution dashboard/reporting"
+      ]
+    },
+    "phase_3": {
+      "name": "Comprehensive Testing (Week 5-6)",
+      "goals": "Complete coverage, add P2, optimize for speed",
+      "critical_paths": ["CP-009", "all error/edge cases"],
+      "deliverables": [
+        "100% coverage of critical paths",
+        "Performance optimization (parallel test execution)",
+        "Mocking strategy for external dependencies",
+        "Documentation and runbooks"
+      ]
+    }
+  },
+  "testing_infrastructure_recommendations": {
+    "tools": [
+      {
+        "name": "Playwright",
+        "purpose": "Web UI E2E testing",
+        "use_case": "Testing at http://localhost:3000 for rapid iteration"
+      },
+      {
+        "name": "Electron MCP",
+        "purpose": "Desktop app testing with Chrome DevTools Protocol",
+        "use_case": "Testing native features, terminal, file dialogs"
+      },
+      {
+        "name": "MSW (Mock Service Worker)",
+        "purpose": "API mocking",
+        "use_case": "Mocking Claude SDK, GitHub API for faster tests"
+      },
+      {
+        "name": "Fixture generation",
+        "purpose": "Test data management",
+        "use_case": "Creating reproducible projects, tasks, git repos"
+      }
+    ],
+    "test_data_strategy": {
+      "projects": "Create fixture projects with different states (initialized, un-initialized, with/without GitHub)",
+      "tasks": "Mock task specs for various scenarios (passing, failing, QA rejection)",
+      "git_repos": "Use test repositories with known branches and issues",
+      "credentials": "Use test accounts or implement token mocking"
+    },
+    "ci_cd_integration": {
+      "platform": "GitHub Actions",
+      "matrix": "Windows, macOS, Linux (matching app support)",
+      "trigger": "On PR, on push to main, nightly",
+      "artifacts": "Screenshots, test reports, coverage"
+    }
+  },
+  "risk_assessment": {
+    "high_risk_areas": [
+      {
+        "area": "Backend dependency",
+        "risk": "Tests require real Python backend and agent execution",
+        "mitigation": "Implement comprehensive mocking strategy"
+      },
+      {
+        "area": "External APIs",
+        "risk": "Claude SDK, GitHub API dependencies",
+        "mitigation": "Use MSW or dedicated mock servers"
+      },
+      {
+        "area": "Authentication",
+        "risk": "OAuth flows require real accounts or complex mocking",
+        "mitigation": "Test accounts + token rotation strategy"
+      },
+      {
+        "area": "Test speed",
+        "risk": "Full E2E tests with real execution are slow",
+        "mitigation": "Prioritize mocked tests, run real execution nightly"
+      }
+    ]
+  }
+}

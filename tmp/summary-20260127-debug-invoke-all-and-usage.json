@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-01-27T14:00:00Z",
+  "summary": "Added comprehensive debug logging for two issues: (1) 'Invoke Claude All' button not working and (2) false 100% usage alert. The logging will help identify whether the issue is with terminal state tracking, IPC communication, or the ZAI API response parsing.",
+  "current_status": "Debug logging added throughout the invoke Claude flow and ZAI usage parsing. User can now click 'Invoke Claude All' and check the console to see detailed logs showing terminal states, IPC message flow, and terminal ID matching.",
+  "files_modified": [
+    "apps/frontend/src/renderer/components/TerminalGrid.tsx",
+    "apps/frontend/src/main/ipc-handlers/terminal-handlers.ts",
+    "apps/frontend/src/main/terminal/terminal-manager.ts",
+    "apps/frontend/src/main/claude-profile/usage-monitor.ts"
+  ],
+  "context_files": [
+    "@apps/frontend/src/main/terminal/claude-integration-handler.ts",
+    "@apps/frontend/src/main/claude-profile/usage-monitor.ts"
+  ],
+  "next_steps": [
+    "User should click 'Invoke Claude All' and check console logs",
+    "Check for ZAI usage logs in main process console to see raw API data",
+    "Based on logs, identify the root cause of both issues"
+  ],
+  "blockers": []
+}

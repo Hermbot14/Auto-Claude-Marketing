@@ -1,0 +1,82 @@
+{
+  "timestamp": "2026-01-25T11:36:10.297Z",
+  "url": "http://localhost:3000",
+  "status": "accessible",
+  "description": "Marketing Hub for Auto Claude autonomous coding framework",
+  "routes": [
+    {
+      "path": "/",
+      "description": "Home page",
+      "features": [
+        "Hero section with project overview",
+        "Features showcase",
+        "Getting started guide",
+        "Documentation links",
+        "Community resources"
+      ]
+    },
+    {
+      "path": "#features",
+      "description": "Features section",
+      "features": [
+        "Multi-agent architecture",
+        "Autonomous coding capabilities",
+        "QA validation",
+        "Memory management with Graphiti",
+        "GitHub integration"
+      ]
+    },
+    {
+      "path": "#getting-started",
+      "description": "Getting started guide",
+      "features": [
+        "Installation instructions",
+        "Quick start guide",
+        "Configuration examples",
+        "First spec creation tutorial"
+      ]
+    },
+    {
+      "path": "#documentation",
+      "description": "Documentation section",
+      "features": [
+        "Architecture documentation",
+        "API reference",
+        "Contributing guidelines",
+        "Troubleshooting guide"
+      ]
+    },
+    {
+      "path": "#community",
+      "description": "Community section",
+      "features": [
+        "GitHub repository link",
+        "Issues and discussions",
+        "Contributing information",
+        "License information"
+      ]
+    }
+  ],
+  "technologies": [
+    "React 19.2.3",
+    "Vite",
+    "TailwindCSS",
+    "Radix UI components",
+    "i18next for internationalization"
+  ],
+  "visualElements": [
+    "Modern, clean design with Inter font",
+    "Responsive layout",
+    "Dark/light theme support",
+    "Navigation with smooth scrolling",
+    "Feature cards with icons",
+    "Code blocks with syntax highlighting",
+    "Call-to-action buttons"
+  ],
+  "accessibility": [
+    "Semantic HTML",
+    "WCAG AA compliance (where implemented)",
+    "Keyboard navigation support",
+    "Screen reader friendly structure"
+  ]
+}

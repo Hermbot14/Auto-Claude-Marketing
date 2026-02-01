@@ -29,7 +29,7 @@ import {
   Plus,
   Settings,
 } from 'lucide-react';
-import { useCalendarStore } from '../../../stores/calendarStore';
+import { useCalendarStore } from '../../stores/calendarStore';
 import { CALENDAR_COLORS } from '../../../shared/constants';
 import type { CalendarItem } from '../../../shared/types';
 

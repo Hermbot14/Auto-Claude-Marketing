@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-01-28T10:00:00Z",
+  "summary": "Fixed NVM4W Node.js PATH detection issue. The problem was that C:\\nvm4w\\nodejs contains symlinks, not actual executables. The 'where' command returns the resolved path to the actual node.exe in a version subdirectory (e.g., v20.14.0), but we were only adding the parent directory with symlinks to PATH. Fixed by adding BOTH the actual version directory AND the parent directory for symlink resolution.",
+  "current_status": "Fix applied to env-utils.ts. User needs to rebuild and test.",
+  "files_modified": [
+    "apps/frontend/src/main/env-utils.ts"
+  ],
+  "context_files": [
+    "@apps/frontend/src/main/env-utils.ts",
+    "@apps/frontend/src/main/terminal/claude-integration-handler.ts"
+  ],
+  "next_steps": [
+    "User must run: npm run build",
+    "Then restart: npm run dev",
+    "Test 'Invoke Claude All' button - node command should now work",
+    "Verify YOLO mode (dangerously-skip-permissions) works",
+    "Verify usage alert shows correct percentage"
+  ],
+  "blockers": []
+}

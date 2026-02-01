@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-01-28T11:15:00Z",
+  "summary": "Fixed where command detection failing with empty results. The issue was that detached:true option was preventing stdout from being captured. Removed detached from both sync and async where command calls. Also identified the statusline.sh issue - it's a Claude Code feature (ccstatusline) that runs bash with --login -i flags, which opens visible Git Bash windows. This is not an Auto-Claude issue - it's from Claude Code configuration at C:\\Users\\corne\\.claude\\hooks.json or ccstatusline settings.",
+  "current_status": "where command now works reliably. Node.js detection should work consistently.",
+  "files_modified": [
+    "apps/frontend/src/main/env-utils.ts"
+  ],
+  "context_files": [
+    "@apps/frontend/src/main/env-utils.ts",
+    "~\\.claude\\hooks.json"
+  ],
+  "next_steps": [
+    "User must run: npm run build",
+    "Then restart: npm run dev",
+    "Test 'Invoke Claude All' - should work reliably now",
+    "For statusline bash windows: Disable ccstatusline in Claude Code or reconfigure to use Python script instead of bash",
+    "Verify YOLO mode works correctly"
+  ],
+  "blockers": ["Bash windows from ccstatusline - user needs to disable or reconfigure in Claude Code settings"]
+}

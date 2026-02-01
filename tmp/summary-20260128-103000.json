@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-01-28T10:30:00Z",
+  "summary": "Fixed blank bash window issue by adding windowsHide:true and stdio:['ignore','pipe','pipe'] to all shell: true spawns. The issue was that execFile/spawn with shell:true on Windows was creating visible console windows. Added proper Windows process hiding to env-utils.ts (where command), mcp-handlers.ts (MCP server spawn), and worktree-handlers.ts (batch file spawn).",
+  "current_status": "All shell spawns now include windowsHide option to prevent console windows from appearing.",
+  "files_modified": [
+    "apps/frontend/src/main/env-utils.ts",
+    "apps/frontend/src/main/ipc-handlers/mcp-handlers.ts",
+    "apps/frontend/src/main/ipc-handlers/task/worktree-handlers.ts"
+  ],
+  "context_files": [
+    "@apps/frontend/src/main/env-utils.ts",
+    "@apps/frontend/src/main/ipc-handlers/mcp-handlers.ts",
+    "@apps/frontend/src/main/ipc-handlers/task/worktree-handlers.ts"
+  ],
+  "next_steps": [
+    "User must run: npm run build",
+    "Then restart: npm run dev",
+    "Test 'Invoke Claude All' - should work without blank bash window",
+    "Verify YOLO mode works correctly",
+    "Verify usage alert shows correct percentage"
+  ],
+  "blockers": []
+}

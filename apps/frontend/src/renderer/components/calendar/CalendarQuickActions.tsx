@@ -28,7 +28,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { useCalendarStore } from '../../../stores/calendarStore';
+import { useCalendarStore } from '../../stores/calendarStore';
 import { CALENDAR_ITEM_TYPE_LABELS } from '../../../shared/constants';
 import type { CalendarItem, CalendarItemType } from '../../../shared/types';
 

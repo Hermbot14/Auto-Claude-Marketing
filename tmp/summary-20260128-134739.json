@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-01-28T14:15:00Z",
+  "summary": "Enabled web search tools for Marketing Intelligence. User reported AI asking for permission to use web search instead of just using it. Fixed by: 1) Added WebSearch, WebFetch, and MCP__web_reader__webReader to allowed_tools in insights_runner.py, 2) Updated system prompt to explicitly state 'Do NOT ask for permission to use web search - just use it when needed' and added 'External Research' capabilities section. The AI can now proactively research companies, products, competitors, and market trends without asking for permission.",
+  "current_status": "COMPLETE - Marketing Intelligence now has web search capabilities enabled",
+  "files_modified": [
+    "apps/backend/runners/insights_runner.py (added web search tools to allowed_tools and updated system prompt)"
+  ],
+  "context_files": [
+    "@apps/backend/runners/insights_runner.py"
+  ],
+  "next_steps": [],
+  "blockers": []
+}

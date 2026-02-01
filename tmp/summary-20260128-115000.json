@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-01-28T11:50:00Z",
+  "summary": "Fixed ccstatusline bash window issue by removing statusLine configuration from Claude Code settings. The statusline feature was running 'C:\\Users\\corne\\.claude\\statusline.sh' with bash --login -i flags which opened visible Git Bash windows. Removed entire statusLine block from settings.json. Earlier fix: Removed redundant cd command when terminal already in target directory - added pathsAreEquivalent() helper that normalizes paths and handles case-insensitive comparison on Windows. Commands are now just 'claude --dangerously-skip-permissions' without cd prefix.",
+  "current_status": "All known issues fixed: cd command redundancy removed, ccstatusline disabled.",
+  "files_modified": [
+    "apps/frontend/src/main/terminal/claude-integration-handler.ts",
+    "C:\\Users\\corne\\.claude\\settings.json"
+  ],
+  "context_files": [
+    "@apps/frontend/src/main/terminal/claude-integration-handler.ts",
+    "@apps/frontend/src/main/terminal/pty-manager.ts",
+    "@apps/frontend/src/shared/utils/shell-escape.ts"
+  ],
+  "next_steps": [
+    "Restart VSCode or Claude Code extension for settings change to take effect",
+    "User must run: npm run build",
+    "Then restart: npm run dev",
+    "Test 'Invoke Claude All' - should work without bash windows and with simplified command",
+    "Verify YOLO mode works correctly",
+    "Verify usage alert shows correct percentage"
+  ],
+  "blockers": []
+}

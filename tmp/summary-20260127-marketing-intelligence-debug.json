@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-01-27T21:00:00Z",
+  "summary": "Investigated Marketing Intelligence authentication error. Found that both x-api-key and Bearer token formats work with ZAI API. The error 'Invalid bearer token' suggests the SDK might be using a different/old token or there's a configuration issue. Added diagnostic logging to insights_runner.py to trace environment variables and token source.",
+  "current_status": "Added debug logging to trace authentication flow. Need user to test Marketing Intelligence again to capture diagnostic output.",
+  "files_modified": [
+    "apps/backend/runners/insights_runner.py",
+    "apps/frontend/src/renderer/lib/browser-mock.ts"
+  ],
+  "context_files": [
+    "@apps/backend/core/auth.py",
+    "@apps/frontend/src/main/insights/config.ts",
+    "@apps/frontend/src/main/services/profile/profile-service.ts"
+  ],
+  "next_steps": [
+    "User should test Marketing Intelligence again with diagnostic logging enabled",
+    "Check the Electron dev console or terminal output for debug messages",
+    "Verify the ANTHROPIC_AUTH_TOKEN and ANTHROPIC_BASE_URL are being passed correctly",
+    "If token source shows 'OAuth' but credentials are wrong, clear Claude Code OAuth cache",
+    "Consider using API Profile instead of global settings for clearer credential management"
+  ],
+  "blockers": [
+    "Need user to test and provide diagnostic output to proceed",
+    "The actual error may be in SDK client configuration or environment variable passing"
+  ],
+  "test_results": {
+    "zai_api_test": "Both x-api-key and Bearer token formats work (200 OK)",
+    "global_settings": "Correctly configured with ZAI credentials",
+    "connection_test": "Settings Test Connection works (user confirmed)"
+  },
+  "potential_issues": [
+    "SDK might be using cached OAuth token instead of API key from settings.json",
+    "Environment variable not passed correctly from Electron to Python process",
+    "SDK client might need explicit API key parameter instead of relying on env vars",
+    "There might be a CLAUDE_CODE_OAUTH_TOKEN set that's taking precedence"
+  ]
+}

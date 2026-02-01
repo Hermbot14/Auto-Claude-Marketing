@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Loader2, AlertCircle, RefreshCw, Plus } from 'lucide-react';
-import { useCalendarStore, loadCalendarData, saveCalendarData, aggregateFromRoadmap } from '../../../stores/calendarStore';
+import { useCalendarStore, loadCalendarData, saveCalendarData, aggregateFromRoadmap } from '../../stores/calendarStore';
 import type { CalendarItem as CalendarItemType, CalendarZoomLevel } from '../../../shared/types';
 import { CalendarTimeline } from './CalendarTimeline';
 import { CalendarItemDetail } from './CalendarItemDetail';

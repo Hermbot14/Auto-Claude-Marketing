@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-01-27T14:30:00Z",
+  "summary": "Fixed two critical issues: (1) MODULE_NOT_FOUND error causing 'Invoke Claude All' to fail - the require() call for profile-utils was causing bundling issues, fixed by using the already imported function. (2) False 100% usage alert for ZAI - the alert was showing MCP tools quota (TIME_LIMIT: 100%) instead of actual token usage (TOKENS_LIMIT: 60%). For ZAI, now always prioritize sessionPercent (token usage) over weeklyPercent (tools quota) for the limitType calculation.",
+  "current_status": "Both issues fixed. User needs to rebuild the app for changes to take effect. After rebuild: (1) 'Invoke Claude All' should work without MODULE_NOT_FOUND errors, (2) Usage alert should show 60% (token usage) instead of 100% (tools quota).",
+  "files_modified": [
+    "apps/frontend/src/main/claude-profile-manager.ts",
+    "apps/frontend/src/main/claude-profile/usage-monitor.ts"
+  ],
+  "context_files": [
+    "@apps/frontend/src/main/claude-profile/profile-utils.ts",
+    "@apps/frontend/src/main/claude-profile/usage-monitor.ts"
+  ],
+  "next_steps": [
+    "User needs to rebuild and restart the app: npm run dev",
+    "Test 'Invoke Claude All' button - should now work without errors",
+    "Verify usage alert shows 60% instead of 100%"
+  ],
+  "blockers": []
+}

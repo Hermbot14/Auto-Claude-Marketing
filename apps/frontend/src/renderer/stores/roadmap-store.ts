@@ -586,34 +586,7 @@ export const useRoadmapStore = create<RoadmapState>()(
     }),
 
   canUndo: () => get().history.past.length > 0,
-  canRedo: () => get().history.future.length > 0,
-
-  // Reorder features within a phase
-  reorderFeatures: (phaseId, featureIds) =>
-    set((state) => {
-      if (!state.roadmap) return state;
-
-      // Get features for this phase in the new order
-      const phaseFeatures = featureIds
-        .map((id) => state.roadmap!.features.find((f) => f.id === id))
-        .filter((f): f is RoadmapFeature => f !== undefined);
-
-      // Get features from other phases (unchanged)
-      const otherFeatures = state.roadmap.features.filter(
-        (f) => f.phaseId !== phaseId
-      );
-
-      // Combine: other phases first, then reordered phase features
-      const updatedFeatures = [...otherFeatures, ...phaseFeatures];
-
-      return {
-        roadmap: {
-          ...state.roadmap,
-          features: updatedFeatures,
-          updatedAt: new Date()
-        }
-      };
-    })
+  canRedo: () => get().history.future.length > 0
 })));
 
 // Helper functions for loading roadmap

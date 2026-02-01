@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-01-28T14:30:00Z",
+  "summary": "Added web search tools and graceful fallback for Marketing Intelligence. Issue: WebSearch tool hitting 429 rate limit errors. Fixes applied: 1) Added WebSearch, WebFetch, MCP__web_reader__webReader to allowed_tools in insights_runner.py, 2) Updated system prompt to handle WebSearch failures gracefully - AI will now try WebFetch with common URLs (e.g., company.com) and ask user for specific URLs when search fails. LIMITATION: insights_runner.py creates SDK client manually without MCP server configuration, so MCP tools (like brave-search, tavily) won't work. To enable full MCP support, insights_runner.py would need to be refactored to use create_client() from core/client instead of manually creating ClaudeSDKClient. For now, the AI will gracefully fall back to asking for URLs when WebSearch fails.",
+  "current_status": "COMPLETE - Graceful fallback implemented, but full MCP support requires architectural change",
+  "files_modified": [
+    "apps/backend/runners/insights_runner.py (added web search tools and updated system prompt with fallback instructions)"
+  ],
+  "context_files": [
+    "@apps/backend/runners/insights_runner.py",
+    "@apps/backend/agents/tools_pkg/models.py",
+    "@apps/backend/core/simple_client.py"
+  ],
+  "next_steps": [
+    "OPTIONAL: Refactor insights_runner.py to use create_client() for full MCP server support (enables brave-search, tavily MCP servers)",
+    "Alternative: User can provide specific URLs when WebSearch fails"
+  ],
+  "blockers": [
+    "WebSearch hitting rate limits (429 errors) - workarounds in place",
+    "MCP tools require insights_runner.py to use create_client() instead of manual SDK client creation"
+  ]
+}
