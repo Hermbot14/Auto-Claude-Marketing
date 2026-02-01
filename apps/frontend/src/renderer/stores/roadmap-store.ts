@@ -777,7 +777,7 @@ export function setupRoadmapListeners(): () => void {
   };
 
   // Listen for progress updates
-  const unsubProgress = window.electronAPI.roadmap.onRoadmapProgress((projectId, status) => {
+  const unsubProgress = window.electronAPI.onRoadmapProgress((projectId, status) => {
     // Only process events for the current project
     if (!isCurrentProject(projectId)) {
       if (window.DEBUG) {
@@ -800,7 +800,7 @@ export function setupRoadmapListeners(): () => void {
   });
 
   // Listen for log messages (new structured logs)
-  const unsubLog = window.electronAPI.roadmap.onRoadmapLog((projectId, log) => {
+  const unsubLog = window.electronAPI.onRoadmapLog((projectId, log) => {
     if (!isCurrentProject(projectId)) {
       if (window.DEBUG) {
         console.log('[Roadmap] Ignoring log for different project:', projectId);
@@ -829,7 +829,7 @@ export function setupRoadmapListeners(): () => void {
   });
 
   // Listen for completion
-  const unsubComplete = window.electronAPI.roadmap.onRoadmapComplete(async (projectId, roadmap) => {
+  const unsubComplete = window.electronAPI.onRoadmapComplete(async (projectId, roadmap) => {
     if (!isCurrentProject(projectId)) {
       if (window.DEBUG) {
         console.log('[Roadmap] Ignoring complete for different project:', projectId);
@@ -870,7 +870,7 @@ export function setupRoadmapListeners(): () => void {
   });
 
   // Listen for errors
-  const unsubError = window.electronAPI.roadmap.onRoadmapError((projectId, error) => {
+  const unsubError = window.electronAPI.onRoadmapError((projectId, error) => {
     if (!isCurrentProject(projectId)) {
       if (window.DEBUG) {
         console.log('[Roadmap] Ignoring error for different project:', projectId);
@@ -892,7 +892,7 @@ export function setupRoadmapListeners(): () => void {
   });
 
   // Listen for stopped events
-  const unsubStopped = window.electronAPI.roadmap.onRoadmapStopped((projectId) => {
+  const unsubStopped = window.electronAPI.onRoadmapStopped((projectId) => {
     if (!isCurrentProject(projectId)) {
       if (window.DEBUG) {
         console.log('[Roadmap] Ignoring stopped for different project:', projectId);
