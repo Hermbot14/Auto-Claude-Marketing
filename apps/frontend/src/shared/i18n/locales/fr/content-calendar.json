@@ -33,7 +33,9 @@
     "status": "Statut",
     "platforms": "Plateformes",
     "dateRange": "Période",
-    "clearFilters": "Effacer les Filtres"
+    "clearFilters": "Effacer les Filtres",
+    "categories": "Catégories",
+    "allYears": "Toutes les Années"
   },
   "sort": {
     "date": "Date",
@@ -65,6 +67,26 @@
     "estimatedHours": "Heures Estimées",
     "platforms": "Plateformes"
   },
+  "status": {
+    "planned": "Planifié",
+    "inProgress": "En Cours",
+    "done": "Terminé",
+    "underReview": "En Révision"
+  },
+  "countdown": {
+    "today": "Aujourd'hui",
+    "tomorrow": "Demain",
+    "inDays": "Dans {{days}} jours",
+    "inWeeks": "Dans {{weeks}} semaines",
+    "inMonths": "Dans {{months}} mois",
+    "inYears": "Dans {{years}} ans",
+    "inYearsAndMonths": "Dans {{years}}a {{months}}m",
+    "endedToday": "Terminé aujourd'hui",
+    "endedYesterday": "Terminé hier",
+    "endedDaysAgo": "Terminé il y a {{days}} jours",
+    "endedWeeksAgo": "Terminé il y a {{weeks}} semaines",
+    "endedMonthsAgo": "Terminé il y a {{months}} mois"
+  },
   "conflicts": {
     "title": "Conflit de Programmation",
     "description": "Cette campagne est en conflit avec d'autres campagnes programmées à la même date. Voulez-vous la programmer quand même ?",
@@ -77,5 +99,23 @@
     "campaignDeleted": "Campagne supprimée avec succès",
     "campaignMoved": "Campagne déplacée vers {{date}}",
     "conflictResolved": "Conflit de programmation résolu"
+  },
+  "tourTimeline": {
+    "title": "Chronologie des Tournées",
+    "dates": "Dates",
+    "duration": "Durée",
+    "location": "Lieu",
+    "attendees": "Participants Attendus",
+    "pricing": "Gamme de Prix des Billets",
+    "organizer": "Organisme Responsable",
+    "visitWebsite": "Visiter le Site Web",
+    "categories": {
+      "sports-event": "Événement Sportif",
+      "concert-tour": "Tournée de Concert",
+      "festival": "Festival",
+      "exhibition": "Exposition",
+      "championship": "Championnat",
+      "olympics": "Jeux Olympiques"
+    }
   }
 }

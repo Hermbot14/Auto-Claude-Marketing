@@ -39,7 +39,7 @@ export const MOCK_TOUR_CAMPAIGNS: TourCampaign[] = [
     title: 'FIH Pro League Hobart',
     description: 'International hockey tournament featuring world\'s top teams competing in Hobart, Tasmania.',
     contentType: 'event' as ContentType,
-    status: 'planned',
+    status: 'in_progress', // In progress - preparing for event
     priority: 'high',
     phaseId: 'q1-2026',
     dependencies: [],
@@ -68,7 +68,7 @@ export const MOCK_TOUR_CAMPAIGNS: TourCampaign[] = [
     title: 'World Baseball Classic Tokyo',
     description: 'Premier international baseball tournament featuring national teams from around the world.',
     contentType: 'event' as ContentType,
-    status: 'planned',
+    status: 'planned', // Planned - upcoming event
     priority: 'high',
     phaseId: 'q1-2026',
     dependencies: [],
@@ -97,7 +97,7 @@ export const MOCK_TOUR_CAMPAIGNS: TourCampaign[] = [
     title: 'FIFA World Cup Socceroos Campaign',
     description: 'Australian national football team qualifying matches and World Cup campaign.',
     contentType: 'event' as ContentType,
-    status: 'planned',
+    status: 'planned', // Planned - upcoming event
     priority: 'must',
     phaseId: 'q2-2026',
     dependencies: [],
@@ -187,7 +187,7 @@ export const MOCK_TOUR_CAMPAIGNS: TourCampaign[] = [
     title: 'Australian Open Tennis 2026',
     description: 'Grand Slam tennis tournament at Melbourne Park.',
     contentType: 'event' as ContentType,
-    status: 'planned',
+    status: 'under_review', // Under review - finalizing plans
     priority: 'high',
     phaseId: 'q1-2026',
     dependencies: [],
@@ -216,7 +216,7 @@ export const MOCK_TOUR_CAMPAIGNS: TourCampaign[] = [
     title: 'Formula 1 Australian Grand Prix 2026',
     description: 'World championship Formula 1 motor race at Albert Park.',
     contentType: 'event' as ContentType,
-    status: 'planned',
+    status: 'planned', // Planned - upcoming event
     priority: 'high',
     phaseId: 'q1-2026',
     dependencies: [],

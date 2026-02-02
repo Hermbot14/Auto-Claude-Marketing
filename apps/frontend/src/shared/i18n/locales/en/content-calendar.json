@@ -33,7 +33,9 @@
     "status": "Status",
     "platforms": "Platforms",
     "dateRange": "Date Range",
-    "clearFilters": "Clear Filters"
+    "clearFilters": "Clear Filters",
+    "categories": "Categories",
+    "allYears": "All Years"
   },
   "sort": {
     "date": "Date",
@@ -64,6 +66,26 @@
     "dueDate": "Due Date",
     "estimatedHours": "Estimated Hours",
     "platforms": "Platforms"
+  },
+  "status": {
+    "planned": "Planned",
+    "inProgress": "In Progress",
+    "done": "Completed",
+    "underReview": "Under Review"
+  },
+  "countdown": {
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "inDays": "In {{days}} days",
+    "inWeeks": "In {{weeks}} weeks",
+    "inMonths": "In {{months}} months",
+    "inYears": "In {{years}} years",
+    "inYearsAndMonths": "In {{years}}y {{months}}m",
+    "endedToday": "Ended today",
+    "endedYesterday": "Ended yesterday",
+    "endedDaysAgo": "Ended {{days}} days ago",
+    "endedWeeksAgo": "Ended {{weeks}} weeks ago",
+    "endedMonthsAgo": "Ended {{months}} months ago"
   },
   "conflicts": {
     "title": "Scheduling Conflict",

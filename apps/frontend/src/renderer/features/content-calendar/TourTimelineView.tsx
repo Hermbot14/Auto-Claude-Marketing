@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -10,11 +10,14 @@ import {
   eachQuarterOfInterval,
   eachYearOfInterval,
   differenceInDays,
+  differenceInMonths,
+  differenceInYears,
   isToday,
   isSameMonth,
   isSameDay,
   startOfYear,
   endOfYear,
+  intervalToDuration,
 } from 'date-fns';
 import {
   ChevronLeft,
@@ -33,6 +36,11 @@ import {
   GalleryHorizontal,
   Medal,
   Flame,
+  Clock,
+  TrendingUp,
+  CheckCircle2,
+  Circle,
+  AlertCircle,
 } from 'lucide-react';
 
 import { Button } from '../../components/ui/button';
@@ -102,6 +110,52 @@ export function TourTimelineView({
     searchQuery: '',
   });
   const [hoveredCampaign, setHoveredCampaign] = useState<string | null>(null);
+  const [now, setNow] = useState(new Date());
+
+  // Live countdown ticker - updates every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 60000); // Update every minute
+    return () => clearInterval(timer);
+  }, []);
+
+  /**
+   * Calculate countdown text for a campaign
+   * Returns human-readable countdown (e.g., "In 2 days", "In 3 months")
+   */
+  const getCountdown = useCallback((campaign: TourCampaign): { text: string; isUrgent: boolean } => {
+    const eventDate = campaign.scheduledDate;
+    if (!eventDate) return { text: '', isUrgent: false };
+
+    const daysUntil = differenceInDays(eventDate, now);
+    const absoluteDays = Math.abs(daysUntil);
+
+    // Past event
+    if (daysUntil < 0) {
+      if (absoluteDays === 0) return { text: t('contentCalendar:countdown.endedToday', 'Ended today'), isUrgent: false };
+      if (absoluteDays === 1) return { text: t('contentCalendar:countdown.endedYesterday', 'Ended yesterday'), isUrgent: false };
+      if (absoluteDays < 7) return { text: t('contentCalendar:countdown.endedDaysAgo', 'Ended {{days}} days ago', { days: absoluteDays }), isUrgent: false };
+      if (absoluteDays < 30) return { text: t('contentCalendar:countdown.endedWeeksAgo', 'Ended {{weeks}} weeks ago', { weeks: Math.floor(absoluteDays / 7) }), isUrgent: false };
+      return { text: t('contentCalendar:countdown.endedMonthsAgo', 'Ended {{months}} months ago', { months: Math.floor(absoluteDays / 30) }), isUrgent: false };
+    }
+
+    // Today
+    if (daysUntil === 0) return { text: t('contentCalendar:countdown.today', 'Today!'), isUrgent: true };
+    // Tomorrow
+    if (daysUntil === 1) return { text: t('contentCalendar:countdown.tomorrow', 'Tomorrow'), isUrgent: true };
+    // This week
+    if (daysUntil <= 7) return { text: t('contentCalendar:countdown.inDays', 'In {{days}} days', { days: daysUntil }), isUrgent: true };
+    // This month
+    if (daysUntil <= 30) return { text: t('contentCalendar:countdown.inWeeks', 'In {{weeks}} weeks', { weeks: Math.floor(daysUntil / 7) }), isUrgent: false };
+    // This year
+    if (daysUntil <= 365) return { text: t('contentCalendar:countdown.inMonths', 'In {{months}} months', { months: Math.floor(daysUntil / 30) }), isUrgent: false };
+    // Over a year
+    const years = Math.floor(daysUntil / 365);
+    const remainingDays = daysUntil % 365;
+    if (remainingDays < 30) return { text: t('contentCalendar:countdown.inYears', 'In {{years}} years', { years }), isUrgent: false };
+    return { text: t('contentCalendar:countdown.inYearsAndMonths', 'In {{years}}y {{months}}m', { years, months: Math.floor(remainingDays / 30) }), isUrgent: false };
+  }, [now, t]);
 
   // Get time periods based on zoom level
   const timePeriods = useMemo(() => {
@@ -510,13 +564,21 @@ export function TourTimelineView({
 
           {/* Campaign rows */}
           <div className="relative">
-            {/* Today indicator */}
-            {isToday(currentDate) && (
+            {/* Today indicator - shows if today is within the timeline range */}
+            {(() => {
+              const today = new Date();
+              const { start, end } = timelineRange;
+              const isTodayInRange = today >= start && today <= end;
+              return isTodayInRange;
+            })() && (
               <div
                 className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-20 pointer-events-none"
                 style={todayStyle}
               >
                 <div className="absolute -top-1 -left-1.5 w-3 h-3 bg-red-500 rounded-full" />
+                <div className="absolute -top-6 -left-6 text-xs font-medium text-red-500 whitespace-nowrap bg-background px-1 rounded">
+                  {t('contentCalendar:countdown.today', 'Today')}
+                </div>
               </div>
             )}
 
@@ -541,6 +603,41 @@ export function TourTimelineView({
                       const CategoryIcon = getCategoryIcon(campaign.category);
                       const isHovered = hoveredCampaign === campaign.id;
                       const isSelected = selectedCampaign?.id === campaign.id;
+                      const countdown = getCountdown(campaign);
+
+                      // Status configuration
+                      const statusConfig = {
+                        planned: {
+                          label: t('contentCalendar:status.planned', 'Planned'),
+                          icon: Circle,
+                          color: 'text-blue-600',
+                          bgColor: 'bg-blue-50',
+                          dotColor: 'bg-blue-500'
+                        },
+                        in_progress: {
+                          label: t('contentCalendar:status.inProgress', 'In Progress'),
+                          icon: TrendingUp,
+                          color: 'text-amber-600',
+                          bgColor: 'bg-amber-50',
+                          dotColor: 'bg-amber-500'
+                        },
+                        done: {
+                          label: t('contentCalendar:status.done', 'Completed'),
+                          icon: CheckCircle2,
+                          color: 'text-green-600',
+                          bgColor: 'bg-green-50',
+                          dotColor: 'bg-green-500'
+                        },
+                        under_review: {
+                          label: t('contentCalendar:status.underReview', 'Under Review'),
+                          icon: AlertCircle,
+                          color: 'text-purple-600',
+                          bgColor: 'bg-purple-50',
+                          dotColor: 'bg-purple-500'
+                        }
+                      };
+                      const status = statusConfig[campaign.status as keyof typeof statusConfig] || statusConfig.planned;
+                      const StatusIcon = status.icon;
 
                       return (
                         <TooltipProvider key={campaign.id}>
@@ -569,21 +666,29 @@ export function TourTimelineView({
                                 <CategoryIcon className={`h-4 w-4 flex-shrink-0 ${config.color}`} />
                                 <span className="text-sm font-medium truncate flex-1">{campaign.title}</span>
 
-                                {/* Status indicator */}
-                                <div
-                                  className={`
-                                    w-2 h-2 rounded-full flex-shrink-0
-                                    ${
-                                      campaign.status === 'planned'
-                                        ? 'bg-blue-500'
-                                        : campaign.status === 'in_progress'
-                                          ? 'bg-yellow-500'
-                                          : campaign.status === 'done'
-                                            ? 'bg-green-500'
-                                            : 'bg-gray-400'
-                                    }
-                                  `}
-                                />
+                                {/* Countdown badge (only for upcoming/past events) */}
+                                {countdown.text && (
+                                  <motion.div
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className={`
+                                      flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-medium flex-shrink-0
+                                      ${countdown.isUrgent ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'}
+                                    `}
+                                  >
+                                    <Clock className="h-3 w-3" />
+                                    <span className="max-w-20 truncate">{countdown.text}</span>
+                                  </motion.div>
+                                )}
+
+                                {/* Status indicator with icon */}
+                                <div className={`
+                                  flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0
+                                  ${status.bgColor} ${status.color}
+                                `}>
+                                  <StatusIcon className="h-3 w-3" />
+                                  <div className={`w-1.5 h-1.5 rounded-full ${status.dotColor}`} />
+                                </div>
 
                                 {/* Duration badge for longer campaigns */}
                                 {campaign.dueDate &&
@@ -600,26 +705,46 @@ export function TourTimelineView({
                               className="max-w-xs"
                               sideOffset={5}
                             >
-                              <div className="space-y-1">
-                                <p className="font-medium">{campaign.title}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {campaign.scheduledDate &&
-                                    format(campaign.scheduledDate, 'MMM d, yyyy')}
-                                  {campaign.dueDate &&
-                                    ` - ${format(campaign.dueDate, 'MMM d, yyyy')}`}
-                                </p>
-                                {campaign.location && (
-                                  <p className="text-xs flex items-center gap-1">
-                                    <MapPin className="h-3 w-3" />
-                                    {campaign.location}
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between gap-4">
+                                  <p className="font-medium">{campaign.title}</p>
+                                  <div className={`
+                                    flex items-center gap-1 px-2 py-0.5 rounded text-xs
+                                    ${status.bgColor} ${status.color}
+                                  `}>
+                                    <StatusIcon className="h-3 w-3" />
+                                    {status.label}
+                                  </div>
+                                </div>
+                                <div className="text-xs text-muted-foreground space-y-1">
+                                  <p>
+                                    {campaign.scheduledDate &&
+                                      format(campaign.scheduledDate, 'MMM d, yyyy')}
+                                    {campaign.dueDate &&
+                                      ` - ${format(campaign.dueDate, 'MMM d, yyyy')}`}
                                   </p>
-                                )}
-                                {campaign.expectedAttendees && (
-                                  <p className="text-xs flex items-center gap-1">
-                                    <Users className="h-3 w-3" />
-                                    {campaign.expectedAttendees.toLocaleString()} attendees
-                                  </p>
-                                )}
+                                  {countdown.text && (
+                                    <p className={`
+                                      flex items-center gap-1 font-medium
+                                      ${countdown.isUrgent ? 'text-red-600' : 'text-gray-600'}
+                                    `}>
+                                      <Clock className="h-3 w-3" />
+                                      {countdown.text}
+                                    </p>
+                                  )}
+                                  {campaign.location && (
+                                    <p className="flex items-center gap-1">
+                                      <MapPin className="h-3 w-3" />
+                                      {campaign.location}
+                                    </p>
+                                  )}
+                                  {campaign.expectedAttendees && (
+                                    <p className="flex items-center gap-1">
+                                      <Users className="h-3 w-3" />
+                                      {campaign.expectedAttendees.toLocaleString()} attendees
+                                    </p>
+                                  )}
+                                </div>
                               </div>
                             </TooltipContent>
                           </Tooltip>
