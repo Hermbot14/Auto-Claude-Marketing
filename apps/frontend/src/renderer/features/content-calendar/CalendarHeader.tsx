@@ -7,6 +7,7 @@ import {
   CalendarDays,
   CalendarClock,
   List,
+  GitBranch,
   Plus
 } from 'lucide-react';
 
@@ -140,6 +141,7 @@ export function CalendarHeader({
               const Icon = view.icon === 'Calendar' ? Calendar :
                           view.icon === 'CalendarDays' ? CalendarDays :
                           view.icon === 'CalendarClock' ? CalendarClock :
+                          view.icon === 'GitBranch' ? GitBranch :
                           List;
 
               return (

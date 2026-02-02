@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import type { Project, ProjectSettings as ProjectSettingsType, AutoBuildVersionInfo, ProjectEnvConfig, LinearSyncStatus, GitHubSyncStatus, GitLabSyncStatus } from '../../../../shared/types';
+import type { Project, ProjectSettings as ProjectSettingsType, AutoBuildVersionInfo, ProjectEnvConfig, LinearSyncStatus, GitHubSyncStatus, GitLabSyncStatus, CalendarSyncStatus } from '../../../../shared/types';
 import { SettingsSection } from '../SettingsSection';
 import { GeneralSettings } from '../../project-settings/GeneralSettings';
 import { SecuritySettings } from '../../project-settings/SecuritySettings';
 import { LinearIntegration } from '../integrations/LinearIntegration';
 import { GitHubIntegration } from '../integrations/GitHubIntegration';
 import { GitLabIntegration } from '../integrations/GitLabIntegration';
+import { CalendarIntegration } from '../integrations/CalendarIntegration';
 import { InitializationGuard } from '../common/InitializationGuard';
 import type { ProjectSettingsSection } from '../ProjectSettingsContent';
 
@@ -35,6 +36,10 @@ interface SectionRouterProps {
   isCheckingGitLab: boolean;
   linearConnectionStatus: LinearSyncStatus | null;
   isCheckingLinear: boolean;
+  showCalendarKey: boolean;
+  setShowCalendarKey: React.Dispatch<React.SetStateAction<boolean>>;
+  calendarConnectionStatus: CalendarSyncStatus | null;
+  isCheckingCalendar: boolean;
   handleInitialize: () => Promise<void>;
   onOpenLinearImport: () => void;
 }
@@ -69,6 +74,10 @@ export function SectionRouter({
   isCheckingGitLab,
   linearConnectionStatus,
   isCheckingLinear,
+  showCalendarKey,
+  setShowCalendarKey,
+  calendarConnectionStatus,
+  isCheckingCalendar,
   handleInitialize,
   onOpenLinearImport
 }: SectionRouterProps) {
@@ -164,6 +173,29 @@ export function SectionRouter({
               projectPath={project.path}
               settings={settings}
               setSettings={setSettings}
+            />
+          </InitializationGuard>
+        </SettingsSection>
+      );
+
+    case 'calendar':
+      return (
+        <SettingsSection
+          title={t('projectSections.calendar.integrationTitle')}
+          description={t('projectSections.calendar.integrationDescription')}
+        >
+          <InitializationGuard
+            initialized={!!project.autoBuildPath}
+            title={t('projectSections.calendar.integrationTitle')}
+            description={t('projectSections.calendar.syncDescription')}
+          >
+            <CalendarIntegration
+              envConfig={envConfig}
+              updateEnvConfig={updateEnvConfig}
+              showCalendarKey={showCalendarKey}
+              setShowCalendarKey={setShowCalendarKey}
+              calendarConnectionStatus={calendarConnectionStatus}
+              isCheckingCalendar={isCheckingCalendar}
             />
           </InitializationGuard>
         </SettingsSection>

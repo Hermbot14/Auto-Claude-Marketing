@@ -38,7 +38,9 @@ import { MonthView } from './MonthView';
 import { WeekView } from './WeekView';
 import { DayView } from './DayView';
 import { ListView } from './ListView';
+import { TourTimelineView } from './TourTimelineView';
 import { CampaignCard } from './CampaignCard';
+import { MOCK_TOUR_CAMPAIGNS } from '../../data/mockTourCampaigns';
 import { FilterBar } from './FilterBar';
 import { ConflictDialog } from './ConflictDialog';
 import { CampaignDialog } from './CampaignDialog';
@@ -82,6 +84,9 @@ export function ContentCalendar(): JSX.Element {
       case 'list':
         newDate.setDate(newDate.getDate() - 7);
         break;
+      case 'tour-timeline':
+        newDate.setFullYear(newDate.getFullYear() - 1);
+        break;
     }
 
     setCurrentDate(newDate);
@@ -102,6 +107,9 @@ export function ContentCalendar(): JSX.Element {
         break;
       case 'list':
         newDate.setDate(newDate.getDate() + 7);
+        break;
+      case 'tour-timeline':
+        newDate.setFullYear(newDate.getFullYear() + 1);
         break;
     }
 
@@ -149,6 +157,7 @@ export function ContentCalendar(): JSX.Element {
         return generateWeekDays(currentDate);
       case 'day':
       case 'list':
+      case 'tour-timeline':
         return null;
     }
   }, [currentDate, currentView]);
@@ -205,6 +214,10 @@ export function ContentCalendar(): JSX.Element {
 
             {currentView === 'list' && (
               <ListView campaigns={filteredCampaigns} />
+            )}
+
+            {currentView === 'tour-timeline' && (
+              <TourTimelineView campaigns={MOCK_TOUR_CAMPAIGNS} currentDate={currentDate} />
             )}
           </motion.div>
         </AnimatePresence>

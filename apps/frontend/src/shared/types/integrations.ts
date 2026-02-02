@@ -478,3 +478,39 @@ export interface RoadmapProviderConfig {
  * Canny-specific status values
  */
 export type CannyStatus = 'open' | 'under review' | 'planned' | 'in progress' | 'complete' | 'closed';
+
+// ============================================
+// Calendar Integration Types
+// ============================================
+
+export interface CalendarSyncStatus {
+  connected: boolean;
+  provider?: 'google' | 'outlook' | 'ical' | 'calDAV';
+  email?: string;
+  calendarName?: string;
+  eventCount?: number;
+  lastSyncedAt?: string;
+  error?: string;
+}
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  description?: string;
+  startDate: Date;
+  endDate?: Date;
+  location?: string;
+  attendees?: string[];
+  provider: 'google' | 'outlook' | 'ical' | 'calDAV';
+}
+
+export interface CalendarConnection {
+  id: string;
+  provider: 'google' | 'outlook' | 'ical' | 'calDAV';
+  name: string;
+  email?: string;
+  enabled: boolean;
+  lastSync?: Date;
+  syncError?: string;
+  color?: string;
+}

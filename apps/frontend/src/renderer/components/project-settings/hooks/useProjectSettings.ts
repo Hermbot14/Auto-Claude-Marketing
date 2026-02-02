@@ -12,7 +12,8 @@ import type {
   ProjectEnvConfig,
   LinearSyncStatus,
   GitHubSyncStatus,
-  GitLabSyncStatus
+  GitLabSyncStatus,
+  CalendarSyncStatus
 } from '../../../../shared/types';
 
 export interface UseProjectSettingsReturn {
@@ -72,6 +73,12 @@ export interface UseProjectSettingsReturn {
   linearConnectionStatus: LinearSyncStatus | null;
   isCheckingLinear: boolean;
 
+  // Calendar state
+  showCalendarKey: boolean;
+  setShowCalendarKey: React.Dispatch<React.SetStateAction<boolean>>;
+  calendarConnectionStatus: CalendarSyncStatus | null;
+  isCheckingCalendar: boolean;
+
   // Actions
   handleInitialize: () => Promise<void>;
   handleSaveEnv: () => Promise<void>;
@@ -127,6 +134,11 @@ export function useProjectSettings(
   const [showLinearImportModal, setShowLinearImportModal] = useState(false);
   const [linearConnectionStatus, setLinearConnectionStatus] = useState<LinearSyncStatus | null>(null);
   const [isCheckingLinear, setIsCheckingLinear] = useState(false);
+
+  // Calendar state
+  const [showCalendarKey, setShowCalendarKey] = useState(false);
+  const [calendarConnectionStatus, setCalendarConnectionStatus] = useState<CalendarSyncStatus | null>(null);
+  const [isCheckingCalendar, setIsCheckingCalendar] = useState(false);
 
   // Reset settings when project changes
   useEffect(() => {
@@ -271,6 +283,32 @@ export function useProjectSettings(
       checkGitLabConnection();
     }
   }, [envConfig?.gitlabEnabled, envConfig?.gitlabToken, envConfig?.gitlabProject, project.id]);
+
+  // Check Calendar connection when API key changes
+  useEffect(() => {
+    const checkCalendarConnection = async () => {
+      if (!envConfig?.calendarEnabled || !envConfig.calendarApiKey) {
+        setCalendarConnectionStatus(null);
+        return;
+      }
+
+      setIsCheckingCalendar(true);
+      try {
+        const status = await window.electronAPI.checkCalendarConnection(project.id);
+        if (status.success && status.data) {
+          setCalendarConnectionStatus(status.data);
+        }
+      } catch {
+        setCalendarConnectionStatus({ connected: false, error: 'Failed to check connection' });
+      } finally {
+        setIsCheckingCalendar(false);
+      }
+    };
+
+    if (envConfig?.calendarEnabled && envConfig.calendarApiKey) {
+      checkCalendarConnection();
+    }
+  }, [envConfig?.calendarEnabled, envConfig?.calendarApiKey, project.id]);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -418,6 +456,10 @@ export function useProjectSettings(
     setShowLinearImportModal,
     linearConnectionStatus,
     isCheckingLinear,
+    showCalendarKey,
+    setShowCalendarKey,
+    calendarConnectionStatus,
+    isCheckingCalendar,
     handleInitialize,
     handleSaveEnv,
     handleClaudeSetup,

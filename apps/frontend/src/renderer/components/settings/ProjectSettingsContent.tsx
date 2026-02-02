@@ -10,7 +10,7 @@ import { SectionRouter } from './sections/SectionRouter';
 import { createHookProxy } from './utils/hookProxyFactory';
 import type { Project } from '../../../shared/types';
 
-export type ProjectSettingsSection = 'general' | 'linear' | 'github' | 'gitlab' | 'memory';
+export type ProjectSettingsSection = 'general' | 'linear' | 'github' | 'gitlab' | 'calendar' | 'memory';
 
 interface ProjectSettingsContentProps {
   project: Project | undefined;
@@ -102,6 +102,10 @@ function ProjectSettingsContentInner({
     setShowLinearImportModal,
     linearConnectionStatus,
     isCheckingLinear,
+    showCalendarKey,
+    setShowCalendarKey,
+    calendarConnectionStatus,
+    isCheckingCalendar,
     handleInitialize,
     error
   } = hook;
@@ -146,6 +150,10 @@ function ProjectSettingsContentInner({
         isCheckingGitLab={isCheckingGitLab}
         linearConnectionStatus={linearConnectionStatus}
         isCheckingLinear={isCheckingLinear}
+        showCalendarKey={showCalendarKey}
+        setShowCalendarKey={setShowCalendarKey}
+        calendarConnectionStatus={calendarConnectionStatus}
+        isCheckingCalendar={isCheckingCalendar}
         handleInitialize={handleInitialize}
         onOpenLinearImport={() => setShowLinearImportModal(true)}
       />

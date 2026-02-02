@@ -1,5 +1,5 @@
 import { IPC_CHANNELS } from '../../../shared/constants';
-import type { CalendarData, CalendarItem, IPCResult } from '../../../shared/types';
+import type { CalendarData, CalendarItem, CalendarSyncStatus, IPCResult } from '../../../shared/types';
 import { createIpcListener, invokeIpc, IpcListenerCleanup } from './ipc-utils';
 
 /**
@@ -18,6 +18,9 @@ export interface CalendarAPI {
   // Sync operations
   syncRoadmap: (projectId: string, roadmapData: any) => Promise<IPCResult<CalendarItem[]>>;
   scanFiles: (projectId: string) => Promise<IPCResult<CalendarItem[]>>;
+
+  // Integration operations
+  checkCalendarConnection: (projectId: string) => Promise<IPCResult<CalendarSyncStatus>>;
 }
 
 /**
@@ -47,4 +50,8 @@ export const createCalendarAPI = (): CalendarAPI => ({
 
   scanFiles: (projectId: string): Promise<IPCResult<CalendarItem[]>> =>
     invokeIpc(IPC_CHANNELS.CALENDAR_SCAN_FILES, projectId),
+
+  // Integration operations
+  checkCalendarConnection: (projectId: string): Promise<IPCResult<CalendarSyncStatus>> =>
+    invokeIpc(IPC_CHANNELS.CALENDAR_CHECK_CONNECTION, projectId),
 });

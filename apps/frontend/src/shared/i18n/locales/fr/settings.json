@@ -382,6 +382,13 @@
       "integrationDescription": "Se connecter à GitLab pour le suivi des issues",
       "syncDescription": "Synchroniser avec GitLab Issues"
     },
+    "calendar": {
+      "title": "Calendrier",
+      "description": "Synchronisation calendrier marketing",
+      "integrationTitle": "Intégration Calendrier",
+      "integrationDescription": "Se connecter à Google Agenda, Outlook ou d'autres fournisseurs pour la synchronisation des événements",
+      "syncDescription": "Synchroniser les campagnes marketing avec des calendriers externes"
+    },
     "memory": {
       "title": "Mémoire",
       "description": "Backend mémoire Graphiti",

@@ -77,5 +77,23 @@
     "campaignDeleted": "Campaign deleted successfully",
     "campaignMoved": "Campaign moved to {{date}}",
     "conflictResolved": "Scheduling conflict resolved"
+  },
+  "tourTimeline": {
+    "title": "Tour Timeline",
+    "dates": "Dates",
+    "duration": "Duration",
+    "location": "Location",
+    "attendees": "Expected Attendees",
+    "pricing": "Ticket Price Range",
+    "organizer": "Organizing Body",
+    "visitWebsite": "Visit Website",
+    "categories": {
+      "sports-event": "Sports Event",
+      "concert-tour": "Concert Tour",
+      "festival": "Festival",
+      "exhibition": "Exhibition",
+      "championship": "Championship",
+      "olympics": "Olympics"
+    }
   }
 }

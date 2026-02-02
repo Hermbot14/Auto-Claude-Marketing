@@ -131,7 +131,8 @@ import type {
   GitLabInvestigationStatus,
   GitLabMRReviewResult,
   GitLabMRReviewProgress,
-  GitLabNewCommitsCheck
+  GitLabNewCommitsCheck,
+  CalendarSyncStatus
 } from './integrations';
 import type { APIProfile, ProfilesFile, TestConnectionResult, DiscoverModelsResult } from './profile';
 
@@ -582,6 +583,9 @@ export interface ElectronAPI {
   onGitLabInvestigationError: (
     callback: (projectId: string, error: string) => void
   ) => () => void;
+
+  // Calendar integration operations
+  checkCalendarConnection: (projectId: string) => Promise<IPCResult<CalendarSyncStatus>>;
 
   // Release operations
   getReleaseableVersions: (projectId: string) => Promise<IPCResult<ReleaseableVersion[]>>;

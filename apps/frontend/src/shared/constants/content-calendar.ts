@@ -75,7 +75,8 @@ export const CALENDAR_VIEWS = [
   { id: 'month', label: 'Month', icon: 'Calendar' },
   { id: 'week', label: 'Week', icon: 'CalendarDays' },
   { id: 'day', label: 'Day', icon: 'CalendarClock' },
-  { id: 'list', label: 'List', icon: 'List' }
+  { id: 'list', label: 'List', icon: 'List' },
+  { id: 'tour-timeline', label: 'Tour Timeline', icon: 'GitBranch' }
 ] as const;
 
 // ============================================

@@ -192,6 +192,7 @@ export const IPC_CHANNELS = {
   CALENDAR_DELETE_ITEM: 'calendar:deleteItem',
   CALENDAR_SYNC_ROADMAP: 'calendar:syncRoadmap',
   CALENDAR_SCAN_FILES: 'calendar:scanFiles',
+  CALENDAR_CHECK_CONNECTION: 'calendar:checkConnection',
 
   // Context operations
   CONTEXT_GET: 'context:get',

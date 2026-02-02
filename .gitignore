@@ -119,6 +119,7 @@ dist/
 out/
 *.tsbuildinfo
 apps/frontend/python-runtime/
+tmp/
 
 # Cache
 .cache/

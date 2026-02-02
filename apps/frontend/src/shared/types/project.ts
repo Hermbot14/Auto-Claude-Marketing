@@ -320,6 +320,13 @@ export interface ProjectEnvConfig {
   gitlabProject?: string; // Format: group/project or numeric ID
   gitlabAutoSync?: boolean; // Auto-sync issues on project load
 
+  // Calendar Integration
+  calendarEnabled?: boolean;
+  calendarProvider?: 'google' | 'outlook' | 'ical' | 'calDAV';
+  calendarApiKey?: string;
+  calendarEmail?: string;
+  calendarAutoSync?: boolean; // Auto-sync events on project load
+
   // Git/Worktree Settings
   defaultBranch?: string; // Base branch for worktree creation (e.g., 'main', 'develop')
 

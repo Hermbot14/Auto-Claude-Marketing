@@ -382,6 +382,13 @@
       "integrationDescription": "Connect to GitLab for issue tracking",
       "syncDescription": "Sync with GitLab Issues"
     },
+    "calendar": {
+      "title": "Calendar",
+      "description": "Marketing calendar sync",
+      "integrationTitle": "Calendar Integration",
+      "integrationDescription": "Connect to Google Calendar, Outlook, or other providers for event sync",
+      "syncDescription": "Sync marketing campaigns with external calendars"
+    },
     "memory": {
       "title": "Memory",
       "description": "Graphiti memory backend",

@@ -25,7 +25,7 @@ export interface ContentCampaign extends RoadmapFeature {
 // Calendar View Types
 // ============================================
 
-export type CalendarView = 'month' | 'week' | 'day' | 'list';
+export type CalendarView = 'month' | 'week' | 'day' | 'list' | 'tour-timeline';
 
 export interface CalendarDate {
   date: Date;

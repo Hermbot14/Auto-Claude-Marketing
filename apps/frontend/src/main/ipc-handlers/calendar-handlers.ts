@@ -2,11 +2,31 @@ import { ipcMain } from 'electron';
 import type { BrowserWindow } from 'electron';
 import { IPC_CHANNELS, CALENDAR_DIR, CALENDAR_DATA_FILE } from '../../shared/constants';
 import type { IPCResult, CalendarData, CalendarItem } from '../../shared/types';
+import type { Project } from '../../shared/types';
 import path from 'path';
 import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync } from 'fs';
 import { projectStore } from '../project-store';
 import { debugLog, debugError } from '../../shared/utils/debug-logger';
 import { safeSendToRenderer } from './utils';
+
+/**
+ * Parse .env file content into key-value pairs
+ */
+function parseEnvFile(content: string): Record<string, string> {
+  const vars: Record<string, string> = {};
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#')) {
+      const eqIndex = trimmed.indexOf('=');
+      if (eqIndex > 0) {
+        const key = trimmed.substring(0, eqIndex).trim();
+        const value = trimmed.substring(eqIndex + 1).trim();
+        vars[key] = value;
+      }
+    }
+  }
+  return vars;
+}
 
 /**
  * Register all calendar-related IPC handlers
@@ -17,6 +37,33 @@ export function registerCalendarHandlers(
   // ============================================
   // Calendar Data Operations
   // ============================================
+
+  /**
+   * Helper to get calendar config from project env
+   */
+  const getCalendarConfig = (project: Project): {
+    enabled: boolean;
+    provider?: string;
+    apiKey?: string;
+    email?: string;
+  } => {
+    if (!project.autoBuildPath) return { enabled: false };
+    const envPath = path.join(project.path, project.autoBuildPath, '.env');
+    if (!existsSync(envPath)) return { enabled: false };
+
+    try {
+      const content = readFileSync(envPath, 'utf-8');
+      const vars = parseEnvFile(content);
+      return {
+        enabled: vars['CALENDAR_ENABLED'] === 'true',
+        provider: vars['CALENDAR_PROVIDER'],
+        apiKey: vars['CALENDAR_API_KEY'],
+        email: vars['CALENDAR_EMAIL']
+      };
+    } catch {
+      return { enabled: false };
+    }
+  };
 
   ipcMain.handle(
     IPC_CHANNELS.CALENDAR_GET_DATA,
@@ -489,6 +536,66 @@ export function registerCalendarHandlers(
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to scan files',
+        };
+      }
+    }
+  );
+
+  // ============================================
+  // Calendar Integration Connection Check
+  // ============================================
+
+  ipcMain.handle(
+    IPC_CHANNELS.CALENDAR_CHECK_CONNECTION,
+    async (_, projectId: string): Promise<IPCResult<import('../../shared/types/integrations').CalendarSyncStatus>> => {
+      const project = projectStore.getProject(projectId);
+      if (!project) {
+        return { success: false, error: 'Project not found' };
+      }
+
+      try {
+        // Get the calendar config from the project's .env file
+        const calendarConfig = getCalendarConfig(project);
+
+        if (!calendarConfig.enabled || !calendarConfig.apiKey) {
+          return {
+            success: true,
+            data: {
+              connected: false,
+              error: 'Calendar integration is not enabled or API key is missing'
+            }
+          };
+        }
+
+        const provider = (calendarConfig.provider || 'google') as 'google' | 'outlook' | 'ical' | 'calDAV';
+
+        // TODO: Implement actual connection check for each provider
+        // For now, return a mock response
+        // In production, this would:
+        // - For Google: Use googleapis library to call calendar.calendarList.list()
+        // - For Outlook: Use Microsoft Graph API to call /me/calendars
+        // - For CalDAV: Make a PROPFIND request to the CalDAV server
+
+        debugLog(`[Calendar Handler] Checking ${provider} calendar connection for project ${projectId}`);
+
+        // Mock successful connection for testing
+        // Replace this with actual API calls to validate the connection
+        const mockData: import('../../shared/types/integrations').CalendarSyncStatus = {
+          connected: false,
+          provider,
+          email: calendarConfig.email,
+          calendarName: 'Mock Calendar',
+          eventCount: 0,
+          lastSyncedAt: undefined,
+          error: 'Connection check not yet implemented - please verify API key manually'
+        };
+
+        return { success: true, data: mockData };
+      } catch (error) {
+        debugError('[Calendar Handler] Failed to check calendar connection:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to check calendar connection',
         };
       }
     }
