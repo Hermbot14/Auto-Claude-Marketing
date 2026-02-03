@@ -275,24 +275,29 @@ export function TourTimelineView({
     return rows;
   }, [filteredCampaigns]);
 
-  // Calculate campaign position and width
-  const getCampaignStyle = useCallback(
+  // Calculate campaign position as percentage of timeline
+  const getCampaignPosition = useCallback(
     (campaign: TourCampaign) => {
       const { start, end } = timelineRange;
-      const totalDays = Math.max(differenceInDays(end, start), 1);
-
       const campaignStart = campaign.scheduledDate || new Date();
       const campaignEnd = campaign.dueDate || campaignStart;
 
-      const startOffset = Math.max(differenceInDays(campaignStart, start), 0);
-      const duration = Math.max(differenceInDays(campaignEnd, campaignStart), 1);
+      // Calculate total timeline duration in days
+      const totalDays = Math.max(differenceInDays(end, start), 1);
 
+      // Calculate campaign start offset in days
+      const startOffset = Math.max(differenceInDays(campaignStart, start), 0);
+
+      // Calculate campaign duration in days
+      const campaignDuration = Math.max(differenceInDays(campaignEnd, campaignStart), 1);
+
+      // Convert to percentages
       const leftPercent = (startOffset / totalDays) * 100;
-      const widthPercent = Math.min((duration / totalDays) * 100, 100 - leftPercent);
+      const widthPercent = Math.min((campaignDuration / totalDays) * 100, 100 - leftPercent);
 
       return {
         left: `${leftPercent}%`,
-        width: `${Math.max(widthPercent, 1)}%`, // Minimum 1% width
+        width: `${Math.max(widthPercent, 0.5)}%`, // Minimum 0.5% width for visibility
       };
     },
     [timelineRange]
@@ -341,6 +346,37 @@ export function TourTimelineView({
     return icons[category] || Calendar;
   };
 
+  // Get category background color
+  const getCategoryColor = (category: TourCampaignCategory) => {
+    const colors = {
+      'sports-event': 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',      // Blue
+      'concert-tour': 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)',     // Purple
+      'festival': 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',        // Pink
+      'exhibition': 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',      // Orange
+      'championship': 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',     // Gold/Yellow
+      'olympics': 'linear-gradient(135deg, #10b981 0%, #059669 100%)',        // Emerald/Green
+    };
+    return colors[category] || 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
+  };
+
+  // Get category border color
+  const getCategoryBorderColor = (category: TourCampaignCategory) => {
+    const colors = {
+      'sports-event': '#1d4ed8',
+      'concert-tour': '#7c3aed',
+      'festival': '#be185d',
+      'exhibition': '#c2410c',
+      'championship': '#a16207',
+      'olympics': '#047857',
+    };
+    return colors[category] || '#374151';
+  };
+
+  // Get category text color
+  const getCategoryTextColor = (category: TourCampaignCategory) => {
+    return '#ffffff'; // Always white text for contrast with gradient backgrounds
+  };
+
   // Get period label
   const getPeriodLabel = (period: Date) => {
     switch (zoomLevel) {
@@ -362,18 +398,6 @@ export function TourTimelineView({
     );
     return Array.from(years).sort();
   }, [campaigns]);
-
-  // Calculate today position
-  const todayStyle = useMemo(() => {
-    const { start, end } = timelineRange;
-    const totalDays = Math.max(differenceInDays(end, start), 1);
-    const todayOffset = differenceInDays(new Date(), start);
-    const leftPercent = (todayOffset / totalDays) * 100;
-
-    return {
-      left: `${Math.max(0, Math.min(leftPercent, 100))}%`,
-    };
-  }, [timelineRange]);
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -422,6 +446,32 @@ export function TourTimelineView({
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Category Legend */}
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-muted-foreground font-medium">Categories:</span>
+            {(Object.keys(TOUR_CATEGORY_CONFIG) as TourCampaignCategory[]).map((category) => {
+              const config = TOUR_CATEGORY_CONFIG[category];
+              const CategoryIcon = getCategoryIcon(category);
+
+              return (
+                <div
+                  key={category}
+                  className="flex items-center gap-1 px-2 py-1 rounded-full text-white font-medium"
+                  style={{
+                    background: getCategoryColor(category),
+                    border: `1px solid ${getCategoryBorderColor(category)}`,
+                  }}
+                  title={config.label}
+                >
+                  <CategoryIcon className="h-3 w-3" />
+                  <span className="max-w-20 truncate">{config.label}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="w-px h-8 bg-border" />
+
           {/* Zoom level controls */}
           <div className="flex items-center gap-1 border rounded-lg p-0.5">
             {(['month', 'quarter', 'year'] as const).map((level) => (
@@ -537,55 +587,79 @@ export function TourTimelineView({
         </div>
       )}
 
-      {/* Timeline */}
-      <div className="flex-1 overflow-auto">
-        <div className="min-w-max">
-          {/* Time periods header */}
-          <div className="flex border-b bg-muted/30 sticky top-0 z-10">
-            {timePeriods.map((period, index) => {
-              const isCurrentPeriod =
-                zoomLevel === 'year'
-                  ? period.getFullYear() === new Date().getFullYear()
-                  : isSameMonth(period, new Date());
+      {/* Timeline - Gantt Chart Style */}
+      <div className="flex-1 overflow-auto border-t">
+        {/* Timeline container with fixed minimum width for horizontal scrolling */}
+        <div
+          className="relative min-w-max"
+          style={{ width: `${Math.max(timePeriods.length * 150, 1200)}px` }}
+        >
+          {/* Time periods header with grid lines */}
+          <div className="sticky top-0 z-20 bg-background border-b">
+            <div className="flex">
+              {timePeriods.map((period, index) => {
+                const isCurrentPeriod =
+                  zoomLevel === 'year'
+                    ? period.getFullYear() === new Date().getFullYear()
+                    : isSameMonth(period, new Date());
 
-              return (
-                <div
-                  key={index}
-                  className={`
-                    flex-1 min-w-32 p-2 text-center border-r last:border-r-0
-                    ${isCurrentPeriod ? 'bg-primary/10' : ''}
-                  `}
-                >
-                  <div className="text-sm font-medium">{getPeriodLabel(period)}</div>
-                </div>
-              );
-            })}
+                return (
+                  <div
+                    key={`header-${index}`}
+                    className={`
+                      flex-shrink-0 w-[150px] p-3 text-center border-r last:border-r-0
+                      ${isCurrentPeriod ? 'bg-primary/10' : 'bg-muted/30'}
+                    `}
+                  >
+                    <div className="text-sm font-semibold">{getPeriodLabel(period)}</div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Campaign rows */}
+          {/* Timeline body with vertical grid lines */}
           <div className="relative">
-            {/* Today indicator - shows if today is within the timeline range */}
+            {/* Vertical grid lines */}
+            <div className="absolute inset-0 pointer-events-none flex">
+              {timePeriods.map((_, index) => (
+                <div
+                  key={`gridline-${index}`}
+                  className="flex-shrink-0 w-[150px] border-r border-border/50 last:border-r-0"
+                />
+              ))}
+            </div>
+
+            {/* Today indicator */}
             {(() => {
               const today = new Date();
               const { start, end } = timelineRange;
               const isTodayInRange = today >= start && today <= end;
-              return isTodayInRange;
-            })() && (
-              <div
-                className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-20 pointer-events-none"
-                style={todayStyle}
-              >
-                <div className="absolute -top-1 -left-1.5 w-3 h-3 bg-red-500 rounded-full" />
-                <div className="absolute -top-6 -left-6 text-xs font-medium text-red-500 whitespace-nowrap bg-background px-1 rounded">
-                  {t('contentCalendar:countdown.today', 'Today')}
-                </div>
-              </div>
-            )}
+              if (!isTodayInRange) return null;
 
+              // Calculate today's position as a percentage
+              const totalDays = differenceInDays(end, start);
+              const todayOffset = differenceInDays(today, start);
+              const todayPercent = (todayOffset / totalDays) * 100;
+
+              return (
+                <div
+                  className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10 pointer-events-none"
+                  style={{ left: `${todayPercent}%` }}
+                >
+                  <div className="absolute -top-1 -left-1.5 w-3 h-3 bg-red-500 rounded-full" />
+                  <div className="absolute -top-6 -left-6 text-xs font-medium text-red-500 whitespace-nowrap bg-background px-1 rounded border">
+                    {t('contentCalendar:countdown.today', 'Today')}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Campaign rows - vertical stacking with color coding */}
             {campaignRows.length === 0 ? (
-              <div className="flex items-center justify-center h-64 text-muted-foreground">
+              <div className="flex items-center justify-center py-32 text-muted-foreground">
                 <div className="text-center">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <Calendar className="h-16 w-16 mx-auto mb-4 opacity-50" />
                   <p className="text-lg font-medium">
                     {t('contentCalendar:views.noCampaigns', 'No campaigns found')}
                   </p>
@@ -595,164 +669,173 @@ export function TourTimelineView({
                 </div>
               </div>
             ) : (
-              <div className="relative p-4 space-y-2">
-                {campaignRows.map((row, rowIndex) => (
-                  <div key={rowIndex} className="flex h-12 relative">
-                    {row.map((campaign) => {
-                      const config = TOUR_CATEGORY_CONFIG[campaign.category];
-                      const CategoryIcon = getCategoryIcon(campaign.category);
-                      const isHovered = hoveredCampaign === campaign.id;
-                      const isSelected = selectedCampaign?.id === campaign.id;
-                      const countdown = getCountdown(campaign);
+              <div className="relative p-4">
+                {/* Campaign timeline - vertical stacking by date */}
+                {filteredCampaigns.map((campaign, index) => {
+                  const config = TOUR_CATEGORY_CONFIG[campaign.category];
+                  const CategoryIcon = getCategoryIcon(campaign.category);
+                  const isHovered = hoveredCampaign === campaign.id;
+                  const isSelected = selectedCampaign?.id === campaign.id;
+                  const countdown = getCountdown(campaign);
+                  const position = getCampaignPosition(campaign);
 
-                      // Status configuration
-                      const statusConfig = {
-                        planned: {
-                          label: t('contentCalendar:status.planned', 'Planned'),
-                          icon: Circle,
-                          color: 'text-blue-600',
-                          bgColor: 'bg-blue-50',
-                          dotColor: 'bg-blue-500'
-                        },
-                        in_progress: {
-                          label: t('contentCalendar:status.inProgress', 'In Progress'),
-                          icon: TrendingUp,
-                          color: 'text-amber-600',
-                          bgColor: 'bg-amber-50',
-                          dotColor: 'bg-amber-500'
-                        },
-                        done: {
-                          label: t('contentCalendar:status.done', 'Completed'),
-                          icon: CheckCircle2,
-                          color: 'text-green-600',
-                          bgColor: 'bg-green-50',
-                          dotColor: 'bg-green-500'
-                        },
-                        under_review: {
-                          label: t('contentCalendar:status.underReview', 'Under Review'),
-                          icon: AlertCircle,
-                          color: 'text-purple-600',
-                          bgColor: 'bg-purple-50',
-                          dotColor: 'bg-purple-500'
-                        }
-                      };
-                      const status = statusConfig[campaign.status as keyof typeof statusConfig] || statusConfig.planned;
-                      const StatusIcon = status.icon;
+                  // Status configuration
+                  const statusConfig = {
+                    planned: {
+                      label: t('contentCalendar:status.planned', 'Planned'),
+                      icon: Circle,
+                      color: 'text-blue-700',
+                      bgColor: 'bg-blue-100',
+                      dotColor: 'bg-blue-500',
+                    },
+                    in_progress: {
+                      label: t('contentCalendar:status.inProgress', 'In Progress'),
+                      icon: TrendingUp,
+                      color: 'text-amber-700',
+                      bgColor: 'bg-amber-100',
+                      dotColor: 'bg-amber-500',
+                    },
+                    done: {
+                      label: t('contentCalendar:status.done', 'Completed'),
+                      icon: CheckCircle2,
+                      color: 'text-green-700',
+                      bgColor: 'bg-green-100',
+                      dotColor: 'bg-green-500',
+                    },
+                    under_review: {
+                      label: t('contentCalendar:status.underReview', 'Under Review'),
+                      icon: AlertCircle,
+                      color: 'text-purple-700',
+                      bgColor: 'bg-purple-100',
+                      dotColor: 'bg-purple-500',
+                    },
+                  };
+                  const status = statusConfig[campaign.status as keyof typeof statusConfig] || statusConfig.planned;
+                  const StatusIcon = status.icon;
 
-                      return (
-                        <TooltipProvider key={campaign.id}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
+                  // Calculate vertical position based on index
+                  const topPosition = index * 56; // 56px per row
+
+                  return (
+                    <TooltipProvider key={campaign.id}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <motion.div
+                            layout
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            whileHover={{ scale: 1.01, y: -2 }}
+                            onClick={() => {
+                              setSelectedCampaign(campaign);
+                              onCampaignClick?.(campaign);
+                            }}
+                            onMouseEnter={() => setHoveredCampaign(campaign.id)}
+                            onMouseLeave={() => setHoveredCampaign(null)}
+                            className={`
+                              absolute h-12 rounded-lg border-2 cursor-pointer
+                              transition-all duration-200
+                              flex items-center px-3 gap-2 shadow-sm
+                              ${isHovered || isSelected ? 'shadow-lg ring-2 ring-primary/50 z-20' : 'hover:shadow-md'}
+                            `}
+                            style={{
+                              ...position,
+                              top: `${topPosition}px`,
+                              // Color coding by category
+                              backgroundColor: getCategoryColor(campaign.category),
+                              borderColor: getCategoryBorderColor(campaign.category),
+                              color: getCategoryTextColor(campaign.category),
+                            }}
+                          >
+                            <CategoryIcon className="h-4 w-4 flex-shrink-0" />
+                            <span className="text-xs font-semibold truncate flex-1">{campaign.title}</span>
+
+                            {/* Date range badge */}
+                            <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-white/30 text-[10px] font-medium flex-shrink-0">
+                              <Calendar className="h-3 w-3" />
+                              <span className="max-w-24 truncate">
+                                {campaign.scheduledDate && format(campaign.scheduledDate, 'MMM d')}
+                                {campaign.dueDate && ` - ${format(campaign.dueDate, 'MMM d')}`}
+                              </span>
+                            </div>
+
+                            {/* Countdown badge */}
+                            {countdown.text && (
                               <motion.div
-                                layout
-                                initial={{ opacity: 0, scale: 0.95 }}
+                                initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                whileHover={{ scale: 1.02, y: -2 }}
-                                onClick={() => {
-                                  setSelectedCampaign(campaign);
-                                  onCampaignClick?.(campaign);
-                                }}
-                                onMouseEnter={() => setHoveredCampaign(campaign.id)}
-                                onMouseLeave={() => setHoveredCampaign(null)}
                                 className={`
-                                  absolute h-10 rounded-lg cursor-pointer shadow-sm
-                                  flex items-center px-3 gap-2
-                                  transition-all
-                                  ${config.bgColor}
-                                  ${isHovered || isSelected ? 'shadow-md ring-2 ring-primary/50' : ''}
+                                  flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium flex-shrink-0
+                                  ${countdown.isUrgent ? 'bg-red-500 text-white' : 'bg-white/40'}
                                 `}
-                                style={getCampaignStyle(campaign)}
                               >
-                                <CategoryIcon className={`h-4 w-4 flex-shrink-0 ${config.color}`} />
-                                <span className="text-sm font-medium truncate flex-1">{campaign.title}</span>
-
-                                {/* Countdown badge (only for upcoming/past events) */}
-                                {countdown.text && (
-                                  <motion.div
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    className={`
-                                      flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-medium flex-shrink-0
-                                      ${countdown.isUrgent ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'}
-                                    `}
-                                  >
-                                    <Clock className="h-3 w-3" />
-                                    <span className="max-w-20 truncate">{countdown.text}</span>
-                                  </motion.div>
-                                )}
-
-                                {/* Status indicator with icon */}
-                                <div className={`
-                                  flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0
-                                  ${status.bgColor} ${status.color}
-                                `}>
-                                  <StatusIcon className="h-3 w-3" />
-                                  <div className={`w-1.5 h-1.5 rounded-full ${status.dotColor}`} />
-                                </div>
-
-                                {/* Duration badge for longer campaigns */}
-                                {campaign.dueDate &&
-                                  campaign.scheduledDate &&
-                                  differenceInDays(campaign.dueDate, campaign.scheduledDate) > 7 && (
-                                    <Badge variant="secondary" className="h-5 px-1 text-xs">
-                                      {differenceInDays(campaign.dueDate, campaign.scheduledDate)}d
-                                    </Badge>
-                                  )}
+                                <Clock className="h-3 w-3" />
+                                <span className="max-w-20 truncate">{countdown.text}</span>
                               </motion.div>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="bottom"
-                              className="max-w-xs"
-                              sideOffset={5}
+                            )}
+
+                            {/* Status indicator */}
+                            <div
+                              className={`
+                                flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 bg-white/30
+                              `}
                             >
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between gap-4">
-                                  <p className="font-medium">{campaign.title}</p>
-                                  <div className={`
-                                    flex items-center gap-1 px-2 py-0.5 rounded text-xs
-                                    ${status.bgColor} ${status.color}
-                                  `}>
-                                    <StatusIcon className="h-3 w-3" />
-                                    {status.label}
-                                  </div>
-                                </div>
-                                <div className="text-xs text-muted-foreground space-y-1">
-                                  <p>
-                                    {campaign.scheduledDate &&
-                                      format(campaign.scheduledDate, 'MMM d, yyyy')}
-                                    {campaign.dueDate &&
-                                      ` - ${format(campaign.dueDate, 'MMM d, yyyy')}`}
-                                  </p>
-                                  {countdown.text && (
-                                    <p className={`
-                                      flex items-center gap-1 font-medium
-                                      ${countdown.isUrgent ? 'text-red-600' : 'text-gray-600'}
-                                    `}>
-                                      <Clock className="h-3 w-3" />
-                                      {countdown.text}
-                                    </p>
-                                  )}
-                                  {campaign.location && (
-                                    <p className="flex items-center gap-1">
-                                      <MapPin className="h-3 w-3" />
-                                      {campaign.location}
-                                    </p>
-                                  )}
-                                  {campaign.expectedAttendees && (
-                                    <p className="flex items-center gap-1">
-                                      <Users className="h-3 w-3" />
-                                      {campaign.expectedAttendees.toLocaleString()} attendees
-                                    </p>
-                                  )}
-                                </div>
+                              <StatusIcon className="h-3 w-3" />
+                              <div className={`w-1.5 h-1.5 rounded-full ${status.dotColor}`} />
+                            </div>
+                          </motion.div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs" sideOffset={5}>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between gap-4">
+                              <p className="font-semibold">{campaign.title}</p>
+                              <div
+                                className={`
+                                  flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium
+                                  ${status.bgColor} ${status.color}
+                                `}
+                              >
+                                <StatusIcon className="h-3 w-3" />
+                                {status.label}
                               </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      );
-                    })}
-                  </div>
-                ))}
+                            </div>
+                            <div className="text-xs text-muted-foreground space-y-1">
+                              <p className="font-medium">
+                                {campaign.scheduledDate && format(campaign.scheduledDate, 'MMM d, yyyy')}
+                                {campaign.dueDate && ` - ${format(campaign.dueDate, 'MMM d, yyyy')}`}
+                              </p>
+                              {countdown.text && (
+                                <p
+                                  className={`
+                                    flex items-center gap-1 font-medium
+                                    ${countdown.isUrgent ? 'text-red-600' : 'text-gray-600'}
+                                  `}
+                                >
+                                  <Clock className="h-3 w-3" />
+                                  {countdown.text}
+                                </p>
+                              )}
+                              {campaign.location && (
+                                <p className="flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" />
+                                  {campaign.location}
+                                </p>
+                              )}
+                              {campaign.expectedAttendees && (
+                                <p className="flex items-center gap-1">
+                                  <Users className="h-3 w-3" />
+                                  {campaign.expectedAttendees.toLocaleString()} attendees
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  );
+                })}
+
+                {/* Timeline container height */}
+                <div style={{ height: `${filteredCampaigns.length * 56}px` }} />
               </div>
             )}
           </div>

@@ -89,8 +89,10 @@ export function CalendarHeader({
         return getDayLabel();
       case 'list':
         return 'All Campaigns';
+      case 'tour-timeline':
+        return t('contentCalendar:tourTimeline.title', 'Tour Timeline');
     }
-  }, [currentView, currentMonthLabel, getWeekLabel, getDayLabel]);
+  }, [currentView, currentMonthLabel, getWeekLabel, getDayLabel, t]);
 
   return (
     <div className="flex items-center justify-between px-6 py-4 border-b bg-card">

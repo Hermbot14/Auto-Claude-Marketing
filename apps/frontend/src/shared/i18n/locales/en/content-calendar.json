@@ -12,6 +12,7 @@
     "week": "Week",
     "day": "Day",
     "list": "List",
+    "tour-timeline": "Tour Timeline",
     "noCampaigns": "No campaigns scheduled",
     "noCampaignsDescription": "There are no campaigns scheduled for this day. Click 'Add Campaign' to create one.",
     "noCampaignsInList": "No campaigns found. Try adjusting your filters.",
