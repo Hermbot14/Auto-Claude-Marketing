@@ -41,6 +41,7 @@ import {
   CheckCircle2,
   Circle,
   AlertCircle,
+  MoreHorizontal,
 } from 'lucide-react';
 
 import { Button } from '../../components/ui/button';
@@ -87,6 +88,226 @@ interface TourTimelineViewProps {
   onCampaignClick?: (campaign: TourCampaign) => void;
   initialZoomLevel?: TimelineZoomLevel;
   showFilters?: boolean;
+}
+
+/**
+ * Redesigned Campaign Tile Component
+ * Compact, unified card design with integrated elements
+ */
+interface CampaignTileProps {
+  campaign: TourCampaign;
+  position: { left: string; width: string };
+  topPosition: number;
+  isHovered: boolean;
+  isSelected: boolean;
+  countdown: { text: string; isUrgent: boolean };
+  onHover: () => void;
+  onHoverEnd: () => void;
+  onClick: () => void;
+}
+
+function CampaignTile({
+  campaign,
+  position,
+  topPosition,
+  isHovered,
+  isSelected,
+  countdown,
+  onHover,
+  onHoverEnd,
+  onClick,
+}: CampaignTileProps): JSX.Element {
+  const { t } = useTranslation(['contentCalendar', 'common']);
+
+  // Unified color scheme per category
+  const getTheme = () => {
+    const themes = {
+      'sports-event': {
+        bg: 'bg-gradient-to-r from-blue-500 to-blue-600',
+        border: 'border-blue-400',
+        shadow: 'shadow-blue-500/20',
+        icon: Trophy,
+      },
+      'concert-tour': {
+        bg: 'bg-gradient-to-r from-purple-500 to-purple-600',
+        border: 'border-purple-400',
+        shadow: 'shadow-purple-500/20',
+        icon: Music,
+      },
+      'festival': {
+        bg: 'bg-gradient-to-r from-pink-500 to-pink-600',
+        border: 'border-pink-400',
+        shadow: 'shadow-pink-500/20',
+        icon: Sparkles,
+      },
+      'exhibition': {
+        bg: 'bg-gradient-to-r from-orange-500 to-orange-600',
+        border: 'border-orange-400',
+        shadow: 'shadow-orange-500/20',
+        icon: GalleryHorizontal,
+      },
+      'championship': {
+        bg: 'bg-gradient-to-r from-amber-500 to-amber-600',
+        border: 'border-amber-400',
+        shadow: 'shadow-amber-500/20',
+        icon: Medal,
+      },
+      'olympics': {
+        bg: 'bg-gradient-to-r from-emerald-500 to-emerald-600',
+        border: 'border-emerald-400',
+        shadow: 'shadow-emerald-500/20',
+        icon: Flame,
+      },
+    };
+    return themes[campaign.category] || themes['sports-event'];
+  };
+
+  const theme = getTheme();
+  const CategoryIcon = theme.icon;
+
+  // Status icon
+  const getStatusIcon = () => {
+    const icons = {
+      planned: Circle,
+      in_progress: TrendingUp,
+      done: CheckCircle2,
+      under_review: AlertCircle,
+    };
+    return icons[campaign.status as keyof typeof icons] || Circle;
+  };
+
+  const StatusIcon = getStatusIcon();
+
+  // Progress based on status
+  const progress = campaign.status === 'done' ? 100
+    : campaign.status === 'under_review' ? 80
+    : campaign.status === 'in_progress' ? 45
+    : 0;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', damping: 18, stiffness: 280 }}
+            whileHover={{
+              scale: 1.02,
+              y: -2,
+              transition: { type: 'spring', damping: 12, stiffness: 180 }
+            }}
+            onClick={onClick}
+            onMouseEnter={onHover}
+            onMouseLeave={onHoverEnd}
+            className={`
+              absolute rounded-xl cursor-pointer overflow-hidden
+              border-2 transition-all duration-200 ease-out
+              ${theme.bg}
+              ${isHovered || isSelected
+                ? `shadow-xl ring-2 ring-white/30 z-20`
+                : `shadow-md ${theme.shadow}`
+              }
+            `}
+            style={{
+              left: position.left,
+              width: position.width,
+              top: `${topPosition}px`,
+              height: '60px',
+            }}
+          >
+            {/* Content */}
+            <div className="flex items-center h-full px-3 gap-2">
+              {/* Icon */}
+              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center">
+                <CategoryIcon className="h-4 w-4 text-white" />
+              </div>
+
+              {/* Title */}
+              <h3 className="flex-1 text-sm font-semibold truncate text-white">
+                {campaign.title}
+              </h3>
+
+              {/* Date */}
+              <span className="flex-shrink-0 text-xs text-white/80 font-medium">
+                {campaign.scheduledDate && format(campaign.scheduledDate, 'MMM d')}
+              </span>
+
+              {/* Countdown - urgent only */}
+              {countdown.isUrgent && countdown.text && (
+                <span className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 text-white text-xs font-medium">
+                  <Clock className="h-3 w-3" />
+                  {countdown.text}
+                </span>
+              )}
+
+              {/* Status icon + progress */}
+              <div className="flex-shrink-0 flex items-center gap-2">
+                <StatusIcon className="h-4 w-4 text-white/80" />
+                <span className="text-sm font-bold text-white">
+                  {progress}%
+                </span>
+              </div>
+            </div>
+
+            {/* Progress bar at bottom */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="h-full bg-white"
+              />
+            </div>
+          </motion.div>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="max-w-sm p-3" sideOffset={6}>
+          <div className="space-y-2">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <div className={`w-7 h-7 rounded-lg ${theme.bg} flex items-center justify-center`}>
+                  <CategoryIcon className="h-3.5 w-3.5 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">{campaign.title}</p>
+                  <p className="text-xs text-muted-foreground">{TOUR_CATEGORY_CONFIG[campaign.category].label}</p>
+                </div>
+              </div>
+              <span className="flex items-center gap-1 text-xs bg-muted px-2 py-0.5 rounded-full">
+                <StatusIcon className="h-3 w-3" />
+                {campaign.status}
+              </span>
+            </div>
+
+            {campaign.description && (
+              <p className="text-xs text-muted-foreground line-clamp-2">{campaign.description}</p>
+            )}
+
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+                <span>{campaign.scheduledDate && format(campaign.scheduledDate, 'MMM d, yyyy')}</span>
+              </div>
+              {campaign.location && (
+                <div className="flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className="truncate">{campaign.location}</span>
+                </div>
+              )}
+            </div>
+
+            {countdown.text && countdown.isUrgent && (
+              <div className="flex items-center gap-1.5 text-xs font-medium text-red-600">
+                <Clock className="h-3.5 w-3.5" />
+                {countdown.text}
+              </div>
+            )}
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 }
 
 /**
@@ -333,7 +554,7 @@ export function TourTimelineView({
     setFilters({ categories: [], searchQuery: '' });
   }, []);
 
-  // Get category icon
+  // Get category icon (used by category legend)
   const getCategoryIcon = (category: TourCampaignCategory) => {
     const icons = {
       'sports-event': Trophy,
@@ -344,37 +565,6 @@ export function TourTimelineView({
       'olympics': Flame,
     };
     return icons[category] || Calendar;
-  };
-
-  // Get category background color
-  const getCategoryColor = (category: TourCampaignCategory) => {
-    const colors = {
-      'sports-event': 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',      // Blue
-      'concert-tour': 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)',     // Purple
-      'festival': 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',        // Pink
-      'exhibition': 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',      // Orange
-      'championship': 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',     // Gold/Yellow
-      'olympics': 'linear-gradient(135deg, #10b981 0%, #059669 100%)',        // Emerald/Green
-    };
-    return colors[category] || 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
-  };
-
-  // Get category border color
-  const getCategoryBorderColor = (category: TourCampaignCategory) => {
-    const colors = {
-      'sports-event': '#1d4ed8',
-      'concert-tour': '#7c3aed',
-      'festival': '#be185d',
-      'exhibition': '#c2410c',
-      'championship': '#a16207',
-      'olympics': '#047857',
-    };
-    return colors[category] || '#374151';
-  };
-
-  // Get category text color
-  const getCategoryTextColor = (category: TourCampaignCategory) => {
-    return '#ffffff'; // Always white text for contrast with gradient backgrounds
   };
 
   // Get period label
@@ -446,25 +636,47 @@ export function TourTimelineView({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Category Legend */}
+          {/* Category Legend - Updated to match new tile design */}
           <div className="flex items-center gap-2 text-xs">
             <span className="text-muted-foreground font-medium">Categories:</span>
             {(Object.keys(TOUR_CATEGORY_CONFIG) as TourCampaignCategory[]).map((category) => {
               const config = TOUR_CATEGORY_CONFIG[category];
               const CategoryIcon = getCategoryIcon(category);
 
+              // Get accent color for legend
+              const getAccentColor = (cat: TourCampaignCategory) => {
+                const colors = {
+                  'sports-event': 'bg-blue-500',
+                  'concert-tour': 'bg-purple-500',
+                  'festival': 'bg-pink-500',
+                  'exhibition': 'bg-orange-500',
+                  'championship': 'bg-amber-500',
+                  'olympics': 'bg-emerald-500',
+                };
+                return colors[cat] || 'bg-slate-500';
+              };
+
+              const getBorderColor = (cat: TourCampaignCategory) => {
+                const colors = {
+                  'sports-event': 'border-blue-200 dark:border-blue-800',
+                  'concert-tour': 'border-purple-200 dark:border-purple-800',
+                  'festival': 'border-pink-200 dark:border-pink-800',
+                  'exhibition': 'border-orange-200 dark:border-orange-800',
+                  'championship': 'border-amber-200 dark:border-amber-800',
+                  'olympics': 'border-emerald-200 dark:border-emerald-800',
+                };
+                return colors[cat] || 'border-slate-200';
+              };
+
               return (
                 <div
                   key={category}
-                  className="flex items-center gap-1 px-2 py-1 rounded-full text-white font-medium"
-                  style={{
-                    background: getCategoryColor(category),
-                    border: `1px solid ${getCategoryBorderColor(category)}`,
-                  }}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium border ${getBorderColor(category)} bg-slate-50 dark:bg-slate-900/50`}
                   title={config.label}
                 >
-                  <CategoryIcon className="h-3 w-3" />
-                  <span className="max-w-20 truncate">{config.label}</span>
+                  <div className={`w-2 h-2 rounded-full ${getAccentColor(category)}`} />
+                  <CategoryIcon className="h-3 w-3 text-slate-700 dark:text-slate-300" />
+                  <span className="max-w-20 truncate text-slate-700 dark:text-slate-300">{config.label}</span>
                 </div>
               );
             })}
@@ -655,7 +867,7 @@ export function TourTimelineView({
               );
             })()}
 
-            {/* Campaign rows - vertical stacking with color coding */}
+            {/* Campaign rows - Redesigned tiles */}
             {campaignRows.length === 0 ? (
               <div className="flex items-center justify-center py-32 text-muted-foreground">
                 <div className="text-center">
@@ -669,173 +881,38 @@ export function TourTimelineView({
                 </div>
               </div>
             ) : (
-              <div className="relative p-4">
-                {/* Campaign timeline - vertical stacking by date */}
+              <div className="relative p-3">
+                {/* Campaign timeline - using new compact tiles */}
                 {filteredCampaigns.map((campaign, index) => {
-                  const config = TOUR_CATEGORY_CONFIG[campaign.category];
-                  const CategoryIcon = getCategoryIcon(campaign.category);
                   const isHovered = hoveredCampaign === campaign.id;
                   const isSelected = selectedCampaign?.id === campaign.id;
                   const countdown = getCountdown(campaign);
                   const position = getCampaignPosition(campaign);
 
-                  // Status configuration
-                  const statusConfig = {
-                    planned: {
-                      label: t('contentCalendar:status.planned', 'Planned'),
-                      icon: Circle,
-                      color: 'text-blue-700',
-                      bgColor: 'bg-blue-100',
-                      dotColor: 'bg-blue-500',
-                    },
-                    in_progress: {
-                      label: t('contentCalendar:status.inProgress', 'In Progress'),
-                      icon: TrendingUp,
-                      color: 'text-amber-700',
-                      bgColor: 'bg-amber-100',
-                      dotColor: 'bg-amber-500',
-                    },
-                    done: {
-                      label: t('contentCalendar:status.done', 'Completed'),
-                      icon: CheckCircle2,
-                      color: 'text-green-700',
-                      bgColor: 'bg-green-100',
-                      dotColor: 'bg-green-500',
-                    },
-                    under_review: {
-                      label: t('contentCalendar:status.underReview', 'Under Review'),
-                      icon: AlertCircle,
-                      color: 'text-purple-700',
-                      bgColor: 'bg-purple-100',
-                      dotColor: 'bg-purple-500',
-                    },
-                  };
-                  const status = statusConfig[campaign.status as keyof typeof statusConfig] || statusConfig.planned;
-                  const StatusIcon = status.icon;
-
-                  // Calculate vertical position based on index
-                  const topPosition = index * 56; // 56px per row
+                  // Calculate vertical position with compact spacing
+                  const topPosition = index * 70; // 70px per row (64px tile + 6px gap)
 
                   return (
-                    <TooltipProvider key={campaign.id}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <motion.div
-                            layout
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            whileHover={{ scale: 1.01, y: -2 }}
-                            onClick={() => {
-                              setSelectedCampaign(campaign);
-                              onCampaignClick?.(campaign);
-                            }}
-                            onMouseEnter={() => setHoveredCampaign(campaign.id)}
-                            onMouseLeave={() => setHoveredCampaign(null)}
-                            className={`
-                              absolute h-12 rounded-lg border-2 cursor-pointer
-                              transition-all duration-200
-                              flex items-center px-3 gap-2 shadow-sm
-                              ${isHovered || isSelected ? 'shadow-lg ring-2 ring-primary/50 z-20' : 'hover:shadow-md'}
-                            `}
-                            style={{
-                              ...position,
-                              top: `${topPosition}px`,
-                              // Color coding by category
-                              backgroundColor: getCategoryColor(campaign.category),
-                              borderColor: getCategoryBorderColor(campaign.category),
-                              color: getCategoryTextColor(campaign.category),
-                            }}
-                          >
-                            <CategoryIcon className="h-4 w-4 flex-shrink-0" />
-                            <span className="text-xs font-semibold truncate flex-1">{campaign.title}</span>
-
-                            {/* Date range badge */}
-                            <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-white/30 text-[10px] font-medium flex-shrink-0">
-                              <Calendar className="h-3 w-3" />
-                              <span className="max-w-24 truncate">
-                                {campaign.scheduledDate && format(campaign.scheduledDate, 'MMM d')}
-                                {campaign.dueDate && ` - ${format(campaign.dueDate, 'MMM d')}`}
-                              </span>
-                            </div>
-
-                            {/* Countdown badge */}
-                            {countdown.text && (
-                              <motion.div
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className={`
-                                  flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium flex-shrink-0
-                                  ${countdown.isUrgent ? 'bg-red-500 text-white' : 'bg-white/40'}
-                                `}
-                              >
-                                <Clock className="h-3 w-3" />
-                                <span className="max-w-20 truncate">{countdown.text}</span>
-                              </motion.div>
-                            )}
-
-                            {/* Status indicator */}
-                            <div
-                              className={`
-                                flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 bg-white/30
-                              `}
-                            >
-                              <StatusIcon className="h-3 w-3" />
-                              <div className={`w-1.5 h-1.5 rounded-full ${status.dotColor}`} />
-                            </div>
-                          </motion.div>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="max-w-xs" sideOffset={5}>
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between gap-4">
-                              <p className="font-semibold">{campaign.title}</p>
-                              <div
-                                className={`
-                                  flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium
-                                  ${status.bgColor} ${status.color}
-                                `}
-                              >
-                                <StatusIcon className="h-3 w-3" />
-                                {status.label}
-                              </div>
-                            </div>
-                            <div className="text-xs text-muted-foreground space-y-1">
-                              <p className="font-medium">
-                                {campaign.scheduledDate && format(campaign.scheduledDate, 'MMM d, yyyy')}
-                                {campaign.dueDate && ` - ${format(campaign.dueDate, 'MMM d, yyyy')}`}
-                              </p>
-                              {countdown.text && (
-                                <p
-                                  className={`
-                                    flex items-center gap-1 font-medium
-                                    ${countdown.isUrgent ? 'text-red-600' : 'text-gray-600'}
-                                  `}
-                                >
-                                  <Clock className="h-3 w-3" />
-                                  {countdown.text}
-                                </p>
-                              )}
-                              {campaign.location && (
-                                <p className="flex items-center gap-1">
-                                  <MapPin className="h-3 w-3" />
-                                  {campaign.location}
-                                </p>
-                              )}
-                              {campaign.expectedAttendees && (
-                                <p className="flex items-center gap-1">
-                                  <Users className="h-3 w-3" />
-                                  {campaign.expectedAttendees.toLocaleString()} attendees
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <CampaignTile
+                      key={campaign.id}
+                      campaign={campaign}
+                      position={position}
+                      topPosition={topPosition}
+                      isHovered={isHovered}
+                      isSelected={isSelected}
+                      countdown={countdown}
+                      onHover={() => setHoveredCampaign(campaign.id)}
+                      onHoverEnd={() => setHoveredCampaign(null)}
+                      onClick={() => {
+                        setSelectedCampaign(campaign);
+                        onCampaignClick?.(campaign);
+                      }}
+                    />
                   );
                 })}
 
-                {/* Timeline container height */}
-                <div style={{ height: `${filteredCampaigns.length * 56}px` }} />
+                {/* Timeline container height - updated for compact tile height */}
+                <div style={{ height: `${filteredCampaigns.length * 70}px` }} />
               </div>
             )}
           </div>
