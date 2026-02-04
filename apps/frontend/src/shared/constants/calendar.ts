@@ -10,38 +10,38 @@ import type { CalendarItemType } from '../types';
 
 export const CALENDAR_COLORS: Record<CalendarItemType, { gradient: string; solid: string; light: string }> = {
   campaign: {
-    gradient: 'linear-gradient(135deg, #8B5CF6, #A78BFA)',
-    solid: '#8B5CF6',
+    gradient: 'linear-gradient(135deg, #7C3AED, #A78BFA)',
+    solid: '#7C3AED',
     light: 'bg-purple-100 dark:bg-purple-900/20',
   },
   content: {
-    gradient: 'linear-gradient(135deg, #3B82F6, #60A5FA)',
-    solid: '#3B82F6',
+    gradient: 'linear-gradient(135deg, #2563EB, #60A5FA)',
+    solid: '#2563EB',
     light: 'bg-blue-100 dark:bg-blue-900/20',
   },
   social: {
-    gradient: 'linear-gradient(135deg, #EC4899, #F472B6)',
-    solid: '#EC4899',
+    gradient: 'linear-gradient(135deg, #DB2777, #F472B6)',
+    solid: '#DB2777',
     light: 'bg-pink-100 dark:bg-pink-900/20',
   },
   email: {
-    gradient: 'linear-gradient(135deg, #10B981, #34D399)',
-    solid: '#10B981',
+    gradient: 'linear-gradient(135deg, #059669, #34D399)',
+    solid: '#059669',
     light: 'bg-green-100 dark:bg-green-900/20',
   },
   seo: {
-    gradient: 'linear-gradient(135deg, #F59E0B, #FBBF24)',
-    solid: '#F59E0B',
+    gradient: 'linear-gradient(135deg, #D97706, #FBBF24)',
+    solid: '#D97706',
     light: 'bg-amber-100 dark:bg-amber-900/20',
   },
   deadline: {
-    gradient: 'linear-gradient(135deg, #EF4444, #F87171)',
-    solid: '#EF4444',
+    gradient: 'linear-gradient(135deg, #DC2626, #F87171)',
+    solid: '#DC2626',
     light: 'bg-red-100 dark:bg-red-900/20',
   },
   event: {
-    gradient: 'linear-gradient(135deg, #6366F1, #818CF8)',
-    solid: '#6366F1',
+    gradient: 'linear-gradient(135deg, #4F46E5, #818CF8)',
+    solid: '#4F46E5',
     light: 'bg-indigo-100 dark:bg-indigo-900/20',
   },
 };

@@ -35,7 +35,7 @@ import { AppSettingsDialog, type AppSection } from './components/settings/AppSet
 import type { ProjectSettingsSection } from './components/settings/ProjectSettingsContent';
 import { TerminalGrid } from './components/TerminalGrid';
 import { Roadmap } from './components/Roadmap';
-import { ContentCalendar } from './features/content-calendar/ContentCalendar';
+import { CalendarView } from './components/calendar';
 import { Context } from './components/Context';
 import { Ideation } from './components/Ideation';
 import { Insights } from './components/Insights';
@@ -878,7 +878,7 @@ export function App() {
                   <Roadmap projectId={activeProjectId || selectedProjectId!} onGoToTask={handleGoToTask} />
                 )}
                 {activeView === 'calendar' && (
-                  <ContentCalendar projectId={activeProjectId || selectedProjectId || 'demo'} />
+                  <CalendarView projectId={activeProjectId || selectedProjectId || 'demo'} />
                 )}
                 {activeView === 'context' && (activeProjectId || selectedProjectId) && (
                   <Context projectId={activeProjectId || selectedProjectId!} />

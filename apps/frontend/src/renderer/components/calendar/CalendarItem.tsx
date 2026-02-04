@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { motion } from 'motion/react';
 import { format, isSameDay, differenceInDays } from 'date-fns';
-import { Calendar, Clock, MapPin, User, AlertCircle, Tag } from 'lucide-react';
+import { Calendar, Clock, MapPin, User, AlertCircle, Tag, Repeat } from 'lucide-react';
 import type { CalendarItem as CalendarItemType } from '../../../shared/types';
 import { CALENDAR_COLORS, CALENDAR_ITEM_TYPE_LABELS } from '../../../shared/constants';
 
@@ -53,13 +53,24 @@ export const CalendarItem = memo<CalendarItemProps>(({
     return null;
   };
 
+  const getRecurrenceIndicator = () => {
+    if (item.recurrence) {
+      return <Repeat className="h-3 w-3 text-white/80 ml-auto" />;
+    }
+    return null;
+  };
+
   const formatTime = (date: Date) => {
     return format(date, 'h:mm a');
   };
 
+  const formatTimeShort = (date: Date) => {
+    return format(date, 'ha').toLowerCase();
+  };
+
   const formatDuration = () => {
     if (!endDate || isSameDay(startDate, endDate)) {
-      return item.allDay ? 'All day' : formatTime(startDate);
+      return item.allDay ? 'All Day' : formatTimeShort(startDate);
     }
     if (duration <= 7) {
       return `${duration}d`;
@@ -79,95 +90,65 @@ export const CalendarItem = memo<CalendarItemProps>(({
       onMouseEnter={onHover}
       onMouseLeave={onHoverEnd}
       className={`
-        relative group cursor-pointer rounded-lg border transition-all
+        relative group cursor-pointer rounded-lg border-2 transition-all shadow-md
         ${isSelected ? 'ring-2 ring-offset-2 ring-offset-background' : ''}
-        ${isHovered ? 'shadow-lg' : 'shadow-sm'}
+        ${isHovered ? 'shadow-xl' : ''}
       `}
       style={{
         background: colors.gradient,
-        borderColor: isSelected ? colors.solid : 'transparent',
+        borderColor: isSelected ? colors.solid : 'rgba(255,255,255,0.3)',
         ringColor: colors.solid,
       }}
     >
       {/* Status indicator */}
-      <div className={`absolute top-0 right-0 w-2 h-2 rounded-full m-1 ${getStatusColor()}`} />
+      <div className={`absolute top-0 right-0 w-2.5 h-2.5 rounded-full m-1 ring-2 ring-white/30 ${getStatusColor()}`} />
 
-      {/* Content */}
-      <div className="p-2 space-y-1">
-        {/* Title row */}
-        <div className="flex items-start gap-2">
-          <h4 className="font-medium text-sm text-white truncate flex-1">
-            {item.title}
-          </h4>
-          {getPriorityIndicator()}
-        </div>
-
-        {/* Details */}
-        {viewMode !== 'month' && item.description && (
-          <p className="text-xs text-white/80 line-clamp-2">
-            {item.description}
-          </p>
-        )}
-
-        {/* Meta information */}
-        <div className="flex items-center gap-3 text-xs text-white/70">
-          {/* Type badge */}
-          <span className="px-1.5 py-0.5 rounded bg-white/20">
-            {CALENDAR_ITEM_TYPE_LABELS[item.type]}
-          </span>
-
-          {/* Duration/Time */}
-          <span className="flex items-center gap-1">
-            {item.allDay ? (
-              <Calendar className="h-3 w-3" />
-            ) : (
-              <Clock className="h-3 w-3" />
-            )}
+      {/* Content - TeamUp style layout */}
+      <div className="h-full flex flex-col justify-between p-2.5">
+        {/* Top: Time indicator */}
+        <div className="flex items-start justify-between gap-2">
+          <span className="text-xs font-black text-white tracking-wide drop-shadow-sm">
             {formatDuration()}
           </span>
+          <div className="flex items-center gap-1">
+            {getRecurrenceIndicator()}
+            {getPriorityIndicator()}
+          </div>
+        </div>
 
-          {/* Location */}
-          {item.location && (
-            <span className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              <span className="truncate max-w-20">{item.location}</span>
+        {/* Center: Title (main focus) */}
+        <div className="flex-1 flex items-center min-h-0">
+          <h4 className="font-bold text-sm text-white truncate leading-tight drop-shadow-sm">
+            {item.title}
+          </h4>
+        </div>
+
+        {/* Bottom: Type badge and additional info */}
+        <div className="flex items-center justify-between gap-2 mt-1">
+          <span className="px-2 py-0.5 rounded-md bg-white/25 text-xs font-bold text-white shadow-sm capitalize">
+            {item.type}
+          </span>
+
+          {/* Location or assignee */}
+          {item.location && viewMode !== 'month' && (
+            <span className="flex items-center gap-1 text-xs text-white/70 truncate max-w-20">
+              <MapPin className="h-3 w-3 flex-shrink-0" />
+              <span className="truncate">{item.location}</span>
             </span>
           )}
-
-          {/* Assignee */}
-          {item.assignee && (
-            <span className="flex items-center gap-1">
-              <User className="h-3 w-3" />
-              <span className="truncate max-w-16">{item.assignee}</span>
+          {item.assignee && !item.location && viewMode !== 'month' && (
+            <span className="flex items-center gap-1 text-xs text-white/70 truncate max-w-16">
+              <User className="h-3 w-3 flex-shrink-0" />
+              <span className="truncate">{item.assignee}</span>
             </span>
           )}
         </div>
-
-        {/* Tags */}
-        {item.tags && item.tags.length > 0 && (
-          <div className="flex items-center gap-1 flex-wrap">
-            <Tag className="h-3 w-3 text-white/70" />
-            {item.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="px-1.5 py-0.5 rounded bg-white/20 text-xs text-white/90"
-              >
-                {tag}
-              </span>
-            ))}
-            {item.tags.length > 3 && (
-              <span className="px-1.5 py-0.5 rounded bg-white/20 text-xs text-white/90">
-                +{item.tags.length - 3}
-              </span>
-            )}
-          </div>
-        )}
 
         {/* Source indicator */}
         {item.source !== 'manual' && (
-          <div className="absolute bottom-1 left-1">
-            <span className="text-xs text-white/50 uppercase">
-              {item.source}
+          <div className="absolute top-2 right-2">
+            <span className="text-[10px] text-white/50 uppercase font-medium tracking-wider">
+              {item.source === 'roadmap' ? 'RD' : item.source.slice(0, 2)}
             </span>
           </div>
         )}

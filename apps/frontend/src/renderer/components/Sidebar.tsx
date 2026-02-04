@@ -165,9 +165,6 @@ export function Sidebar({
         return;
       }
 
-      // Only handle shortcuts when a project is selected
-      if (!selectedProjectId) return;
-
       // Check for modifier keys - we want plain key presses only
       if (e.metaKey || e.ctrlKey || e.altKey) return;
 
@@ -177,6 +174,10 @@ export function Sidebar({
       const matchedItem = visibleNavItems.find((item) => item.shortcut === key);
 
       if (matchedItem) {
+        // Allow calendar shortcut without a project
+        const requiresProject = matchedItem.id !== 'calendar';
+        if (requiresProject && !selectedProjectId) return;
+
         e.preventDefault();
         onViewChange?.(matchedItem.id);
       }
@@ -267,12 +268,14 @@ export function Sidebar({
   const renderNavItem = (item: NavItem) => {
     const isActive = activeView === item.id;
     const Icon = item.icon;
+    // Calendar view can be accessed without a project (shows demo content)
+    const requiresProject = item.id !== 'calendar';
 
     return (
       <button
         key={item.id}
         onClick={() => handleNavClick(item.id)}
-        disabled={!selectedProjectId}
+        disabled={requiresProject && !selectedProjectId}
         aria-keyshortcuts={item.shortcut}
         className={cn(
           'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200',

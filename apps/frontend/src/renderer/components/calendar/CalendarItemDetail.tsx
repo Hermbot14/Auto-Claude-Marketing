@@ -299,6 +299,31 @@ export function CalendarItemDetail({ item, isOpen, onClose, onUpdate, onDelete }
               </div>
             ) : null}
 
+            {/* Recurrence */}
+            {item.recurrence ? (
+              <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                <h3 className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4 text-primary" />
+                  Repeating Event
+                </h3>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <div className="capitalize">
+                    Repeats every {item.recurrence.interval > 1 ? `${item.recurrence.interval} ` : ''}{item.recurrence.frequency}
+                    {item.recurrence.interval > 1 ? 's' : ''}
+                  </div>
+                  {item.recurrence.until && (
+                    <div>Until {format(item.recurrence.until, 'MMM d, yyyy')}</div>
+                  )}
+                  {item.recurrence.count && (
+                    <div>For {item.recurrence.count} occurrences</div>
+                  )}
+                  {!item.recurrence.until && !item.recurrence.count && (
+                    <div>Repeats forever</div>
+                  )}
+                </div>
+              </div>
+            ) : null}
+
             {/* Metadata */}
             <div className="pt-4 border-t">
               <div className="text-xs text-muted-foreground space-y-1">

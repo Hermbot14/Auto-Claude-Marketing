@@ -86,7 +86,7 @@ const createEmptyCalendarData = (projectId: string): CalendarData => ({
   projectId,
   items: [],
   viewMode: 'month',
-  zoomLevel: 'month',
+  zoomLevel: 'day',
   currentDate: new Date(),
   filters: defaultFilters,
   updatedAt: new Date(),
@@ -102,7 +102,7 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
   error: null,
   currentDate: new Date(),
   viewMode: 'month',
-  zoomLevel: 'month',
+  zoomLevel: 'day',
   filters: defaultFilters,
 
   // Setters
