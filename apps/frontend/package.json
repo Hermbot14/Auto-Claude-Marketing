@@ -16,7 +16,7 @@
   "main": "out/main/index.cjs",
   "engines": {
     "node": ">=24.0.0",
-    "npm": ">=10.0.0"
+    "bun": ">=1.0.0"
   },
   "scripts": {
     "postinstall": "node scripts/postinstall.cjs",
@@ -43,10 +43,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "npx playwright test --config=e2e/playwright.config.ts",
-    "test:e2e:web": "npx playwright test --config=e2e/playwright.web.config.ts",
+    "test:e2e": "bunx playwright test --config=e2e/playwright.config.ts",
+    "test:e2e:web": "bunx playwright test --config=e2e/playwright.web.config.ts",
     "test:web:explore": "node e2e/web-tests/browser-explorer.mjs",
-    "playwright:install": "npx playwright install chromium",
+    "playwright:install": "bunx playwright install chromium",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",

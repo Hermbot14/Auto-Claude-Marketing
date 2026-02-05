@@ -19,7 +19,7 @@ const GITHUB_REPO = 'AndyMik90/Auto-Claude';
 function getElectronAbi() {
   try {
     // Try to get from electron-abi package
-    const result = execSync('npx electron-abi', {
+    const result = execSync('bunx electron-abi', {
       encoding: 'utf8',
       stdio: ['pipe', 'pipe', 'pipe'],
     }).trim();

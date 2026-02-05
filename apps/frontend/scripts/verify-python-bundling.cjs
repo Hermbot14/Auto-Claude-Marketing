@@ -38,7 +38,7 @@ if (fs.existsSync(runtimePath)) {
     console.log(`   ✗ Python executable not found at: ${pythonExe}`);
   }
 } else {
-  console.log(`   ✗ Python runtime not downloaded. Run: npm run python:download`);
+  console.log(`   ✗ Python runtime not downloaded. Run: bun run python:download`);
 }
 
 // Check 2: package.json extraResources configured?
@@ -94,8 +94,8 @@ if (fs.existsSync(requirementsPath)) {
 // Summary
 console.log('\n=== Summary ===');
 console.log('To fully test Python bundling:');
-console.log('1. Run: npm run python:download');
-console.log('2. Run: npm run package:win (or :mac/:linux)');
+console.log('1. Run: bun run python:download');
+console.log('2. Run: bun run package:win (or :mac/:linux)');
 console.log('3. Launch the packaged app and check Dev Tools console for:');
 console.log('   - "[Python] Found bundled Python at: ..."');
 console.log('   - "[PythonEnvManager] Ready with Python path: ..."');

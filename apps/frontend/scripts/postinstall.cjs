@@ -37,7 +37,7 @@ To install:
   3. In "Individual Components", also select:
      - "MSVC v143 - VS 2022 C++ x64/x86 Spectre-mitigated libs"
 
-  4. Restart your terminal and run: npm install
+  4. Restart your terminal and run: bun install
 
 ================================================================================
 `;
@@ -61,7 +61,7 @@ function getElectronVersion() {
  */
 function runElectronRebuild() {
   return new Promise((resolve, reject) => {
-    const npx = isWindows ? 'npx.cmd' : 'npx';
+    const bunx = isWindows ? 'bunx.exe' : 'bunx';
     const electronVersion = getElectronVersion();
     const args = ['electron-rebuild'];
 
@@ -71,7 +71,7 @@ function runElectronRebuild() {
       console.log(`[postinstall] Using Electron version: ${electronVersion}`);
     }
 
-    const child = spawn(npx, args, {
+    const child = spawn(bunx, args, {
       stdio: 'inherit',
       shell: isWindows,
       cwd: path.join(__dirname, '..'),

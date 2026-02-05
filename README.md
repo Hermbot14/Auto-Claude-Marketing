@@ -43,7 +43,7 @@ The **Web UI** is the primary way to view and interact with the Marketing Hub in
 
 ```bash
 # Start the web UI development server
-npm run dev:web
+bun run dev:web
 
 # Access at http://localhost:3000
 ```
@@ -61,16 +61,16 @@ The Electron desktop app provides the same interface in a native desktop window.
 
 ```bash
 # Run in development mode
-npm run dev
+bun run dev
 
 # Run with debugging for E2E testing
-npm run dev:debug
+bun run dev:debug
 
 # Build for production
-npm run build
+bun run build
 
 # Package as desktop app
-npm run package
+bun run package
 ```
 
 **Note:** A workspace hoisting issue may occur on first launch. The fix has been applied to package.json (nohoist configuration). If you encounter `require("electron")` errors, see [LAUNCH_ISSUE_ANALYSIS.md](LAUNCH_ISSUE_ANALYSIS.md) for troubleshooting steps.
@@ -102,11 +102,11 @@ auto-claude-marketing/
 
 ```bash
 # Install all dependencies
-npm run install:all
+bun run install:all
 
 # Or install separately:
 cd apps/backend && uv venv && uv pip install -r requirements.txt
-cd apps/frontend && npm install
+cd apps/frontend && bun install
 ```
 
 See [CLAUDE.md](CLAUDE.md) for detailed development instructions.
@@ -115,7 +115,7 @@ See [CLAUDE.md](CLAUDE.md) for detailed development instructions.
 
 **Version:** 1.0.0 (95% Complete - 19/20 tasks)
 **Release Date:** 2026-01-24
-**Web UI:** ✅ Fully functional at http://localhost:3000 (npm run dev:web)
+**Web UI:** ✅ Fully functional at http://localhost:3000 (bun run dev:web)
 **Validation Report:** [MARKETING_HUB_VALIDATION_REPORT.md](MARKETING_HUB_VALIDATION_REPORT.md)
 
 ### ✅ Implemented Features (95%)
@@ -215,6 +215,22 @@ The Electron desktop app may encounter a workspace hoisting issue on first launc
 2. **For Electron desktop app:**
    - The nohoist configuration has been applied to package.json
    - Try running: `npm install` from root directory
+   - If issue persists, see [LAUNCH_ISSUE_ANALYSIS.md](LAUNCH_ISSUE_ANALYSIS.md) for detailed troubleshooting
+
+**Impact:**
+- Web UI: ✅ Fully functional, all features available
+- Electron Desktop: ⚠️ May require additional setup steps
+
+**Solution:**
+1. **Use Web UI** (recommended for development):
+   ```bash
+   bun run dev:web
+   # Access at http://localhost:3000
+   ```
+
+2. **For Electron desktop app:**
+   - The nohoist configuration has been applied to package.json
+   - Try running: `bun install` from root directory
    - If issue persists, see [LAUNCH_ISSUE_ANALYSIS.md](LAUNCH_ISSUE_ANALYSIS.md) for detailed troubleshooting
 
 **Impact:**

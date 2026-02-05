@@ -53,14 +53,14 @@ autonomous-coding/
 
 ```bash
 # Install all dependencies from root
-npm run install:all
+bun run install:all
 
 # Or install separately:
 # Backend (from apps/backend/)
 cd apps/backend && uv venv && uv pip install -r requirements.txt
 
 # Frontend (from apps/frontend/)
-cd apps/frontend && npm install
+cd apps/frontend && bun install
 
 # Authenticate (token auto-saved to Keychain)
 claude
@@ -131,7 +131,7 @@ apps/backend/.venv/bin/pytest tests/test_security.py::test_bash_command_validati
 apps/backend/.venv/bin/pytest tests/ -m "not slow"
 
 # Or from root
-npm run test:backend
+bun run test:backend
 ```
 
 ### Spec Validation
@@ -142,7 +142,7 @@ python apps/backend/validate_spec.py --spec-dir apps/backend/specs/001-feature -
 ### Web UI Development
 ```bash
 # Start web development server (PRIMARY development method)
-npm run dev:web
+bun run dev:web
 
 # Features:
 # - Hot Module Replacement (HMR) for instant updates
@@ -152,7 +152,7 @@ npm run dev:web
 # - Auto-reloads on file changes
 
 # The web UI is the RECOMMENDED way to develop frontend features.
-# Use Electron (npm run dev) only when testing:
+# Use Electron (bun run dev) only when testing:
 # - Native OS integrations (file system, tray, notifications)
 # - Electron-specific APIs (ipcRenderer, desktop capture)
 # - Final pre-release testing
@@ -161,8 +161,8 @@ npm run dev:web
 ### Electron Desktop Development
 ```bash
 # Build and run desktop app (for Electron-specific features)
-npm start        # Build and run desktop app
-npm run dev      # Run in development mode (includes --remote-debugging-port=9222 for E2E testing)
+bun start        # Build and run desktop app
+bun run dev      # Run in development mode (includes --remote-debugging-port=9222 for E2E testing)
 
 # Use this when testing:
 # - Native OS features
@@ -593,7 +593,7 @@ The Electron MCP server allows QA agents to interact with the running Electron a
 **Setup:**
 1. Start the Electron app with remote debugging enabled:
    ```bash
-   npm run dev  # Already configured with --remote-debugging-port=9222
+   bun run dev  # Already configured with --remote-debugging-port=9222
    ```
 
 2. Enable Electron MCP in `apps/backend/.env`:
@@ -677,7 +677,7 @@ The web UI provides a fast, efficient development workflow with modern tooling:
 **Getting Started:**
 ```bash
 # Start the web development server
-npm run dev:web
+bun run dev:web
 
 # Access the application
 # Open http://localhost:3000 in your browser
@@ -727,7 +727,7 @@ npm run dev:web
 
 ```bash
 # 1. Start web dev server (terminal 1)
-npm run dev:web
+bun run dev:web
 
 # 2. Start backend if needed (terminal 2)
 cd apps/backend
@@ -790,19 +790,19 @@ When working with backend APIs:
 Before releasing, always test in Electron:
 ```bash
 # Final integration testing
-npm run dev
+bun run dev
 
 # Production build testing
-npm run build
-npm start
+bun run build
+bun start
 ```
 
 This ensures native features work correctly before distribution.
 
 **Summary:**
 
-- **Web UI (npm run dev:web)** - Use for 95% of development
-- **Electron (npm run dev)** - Use only for native features and final testing
+- **Web UI (bun run dev:web)** - Use for 95% of development
+- **Electron (bun run dev)** - Use only for native features and final testing
 - The web UI provides faster iteration, better debugging, and modern tooling
 - Always test in Electron before releasing to ensure native features work
 
@@ -811,7 +811,7 @@ This ensures native features work correctly before distribution.
 **Primary Development Method - Web UI:**
 ```bash
 # Start web development server (RECOMMENDED for development)
-npm run dev:web
+bun run dev:web
 
 # Access at http://localhost:3000
 # Features: HMR, DevTools, fast iteration
@@ -820,8 +820,8 @@ npm run dev:web
 **Electron Desktop App:**
 ```bash
 # Build and run desktop app (for native features or final testing)
-npm start        # Build and run desktop app
-npm run dev      # Run in development mode (includes --remote-debugging-port=9222 for E2E testing)
+bun start        # Build and run desktop app
+bun run dev      # Run in development mode (includes --remote-debugging-port=9222 for E2E testing)
 ```
 
 **Backend CLI (Standalone):**
@@ -832,13 +832,13 @@ python run.py --spec 001
 ```
 
 **For E2E Testing with QA Agents:**
-1. Start the Electron app: `npm run dev`
+1. Start the Electron app: `bun run dev`
 2. Enable Electron MCP in `apps/backend/.env`: `ELECTRON_MCP_ENABLED=true`
 3. Run QA: `python run.py --spec 001 --qa`
 4. QA agents will automatically interact with the running app for testing
 
 **Recommendation:**
-- Use **Web UI** (`npm run dev:web`) for 95% of development
+- Use **Web UI** (`bun run dev:web`) for 95% of development
 - Use **Electron** only when testing native features or pre-release
 - See "Web UI Development" section above for detailed comparison
 

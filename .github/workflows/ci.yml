@@ -15,6 +15,7 @@ on:
       - 'apps/**'
       - 'tests/**'
       - 'package*.json'
+      - 'bun.lockb'
       - 'requirements*.txt'
       - 'pyproject.toml'
       - 'tsconfig*.json'
@@ -27,6 +28,7 @@ on:
       - 'apps/**'
       - 'tests/**'
       - 'package*.json'
+      - 'bun.lockb'
       - 'requirements*.txt'
       - 'pyproject.toml'
       - 'tsconfig*.json'
@@ -123,22 +125,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js frontend
-        uses: ./.github/actions/setup-node-frontend
+      - name: Setup Bun frontend
+        uses: ./.github/actions/setup-bun-frontend
         with:
           ignore-scripts: 'true'
 
       - name: Run TypeScript type check
         working-directory: apps/frontend
-        run: npm run typecheck
+        run: bun run typecheck
 
       - name: Run unit tests
         working-directory: apps/frontend
-        run: npm run test
+        run: bun run test
 
       - name: Build application
         working-directory: apps/frontend
-        run: npm run build
+        run: bun run build
 
   # --------------------------------------------------------------------------
   # Gate Job - Single check for branch protection

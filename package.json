@@ -4,39 +4,29 @@
   "description": "Autonomous multi-agent marketing AI framework powered by Claude",
   "license": "AGPL-3.0",
   "author": "Auto-Marketing Team",
-  "workspaces": {
-    "packages": [
-      "apps/*",
-      "libs/*"
-    ],
-    "nohoist": [
-      "electron",
-      "**/electron",
-      "**/@electron/**",
-      "electron-builder",
-      "**/electron-builder"
-    ]
-  },
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
     "install:backend": "node scripts/install-backend.js",
-    "install:frontend": "cd apps/frontend && npm install",
-    "install:all": "npm run install:backend && npm run install:frontend",
-    "start": "cd apps/frontend && npm run build && npm run start",
-    "dev": "cd apps/frontend && npm run dev",
-    "dev:debug": "cd apps/frontend && npm run dev:debug",
-    "dev:mcp": "cd apps/frontend && npm run dev:mcp",
-    "build": "cd apps/frontend && npm run build",
-    "lint": "cd apps/frontend && npm run lint",
-    "test": "cd apps/frontend && npm test",
+    "install:frontend": "cd apps/frontend && bun install",
+    "install:all": "bun run install:backend && bun run install:frontend",
+    "start": "cd apps/frontend && bun run build && bun run start",
+    "dev": "cd apps/frontend && bun run dev",
+    "dev:debug": "cd apps/frontend && bun run dev:debug",
+    "dev:mcp": "cd apps/frontend && bun run dev:mcp",
+    "build": "cd apps/frontend && bun run build",
+    "lint": "cd apps/frontend && bun run lint",
+    "test": "cd apps/frontend && bun test",
     "test:backend": "node scripts/test-backend.js",
-    "package": "cd apps/frontend && npm run package",
-    "package:mac": "cd apps/frontend && npm run package:mac",
-    "package:win": "cd apps/frontend && npm run package:win",
-    "package:linux": "cd apps/frontend && npm run package:linux"
+    "package": "cd apps/frontend && bun run package",
+    "package:mac": "cd apps/frontend && bun run package:mac",
+    "package:win": "cd apps/frontend && bun run package:win",
+    "package:linux": "cd apps/frontend && bun run package:linux"
   },
   "engines": {
     "node": ">=24.0.0",
-    "npm": ">=10.0.0"
+    "bun": ">=1.0.0"
   },
   "repository": {
     "type": "git",
