@@ -62,6 +62,146 @@ const browserMockAPI: ElectronAPI = {
     success: true
   }),
 
+  // Calendar Operations
+  getCalendarData: async (projectId: string) => {
+    const now = new Date();
+    return {
+      success: true,
+      data: {
+        projectId,
+        items: [
+          {
+            id: 'mock-item-1',
+            title: 'Q1 Marketing Campaign',
+            description: 'Annual marketing campaign for Q1',
+            type: 'campaign' as const,
+            status: 'published' as const,
+            source: 'manual' as const,
+            startDate: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
+            endDate: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
+            allDay: true,
+            priority: 'high' as const,
+            tags: ['marketing', 'q1'],
+            assignee: 'Marketing Team',
+            createdAt: now,
+            updatedAt: now,
+          },
+          {
+            id: 'mock-item-2',
+            title: 'Blog Post: AI Trends',
+            description: 'Blog post about AI marketing trends',
+            type: 'content' as const,
+            status: 'scheduled' as const,
+            source: 'manual' as const,
+            startDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000),
+            allDay: true,
+            priority: 'medium' as const,
+            tags: ['blog', 'content'],
+            assignee: 'Sarah Chen',
+            createdAt: now,
+            updatedAt: now,
+          },
+          {
+            id: 'mock-item-3',
+            title: 'Weekly Social Posts',
+            description: 'Weekly social media content',
+            type: 'social' as const,
+            status: 'published' as const,
+            source: 'manual' as const,
+            startDate: now,
+            allDay: true,
+            priority: 'medium' as const,
+            tags: ['social'],
+            assignee: 'Alex Rivera',
+            recurrence: {
+              frequency: 'weekly' as const,
+              interval: 1,
+            },
+            createdAt: now,
+            updatedAt: now,
+          },
+          {
+            id: 'mock-item-4',
+            title: 'Monthly Newsletter',
+            description: 'Monthly email newsletter',
+            type: 'email' as const,
+            status: 'scheduled' as const,
+            source: 'manual' as const,
+            startDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
+            allDay: true,
+            priority: 'medium' as const,
+            tags: ['newsletter', 'email'],
+            assignee: 'Jamie Smith',
+            createdAt: now,
+            updatedAt: now,
+          },
+          {
+            id: 'mock-item-5',
+            title: 'SEO Keyword Research',
+            description: 'Q1 SEO keywords research',
+            type: 'seo' as const,
+            status: 'published' as const,
+            source: 'manual' as const,
+            startDate: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
+            endDate: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000),
+            allDay: true,
+            priority: 'high' as const,
+            tags: ['seo', 'research'],
+            assignee: 'Mike Johnson',
+            createdAt: now,
+            updatedAt: now,
+          },
+        ],
+        viewMode: 'month' as const,
+        zoomLevel: 'month' as const,
+        currentDate: now,
+        filters: {
+          itemTypes: [],
+          status: [],
+          sources: [],
+          tags: [],
+          searchQuery: '',
+        },
+        updatedAt: now,
+      },
+    };
+  },
+
+  saveCalendarData: async () => ({
+    success: true,
+  }),
+
+  addCalendarItem: async () => ({
+    success: true,
+    data: `mock-item-${Date.now()}`,
+  }),
+
+  updateCalendarItem: async () => ({
+    success: true,
+  }),
+
+  deleteCalendarItem: async () => ({
+    success: true,
+  }),
+
+  syncRoadmap: async () => ({
+    success: true,
+    data: [],
+  }),
+
+  scanFiles: async () => ({
+    success: true,
+    data: [],
+  }),
+
+  checkCalendarConnection: async () => ({
+    success: true,
+    data: {
+      connected: false,
+      error: 'Calendar integration not available in browser mode',
+    },
+  }),
+
   generateRoadmap: (_projectId: string, _enableCompetitorAnalysis?: boolean, _refreshCompetitorAnalysis?: boolean) => {
     console.warn('[Browser Mock] generateRoadmap called');
   },

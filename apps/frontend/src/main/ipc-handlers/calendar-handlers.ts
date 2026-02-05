@@ -8,6 +8,15 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync } from 
 import { projectStore } from '../project-store';
 import { debugLog, debugError } from '../../shared/utils/debug-logger';
 import { safeSendToRenderer } from './utils';
+import { validateProjectId } from '../utils/path-traversal-validator';
+import { sanitizeCalendarItem } from '../../shared/utils/input-sanitizer';
+// SECURITY: Authorization checks for calendar operations
+import {
+  checkCalendarReadPermission,
+  checkCalendarWritePermission,
+  checkCalendarDeletePermission,
+  createPermissionDeniedError,
+} from '../security/calendar-permissions';
 
 /**
  * Parse .env file content into key-value pairs
@@ -68,7 +77,105 @@ export function registerCalendarHandlers(
   ipcMain.handle(
     IPC_CHANNELS.CALENDAR_GET_DATA,
     async (_, projectId: string): Promise<IPCResult<CalendarData | null>> => {
-      const project = projectStore.getProject(projectId);
+      // SECURITY: Validate projectId to prevent path traversal attacks
+      // This protects against attacks like "../../etc/passwd" or absolute paths
+      const validation = validateProjectId(projectId);
+      if (!validation.valid || !validation.sanitized) {
+        return { success: false, error: validation.error || 'Invalid project ID' };
+      }
+
+      const sanitizedProjectId = validation.sanitized;
+
+      // SECURITY: Check read permissions before accessing calendar data
+      // This ensures the user has authorization to read this project's calendar
+      const permission = checkCalendarReadPermission(sanitizedProjectId);
+      if (!permission.granted) {
+        debugError('[Calendar Handler] Read permission denied for project:', sanitizedProjectId);
+        return {
+          success: false,
+          error: permission.error || 'Permission denied',
+          code: permission.code || 'FORBIDDEN',
+        };
+      }
+
+      // Special case for demo project - return mock data
+      if (sanitizedProjectId === 'demo') {
+        const now = new Date();
+        return {
+          success: true,
+          data: {
+            projectId: 'demo',
+            items: [
+              // Demo campaign
+              {
+                id: 'demo-item-1',
+                title: 'Q1 Marketing Campaign',
+                description: 'Annual marketing campaign for Q1',
+                type: 'campaign',
+                status: 'published',
+                source: 'manual',
+                startDate: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
+                endDate: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
+                allDay: true,
+                priority: 'high',
+                tags: ['marketing', 'q1'],
+                assignee: 'Marketing Team',
+                createdAt: now,
+                updatedAt: now,
+              },
+              // Demo content
+              {
+                id: 'demo-item-2',
+                title: 'Blog Post: AI Trends',
+                description: 'Blog post about AI marketing trends',
+                type: 'content',
+                status: 'scheduled',
+                source: 'manual',
+                startDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000),
+                allDay: true,
+                priority: 'medium',
+                tags: ['blog', 'content'],
+                assignee: 'Sarah Chen',
+                createdAt: now,
+                updatedAt: now,
+              },
+              // Demo social
+              {
+                id: 'demo-item-3',
+                title: 'Weekly Social Posts',
+                description: 'Weekly social media content',
+                type: 'social',
+                status: 'published',
+                source: 'manual',
+                startDate: now,
+                allDay: true,
+                priority: 'medium',
+                tags: ['social'],
+                assignee: 'Alex Rivera',
+                recurrence: {
+                  frequency: 'weekly',
+                  interval: 1,
+                },
+                createdAt: now,
+                updatedAt: now,
+              },
+            ],
+            viewMode: 'month',
+            zoomLevel: 'month',
+            currentDate: now,
+            filters: {
+              itemTypes: [],
+              status: [],
+              sources: [],
+              tags: [],
+              searchQuery: '',
+            },
+            updatedAt: now,
+          },
+        };
+      }
+
+      const project = projectStore.getProject(sanitizedProjectId);
       if (!project) {
         return { success: false, error: 'Project not found' };
       }
@@ -84,7 +191,7 @@ export function registerCalendarHandlers(
         return {
           success: true,
           data: {
-            projectId,
+            projectId: sanitizedProjectId,
             items: [],
             viewMode: 'month',
             zoomLevel: 'month',
@@ -107,7 +214,7 @@ export function registerCalendarHandlers(
 
         // Transform snake_case to camelCase for frontend
         const calendarData: CalendarData = {
-          projectId: rawCalendar.project_id || projectId,
+          projectId: rawCalendar.project_id || sanitizedProjectId,
           items: (rawCalendar.items || []).map((item: Record<string, unknown>) => ({
             id: item.id,
             title: item.title,
@@ -158,7 +265,32 @@ export function registerCalendarHandlers(
   ipcMain.handle(
     IPC_CHANNELS.CALENDAR_SAVE_DATA,
     async (_, projectId: string, calendarData: CalendarData): Promise<IPCResult> => {
-      const project = projectStore.getProject(projectId);
+      // SECURITY: Validate projectId to prevent path traversal attacks
+      const validation = validateProjectId(projectId);
+      if (!validation.valid || !validation.sanitized) {
+        return { success: false, error: validation.error || 'Invalid project ID' };
+      }
+
+      const sanitizedProjectId = validation.sanitized;
+
+      // SECURITY: Check write permissions before saving calendar data
+      // This ensures the user has authorization to write to this project's calendar
+      const permission = checkCalendarWritePermission(sanitizedProjectId);
+      if (!permission.granted) {
+        debugError('[Calendar Handler] Write permission denied for project:', sanitizedProjectId);
+        return {
+          success: false,
+          error: permission.error || 'Permission denied',
+          code: permission.code || 'FORBIDDEN',
+        };
+      }
+
+      // Demo project - just return success (data is ephemeral)
+      if (sanitizedProjectId === 'demo') {
+        return { success: true };
+      }
+
+      const project = projectStore.getProject(sanitizedProjectId);
       if (!project) {
         return { success: false, error: 'Project not found' };
       }
@@ -226,7 +358,27 @@ export function registerCalendarHandlers(
   ipcMain.handle(
     IPC_CHANNELS.CALENDAR_ADD_ITEM,
     async (_, projectId: string, item: Omit<CalendarItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<IPCResult<string>> => {
-      const project = projectStore.getProject(projectId);
+      // SECURITY: Validate projectId to prevent path traversal attacks
+      const validation = validateProjectId(projectId);
+      if (!validation.valid || !validation.sanitized) {
+        return { success: false, error: validation.error || 'Invalid project ID' };
+      }
+
+      const sanitizedProjectId = validation.sanitized;
+
+      // SECURITY: Check write permissions before adding calendar item
+      // This ensures the user has authorization to modify this project's calendar
+      const permission = checkCalendarWritePermission(sanitizedProjectId);
+      if (!permission.granted) {
+        debugError('[Calendar Handler] Write permission denied for project:', sanitizedProjectId);
+        return {
+          success: false,
+          error: permission.error || 'Permission denied',
+          code: permission.code || 'FORBIDDEN',
+        };
+      }
+
+      const project = projectStore.getProject(sanitizedProjectId);
       if (!project) {
         return { success: false, error: 'Project not found' };
       }
@@ -240,7 +392,7 @@ export function registerCalendarHandlers(
           const content = readFileSync(calendarPath, 'utf-8');
           const rawCalendar = JSON.parse(content);
           calendarData = {
-            projectId: rawCalendar.project_id || projectId,
+            projectId: rawCalendar.project_id || sanitizedProjectId,
             items: (rawCalendar.items || []).map((i: Record<string, unknown>) => ({
               id: i.id,
               title: i.title,
@@ -278,7 +430,7 @@ export function registerCalendarHandlers(
           };
         } else {
           calendarData = {
-            projectId,
+            projectId: sanitizedProjectId,
             items: [],
             viewMode: 'month',
             zoomLevel: 'month',
@@ -295,8 +447,12 @@ export function registerCalendarHandlers(
         }
 
         // Create new item
+        // SECURITY: Sanitize all user input to prevent XSS attacks
+        // This neutralizes script tags, event handlers, javascript: protocols, etc.
+        const sanitizedItem = sanitizeCalendarItem(item) as Omit<CalendarItem, 'id' | 'createdAt' | 'updatedAt'>;
+
         const newItem: CalendarItem = {
-          ...item,
+          ...sanitizedItem,
           id: `calendar-item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -359,7 +515,27 @@ export function registerCalendarHandlers(
   ipcMain.handle(
     IPC_CHANNELS.CALENDAR_UPDATE_ITEM,
     async (_, projectId: string, itemId: string, updates: Partial<Omit<CalendarItem, 'id'>>): Promise<IPCResult> => {
-      const project = projectStore.getProject(projectId);
+      // SECURITY: Validate projectId to prevent path traversal attacks
+      const validation = validateProjectId(projectId);
+      if (!validation.valid || !validation.sanitized) {
+        return { success: false, error: validation.error || 'Invalid project ID' };
+      }
+
+      const sanitizedProjectId = validation.sanitized;
+
+      // SECURITY: Check write permissions before updating calendar item
+      // This ensures the user has authorization to modify this project's calendar
+      const permission = checkCalendarWritePermission(sanitizedProjectId);
+      if (!permission.granted) {
+        debugError('[Calendar Handler] Write permission denied for project:', sanitizedProjectId);
+        return {
+          success: false,
+          error: permission.error || 'Permission denied',
+          code: permission.code || 'FORBIDDEN',
+        };
+      }
+
+      const project = projectStore.getProject(sanitizedProjectId);
       if (!project) {
         return { success: false, error: 'Project not found' };
       }
@@ -380,8 +556,12 @@ export function registerCalendarHandlers(
           return { success: false, error: 'Item not found' };
         }
 
+        // SECURITY: Sanitize all updates to prevent XSS attacks
+        // This neutralizes script tags, event handlers, javascript: protocols, etc.
+        const sanitizedUpdates = sanitizeCalendarItem(updates);
+
         // Apply updates
-        Object.assign(item, updates);
+        Object.assign(item, sanitizedUpdates);
         if (updates.startDate) {
           item.start_date = updates.startDate.toISOString();
         }
@@ -411,7 +591,27 @@ export function registerCalendarHandlers(
   ipcMain.handle(
     IPC_CHANNELS.CALENDAR_DELETE_ITEM,
     async (_, projectId: string, itemId: string): Promise<IPCResult> => {
-      const project = projectStore.getProject(projectId);
+      // SECURITY: Validate projectId to prevent path traversal attacks
+      const validation = validateProjectId(projectId);
+      if (!validation.valid || !validation.sanitized) {
+        return { success: false, error: validation.error || 'Invalid project ID' };
+      }
+
+      const sanitizedProjectId = validation.sanitized;
+
+      // SECURITY: Check delete permissions before deleting calendar item
+      // This ensures the user has authorization to delete from this project's calendar
+      const permission = checkCalendarDeletePermission(sanitizedProjectId);
+      if (!permission.granted) {
+        debugError('[Calendar Handler] Delete permission denied for project:', sanitizedProjectId);
+        return {
+          success: false,
+          error: permission.error || 'Permission denied',
+          code: permission.code || 'FORBIDDEN',
+        };
+      }
+
+      const project = projectStore.getProject(sanitizedProjectId);
       if (!project) {
         return { success: false, error: 'Project not found' };
       }
@@ -450,7 +650,27 @@ export function registerCalendarHandlers(
   ipcMain.handle(
     IPC_CHANNELS.CALENDAR_SYNC_ROADMAP,
     async (_, projectId: string, roadmapData: any): Promise<IPCResult<CalendarItem[]>> => {
-      const project = projectStore.getProject(projectId);
+      // SECURITY: Validate projectId to prevent path traversal attacks
+      const validation = validateProjectId(projectId);
+      if (!validation.valid || !validation.sanitized) {
+        return { success: false, error: validation.error || 'Invalid project ID' };
+      }
+
+      const sanitizedProjectId = validation.sanitized;
+
+      // SECURITY: Check read permissions before syncing roadmap data
+      // This ensures the user has authorization to read this project's calendar
+      const permission = checkCalendarReadPermission(sanitizedProjectId);
+      if (!permission.granted) {
+        debugError('[Calendar Handler] Read permission denied for project:', sanitizedProjectId);
+        return {
+          success: false,
+          error: permission.error || 'Permission denied',
+          code: permission.code || 'FORBIDDEN',
+        };
+      }
+
+      const project = projectStore.getProject(sanitizedProjectId);
       if (!project) {
         return { success: false, error: 'Project not found' };
       }
@@ -520,7 +740,27 @@ export function registerCalendarHandlers(
   ipcMain.handle(
     IPC_CHANNELS.CALENDAR_SCAN_FILES,
     async (_, projectId: string): Promise<IPCResult<CalendarItem[]>> => {
-      const project = projectStore.getProject(projectId);
+      // SECURITY: Validate projectId to prevent path traversal attacks
+      const validation = validateProjectId(projectId);
+      if (!validation.valid || !validation.sanitized) {
+        return { success: false, error: validation.error || 'Invalid project ID' };
+      }
+
+      const sanitizedProjectId = validation.sanitized;
+
+      // SECURITY: Check read permissions before scanning files
+      // This ensures the user has authorization to read this project's calendar
+      const permission = checkCalendarReadPermission(sanitizedProjectId);
+      if (!permission.granted) {
+        debugError('[Calendar Handler] Read permission denied for project:', sanitizedProjectId);
+        return {
+          success: false,
+          error: permission.error || 'Permission denied',
+          code: permission.code || 'FORBIDDEN',
+        };
+      }
+
+      const project = projectStore.getProject(sanitizedProjectId);
       if (!project) {
         return { success: false, error: 'Project not found' };
       }
@@ -548,7 +788,15 @@ export function registerCalendarHandlers(
   ipcMain.handle(
     IPC_CHANNELS.CALENDAR_CHECK_CONNECTION,
     async (_, projectId: string): Promise<IPCResult<import('../../shared/types/integrations').CalendarSyncStatus>> => {
-      const project = projectStore.getProject(projectId);
+      // SECURITY: Validate projectId to prevent path traversal attacks
+      const validation = validateProjectId(projectId);
+      if (!validation.valid || !validation.sanitized) {
+        return { success: false, error: validation.error || 'Invalid project ID' };
+      }
+
+      const sanitizedProjectId = validation.sanitized;
+
+      const project = projectStore.getProject(sanitizedProjectId);
       if (!project) {
         return { success: false, error: 'Project not found' };
       }
@@ -576,7 +824,7 @@ export function registerCalendarHandlers(
         // - For Outlook: Use Microsoft Graph API to call /me/calendars
         // - For CalDAV: Make a PROPFIND request to the CalDAV server
 
-        debugLog(`[Calendar Handler] Checking ${provider} calendar connection for project ${projectId}`);
+        debugLog(`[Calendar Handler] Checking ${provider} calendar connection for project ${sanitizedProjectId}`);
 
         // Mock successful connection for testing
         // Replace this with actual API calls to validate the connection

@@ -21,6 +21,7 @@ import {
   addMonths,
   subMonths,
 } from 'date-fns';
+import { sanitizeCalendarItem } from '../../shared/utils/input-sanitizer';
 
 /**
  * Calendar Store - State management for calendar feature
@@ -34,7 +35,9 @@ interface CalendarState {
 
   // UI State
   isLoading: boolean;
+  isSaving: boolean;
   error: string | null;
+  pendingItemIds: Set<string>;
 
   // View Settings
   currentDate: Date;
@@ -48,7 +51,10 @@ interface CalendarState {
   setSelectedItem: (item: CalendarItem | null) => void;
   setHoveredItem: (item: CalendarItem | null) => void;
   setLoading: (loading: boolean) => void;
+  setSaving: (saving: boolean) => void;
   setError: (error: string | null) => void;
+  addPendingItem: (itemId: string) => void;
+  removePendingItem: (itemId: string) => void;
 
   // View Actions
   setCurrentDate: (date: Date) => void;
@@ -99,7 +105,9 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
   selectedItem: null,
   hoveredItem: null,
   isLoading: false,
+  isSaving: false,
   error: null,
+  pendingItemIds: new Set<string>(),
   currentDate: new Date(),
   viewMode: 'month',
   zoomLevel: 'day',
@@ -117,6 +125,20 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
   setLoading: (loading) => set({ isLoading: loading }),
 
   setError: (error) => set({ error }),
+
+  setSaving: (saving) => set({ isSaving: saving }),
+
+  addPendingItem: (itemId) =>
+    set((state) => ({
+      pendingItemIds: new Set([...state.pendingItemIds, itemId]),
+    })),
+
+  removePendingItem: (itemId) =>
+    set((state) => {
+      const newSet = new Set(state.pendingItemIds);
+      newSet.delete(itemId);
+      return { pendingItemIds: newSet };
+    }),
 
   // View Actions
   setCurrentDate: (date) => set({ currentDate: date }),
@@ -174,8 +196,12 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
 
   // Item Actions
   addItem: (itemData) => {
+    // SECURITY: Sanitize all user input to prevent XSS attacks
+    // This neutralizes script tags, event handlers, javascript: protocols, etc.
+    const sanitizedItem = sanitizeCalendarItem(itemData) as Omit<CalendarItem, 'id' | 'createdAt' | 'updatedAt'>;
+
     const newItem: CalendarItem = {
-      ...itemData,
+      ...sanitizedItem,
       id: `calendar-item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -199,9 +225,12 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
     set((state) => {
       if (!state.calendarData) return state;
 
+      // SECURITY: Sanitize all updates to prevent XSS attacks
+      const sanitizedUpdates = sanitizeCalendarItem(updates);
+
       const updatedItems = state.calendarData.items.map((item) =>
         item.id === id
-          ? { ...item, ...updates, updatedAt: new Date() }
+          ? { ...item, ...sanitizedUpdates, updatedAt: new Date() }
           : item
       );
 
@@ -213,7 +242,7 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
         },
         selectedItem:
           state.selectedItem?.id === id
-            ? { ...state.selectedItem, ...updates, updatedAt: new Date() }
+            ? { ...state.selectedItem, ...sanitizedUpdates, updatedAt: new Date() }
             : state.selectedItem,
       };
     }),
@@ -366,6 +395,10 @@ export async function loadCalendarData(projectId: string): Promise<void> {
     const result = await window.electronAPI.getCalendarData(projectId);
     if (result.success && result.data) {
       store.setCalendarData(result.data);
+    } else if (result.code === 'FORBIDDEN') {
+      // SECURITY: Handle permission denied errors
+      store.setError(result.error || 'Permission denied');
+      store.setCalendarData(null);
     } else {
       store.setCalendarData(createEmptyCalendarData(projectId));
     }
@@ -392,16 +425,178 @@ export async function saveCalendarData(projectId: string): Promise<void> {
     return;
   }
 
+  store.setSaving(true);
+  store.setError(null);
+
   try {
     const result = await window.electronAPI.saveCalendarData(projectId, calendarData);
     if (!result.success) {
+      // SECURITY: Handle permission denied errors specifically
+      if (result.code === 'FORBIDDEN') {
+        store.setError(result.error || 'Permission denied');
+        throw new Error(result.error || 'Permission denied');
+      }
       throw new Error(result.error || 'Failed to save calendar data');
     }
   } catch (error) {
     console.error('[Calendar] Failed to save calendar data:', error);
-    store.setError(
-      error instanceof Error ? error.message : 'Failed to save calendar data'
+    const errorMessage = error instanceof Error ? error.message : 'Failed to save calendar data';
+    store.setError(errorMessage);
+    throw error;
+  } finally {
+    store.setSaving(false);
+  }
+}
+
+/**
+ * Add item with optimistic update and rollback on error
+ */
+export async function addItemWithOptimisticUpdate(
+  projectId: string,
+  itemData: Omit<CalendarItem, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<string> {
+  const store = useCalendarStore.getState();
+
+  // Create the item
+  const newItem: CalendarItem = {
+    ...itemData,
+    id: `calendar-item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  // Optimistically add to state
+  store.setCalendarData(
+    store.calendarData
+      ? {
+          ...store.calendarData,
+          items: [...store.calendarData.items, newItem],
+          updatedAt: new Date(),
+        }
+      : null
+  );
+
+  // Mark as pending
+  store.addPendingItem(newItem.id);
+
+  try {
+    // Save to backend
+    await saveCalendarData(projectId);
+    store.removePendingItem(newItem.id);
+    return newItem.id;
+  } catch (error) {
+    // Rollback on error
+    console.error('[Calendar] Failed to add item, rolling back:', error);
+    store.setCalendarData(
+      store.calendarData
+        ? {
+            ...store.calendarData,
+            items: store.calendarData.items.filter((i) => i.id !== newItem.id),
+            updatedAt: new Date(),
+          }
+        : null
     );
+    store.removePendingItem(newItem.id);
+    throw error;
+  }
+}
+
+/**
+ * Update item with optimistic update and rollback on error
+ */
+export async function updateItemWithOptimisticUpdate(
+  projectId: string,
+  id: string,
+  updates: Partial<Omit<CalendarItem, 'id'>>
+): Promise<void> {
+  const store = useCalendarStore.getState();
+
+  if (!store.calendarData) {
+    throw new Error('No calendar data available');
+  }
+
+  // Store previous state for rollback
+  const previousItem = store.calendarData.items.find((i) => i.id === id);
+  if (!previousItem) {
+    throw new Error('Item not found');
+  }
+
+  // Optimistically update
+  const updatedItems = store.calendarData.items.map((item) =>
+    item.id === id ? { ...item, ...updates, updatedAt: new Date() } : item
+  );
+
+  store.setCalendarData({
+    ...store.calendarData,
+    items: updatedItems,
+    updatedAt: new Date(),
+  });
+
+  // Mark as pending
+  store.addPendingItem(id);
+
+  try {
+    // Save to backend
+    await saveCalendarData(projectId);
+    store.removePendingItem(id);
+  } catch (error) {
+    // Rollback on error
+    console.error('[Calendar] Failed to update item, rolling back:', error);
+    const rolledBackItems = store.calendarData.items.map((item) =>
+      item.id === id ? previousItem : item
+    );
+    store.setCalendarData({
+      ...store.calendarData,
+      items: rolledBackItems,
+      updatedAt: new Date(),
+    });
+    store.removePendingItem(id);
+    throw error;
+  }
+}
+
+/**
+ * Delete item with optimistic update and rollback on error
+ */
+export async function deleteItemWithOptimisticUpdate(
+  projectId: string,
+  id: string
+): Promise<void> {
+  const store = useCalendarStore.getState();
+
+  if (!store.calendarData) {
+    throw new Error('No calendar data available');
+  }
+
+  // Store previous state for rollback
+  const previousItem = store.calendarData.items.find((i) => i.id === id);
+  if (!previousItem) {
+    throw new Error('Item not found');
+  }
+
+  // Optimistically delete
+  store.setCalendarData({
+    ...store.calendarData,
+    items: store.calendarData.items.filter((item) => item.id !== id),
+    updatedAt: new Date(),
+  });
+
+  // Mark as pending
+  store.addPendingItem(id);
+
+  try {
+    // Save to backend
+    await saveCalendarData(projectId);
+    store.removePendingItem(id);
+  } catch (error) {
+    // Rollback on error
+    console.error('[Calendar] Failed to delete item, rolling back:', error);
+    store.setCalendarData({
+      ...store.calendarData,
+      items: [...store.calendarData.items, previousItem],
+      updatedAt: new Date(),
+    });
+    store.removePendingItem(id);
     throw error;
   }
 }

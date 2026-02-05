@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Calendar as CalendarIcon, Clock, Tag, Link2, User, MapPin, AlertCircle } from 'lucide-react';
+import { X, Calendar as CalendarIcon, Clock, Tag, Link2, User, MapPin, AlertCircle, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 import type { CalendarItem, CalendarItemType, CalendarItemStatus } from '../../../shared/types';
 import { CALENDAR_COLORS, CALENDAR_ITEM_TYPE_LABELS } from '../../../shared/constants';
@@ -10,12 +11,14 @@ interface CalendarAddItemDialogProps {
   onClose: () => void;
   onAdd: (item: Omit<CalendarItem, 'id' | 'createdAt' | 'updatedAt'>) => void;
   defaultDate?: Date;
+  isSubmitting?: boolean;
 }
 
 const ITEM_TYPES: CalendarItemType[] = ['campaign', 'content', 'social', 'email', 'seo', 'deadline', 'event'];
 const ITEM_STATUSES: CalendarItemStatus[] = ['draft', 'scheduled', 'published', 'cancelled'];
 
-export function CalendarAddItemDialog({ isOpen, onClose, onAdd, defaultDate = new Date() }: CalendarAddItemDialogProps) {
+export function CalendarAddItemDialog({ isOpen, onClose, onAdd, defaultDate = new Date(), isSubmitting = false }: CalendarAddItemDialogProps) {
+  const { t } = useTranslation(['calendar', 'common']);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<CalendarItemType>('campaign');
@@ -68,7 +71,7 @@ export function CalendarAddItemDialog({ isOpen, onClose, onAdd, defaultDate = ne
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title.trim()) return;
+    if (!title.trim() || isSubmitting) return;
 
     const newItem: Omit<CalendarItem, 'id' | 'createdAt' | 'updatedAt'> = {
       title: title.trim(),
@@ -97,7 +100,7 @@ export function CalendarAddItemDialog({ isOpen, onClose, onAdd, defaultDate = ne
     };
 
     onAdd(newItem);
-    onClose();
+    // Don't close immediately - let parent handle closing after save
   };
 
   return (
@@ -112,6 +115,7 @@ export function CalendarAddItemDialog({ isOpen, onClose, onAdd, defaultDate = ne
             transition={{ duration: 0.2 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
             onClick={onClose}
+            aria-hidden="true"
           />
 
           {/* Dialog */}
@@ -123,21 +127,25 @@ export function CalendarAddItemDialog({ isOpen, onClose, onAdd, defaultDate = ne
               transition={{ duration: 0.2 }}
               className="bg-card rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
               onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="dialog-title"
+              aria-describedby="dialog-description"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b">
                 <div>
-                  <h2 className="text-xl font-semibold">Add Calendar Item</h2>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    Create a new campaign, content, or event
+                  <h2 id="dialog-title" className="text-xl font-semibold">{t('calendar:dialog.addTitle')}</h2>
+                  <p id="dialog-description" className="text-sm text-muted-foreground mt-0.5">
+                    {t('calendar:dialog.addDescription')}
                   </p>
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={onClose}
-                  className="p-2 rounded-lg hover:bg-accent transition-colors"
-                  aria-label="Close"
+                  className="p-2 rounded-lg hover:bg-accent transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  aria-label={t('common:close')}
                 >
                   <X className="h-5 w-5" />
                 </motion.button>
@@ -521,7 +529,8 @@ export function CalendarAddItemDialog({ isOpen, onClose, onAdd, defaultDate = ne
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={onClose}
-                    className="px-6 py-2 rounded-lg border hover:bg-accent transition-colors font-medium"
+                    disabled={isSubmitting}
+                    className="px-6 py-2 rounded-lg border hover:bg-accent transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Cancel
                   </motion.button>
@@ -529,10 +538,17 @@ export function CalendarAddItemDialog({ isOpen, onClose, onAdd, defaultDate = ne
                     type="submit"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    disabled={!title.trim()}
-                    className="px-6 py-2 rounded-lg bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    disabled={!title.trim() || isSubmitting}
+                    className="px-6 py-2 rounded-lg bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center gap-2"
                   >
-                    Add Item
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      'Add Item'
+                    )}
                   </motion.button>
                 </div>
               </form>

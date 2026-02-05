@@ -1712,3 +1712,310 @@ body {
 [data-ui-scale="190"] { font-size: 30.4px; }
 [data-ui-scale="195"] { font-size: 31.2px; }
 [data-ui-scale="200"] { font-size: 32px; }
+
+/* ============================================
+   Accessibility & RTL Support
+   WCAG AA Compliance & Screen Reader Support
+   ============================================ */
+
+/* Enhanced focus indicators for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Ensure focus states are visible for all interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 3px rgba(214, 216, 118, 0.15);
+}
+
+/* Remove default outline but keep focus visible */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* High contrast focus indicators for better visibility */
+.focus-ring-strong {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Screen reader only but focusable (e.g., skip links) */
+.sr-only-focusable:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Hide content visually but keep accessible to screen readers */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* Skip links for accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 0 0 var(--radius-md) 0;
+  z-index: 9999;
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Ensure color contrast meets WCAG AA standards (4.5:1 for normal text) */
+.text-contrast-enhanced {
+  color: var(--foreground);
+}
+
+/* Enhanced contrast for interactive elements */
+button,
+a,
+[role="button"] {
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+/* RTL (Right-to-Left) language support */
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+/* RTL-specific adjustments for calendar components */
+[dir="rtl"] .calendar-grid {
+  direction: rtl;
+}
+
+[dir="rtl"] .calendar-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .calendar-navigation {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .calendar-event-card {
+  text-align: right;
+}
+
+/* Ensure proper spacing in RTL */
+[dir="rtl"] .flex.items-center.gap-2 > * + * {
+  margin-right: 0.5rem;
+  margin-left: 0;
+}
+
+[dir="rtl"] .flex.items-center.gap-4 > * + * {
+  margin-right: 1rem;
+  margin-left: 0;
+}
+
+/* RTL arrow icon flipping */
+[dir="rtl"] .icon-arrow-left {
+  transform: scaleX(-1);
+}
+
+[dir="rtl"] .icon-arrow-right {
+  transform: scaleX(-1);
+}
+
+/* Touch targets - minimum 44x44px for mobile (WCAG AAA) */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure touch targets have adequate spacing */
+.touch-target + .touch-target {
+  margin-left: 8px;
+}
+
+[dir="rtl"] .touch-target + .touch-target {
+  margin-left: 0;
+  margin-right: 8px;
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Keep essential animations but make them instant */
+  .progress-working::after {
+    animation: none;
+  }
+
+  .status-running,
+  .task-running-pulse {
+    animation: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  * {
+    border-color: var(--foreground) !important;
+  }
+
+  button:focus-visible,
+  a:focus-visible {
+    outline: 3px solid var(--foreground);
+    outline-offset: 3px;
+  }
+}
+
+/* Print styles for accessibility */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure calendar is printable */
+  .calendar-grid {
+    page-break-inside: avoid;
+  }
+
+  .calendar-event-card {
+    page-break-inside: avoid;
+  }
+}
+
+/* Landmark announcements for screen readers */
+[role="region"] {
+  position: relative;
+}
+
+[role="region"]::before {
+  content: attr(aria-label);
+  speak: never;
+}
+
+/* Enhanced focus indicators for motion components */
+motion.button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(214, 216, 118, 0.2);
+}
+
+/* Accessible color combinations for event types */
+.event-type-campaign {
+  background: linear-gradient(135deg, #7C3AED, #A78BFA);
+  color: white;
+}
+
+.event-type-content {
+  background: linear-gradient(135deg, #3B82F6, #60A5FA);
+  color: white;
+}
+
+.event-type-social {
+  background: linear-gradient(135deg, #F59E0B, #FBBF24);
+  color: #0B0B0F;
+}
+
+.event-type-email {
+  background: linear-gradient(135deg, #10B981, #34D399);
+  color: white;
+}
+
+.event-type-seo {
+  background: linear-gradient(135deg, #8B5CF6, #A78BFA);
+  color: white;
+}
+
+.event-type-deadline {
+  background: linear-gradient(135deg, #EF4444, #F87171);
+  color: white;
+}
+
+.event-type-event {
+  background: linear-gradient(135deg, #06B6D4, #22D3EE);
+  color: white;
+}
+
+/* Priority indicators with accessible labels */
+.priority-high {
+  background-color: #DC2626;
+  color: white;
+}
+
+.priority-medium {
+  background-color: #D97706;
+  color: white;
+}
+
+.priority-low {
+  background-color: #65A30D;
+  color: white;
+}
+
+/* Accessible status badges */
+.status-draft {
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+}
+
+.status-scheduled {
+  background-color: var(--info);
+  color: var(--info-foreground);
+}
+
+.status-published {
+  background-color: var(--success);
+  color: var(--success-foreground);
+}
+
+.status-cancelled {
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+}

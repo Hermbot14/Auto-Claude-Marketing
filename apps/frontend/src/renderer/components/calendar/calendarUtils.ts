@@ -163,99 +163,45 @@ export function downloadICS(items: CalendarItem[], filename: string = 'calendar.
 }
 
 /**
- * Import ICS file (basic parser)
- * This is a simplified parser that handles basic VEVENT items
- */
-export function importICS(icsContent: string): CalendarItem[] {
-  const items: CalendarItem[] = [];
-  const lines = icsContent.split(/\r\n|\n|\r/);
-
-  let currentItem: Partial<CalendarItem> | null = null;
-  let inEvent = false;
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-
-    if (trimmed === 'BEGIN:VEVENT') {
-      inEvent = true;
-      currentItem = {
-        id: `import-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        source: 'external',
-        type: 'event',
-        status: 'scheduled',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-    } else if (trimmed === 'END:VEVENT') {
-      if (currentItem && currentItem.title) {
-        items.push(currentItem as CalendarItem);
-      }
-      currentItem = null;
-      inEvent = false;
-    } else if (inEvent && currentItem) {
-      // Parse ICS properties
-      if (trimmed.startsWith('SUMMARY:')) {
-        currentItem.title = trimmed.substring(8).replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\n/g, '\n').replace(/\\\\/g, '\\');
-      } else if (trimmed.startsWith('DESCRIPTION:')) {
-        currentItem.description = trimmed.substring(11).replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\n/g, '\n').replace(/\\\\/g, '\\');
-      } else if (trimmed.startsWith('LOCATION:')) {
-        currentItem.location = trimmed.substring(9).replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\n/g, '\n').replace(/\\\\/g, '\\');
-      } else if (trimmed.startsWith('DTSTART') || trimmed.startsWith('DTSTART;')) {
-        // Parse date (simplified - doesn't handle all timezone cases)
-        const dateMatch = trimmed.match(/:([0-9]{8})/);
-        if (dateMatch) {
-          const year = parseInt(dateMatch[1].substring(0, 4));
-          const month = parseInt(dateMatch[1].substring(4, 6)) - 1;
-          const day = parseInt(dateMatch[1].substring(6, 8));
-          currentItem.startDate = new Date(year, month, day);
-        }
-      } else if (trimmed.startsWith('DTEND') || trimmed.startsWith('DTEND;')) {
-        const dateMatch = trimmed.match(/:([0-9]{8})/);
-        if (dateMatch) {
-          const year = parseInt(dateMatch[1].substring(0, 4));
-          const month = parseInt(dateMatch[1].substring(4, 6)) - 1;
-          const day = parseInt(dateMatch[1].substring(6, 8));
-          currentItem.endDate = new Date(year, month, day);
-        }
-      } else if (trimmed.startsWith('STATUS:')) {
-        const status = trimmed.substring(7);
-        if (status === 'CANCELLED') {
-          currentItem.status = 'cancelled';
-        } else if (status === 'CONFIRMED') {
-          currentItem.status = 'published';
-        } else {
-          currentItem.status = 'draft';
-        }
-      } else if (trimmed.startsWith('PRIORITY:')) {
-        const priority = parseInt(trimmed.substring(9));
-        currentItem.priority = priority <= 3 ? 'high' : priority >= 7 ? 'low' : 'medium';
-      } else if (trimmed.startsWith('CATEGORIES:')) {
-        currentItem.tags = trimmed.substring(11).split(',').map(t => t.trim().replace(/\\,/g, ',').replace(/\\;/g, ';'));
-      } else if (trimmed.startsWith('ATTENDEE')) {
-        const cnMatch = trimmed.match(/CN=([^:]+)/);
-        if (cnMatch) {
-          currentItem.assignee = cnMatch[1].replace(/\\,/g, ',').replace(/\\;/g, ';');
-        }
-      }
-    }
-  }
-
-  return items;
-}
-
-/**
  * Read ICS file from File object
+ * Uses secure ICS parser with comprehensive security validation
  */
 export async function readICSFile(file: File): Promise<CalendarItem[]> {
+  // Security: Check file size before reading
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error(`ICS file exceeds maximum size of ${MAX_FILE_SIZE} bytes`);
+  }
+
+  // Security: Validate file extension
+  if (!file.name.toLowerCase().endsWith('.ics')) {
+    throw new Error('Invalid file type. Only .ics files are allowed.');
+  }
+
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const content = e.target?.result as string;
       try {
-        const items = importICS(content);
-        resolve(items);
+        // Use secure ICS parser
+        const { parseICSToCalendarItems } = await import('../../lib/ics-parser');
+        const items = parseICSToCalendarItems(content);
+
+        // Add IDs and timestamps to each imported item
+        const itemsWithMetadata: CalendarItem[] = items.map((item) => ({
+          ...item,
+          id: `import-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }));
+
+        resolve(itemsWithMetadata);
       } catch (error) {
-        reject(error);
+        if (error instanceof Error) {
+          reject(new Error(`Failed to parse ICS file: ${error.message}`));
+        } else {
+          reject(new Error('Failed to parse ICS file: Unknown error'));
+        }
       }
     };
     reader.onerror = () => reject(new Error('Failed to read file'));

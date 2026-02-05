@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Edit2, Trash2, Calendar, Clock, MapPin, User, Tag, Link2, FileText } from 'lucide-react';
+import { X, Edit2, Trash2, Calendar, Clock, MapPin, User, Tag, Link2, FileText, Loader2, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import type { CalendarItem as CalendarItemType } from '../../../shared/types';
 import { CALENDAR_COLORS, CALENDAR_ITEM_TYPE_LABELS } from '../../../shared/constants';
@@ -11,9 +12,12 @@ interface CalendarItemDetailProps {
   onClose: () => void;
   onUpdate: (updates: Partial<Omit<CalendarItemType, 'id'>>) => void;
   onDelete: () => void;
+  isSaving?: boolean;
+  isPending?: boolean;
 }
 
-export function CalendarItemDetail({ item, isOpen, onClose, onUpdate, onDelete }: CalendarItemDetailProps) {
+export function CalendarItemDetail({ item, isOpen, onClose, onUpdate, onDelete, isSaving = false, isPending = false }: CalendarItemDetailProps) {
+  const { t } = useTranslation(['calendar', 'common']);
   const [isEditing, setIsEditing] = useState(false);
   const [editedItem, setEditedItem] = useState(item);
 
@@ -21,8 +25,8 @@ export function CalendarItemDetail({ item, isOpen, onClose, onUpdate, onDelete }
     setEditedItem(item);
   }, [item]);
 
-  const handleSave = () => {
-    onUpdate(editedItem);
+  const handleSave = async () => {
+    await onUpdate(editedItem);
     setIsEditing(false);
   };
 
@@ -43,6 +47,7 @@ export function CalendarItemDetail({ item, isOpen, onClose, onUpdate, onDelete }
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
+        aria-hidden="true"
       >
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
@@ -50,6 +55,10 @@ export function CalendarItemDetail({ item, isOpen, onClose, onUpdate, onDelete }
           exit={{ scale: 0.95, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
           className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-card border-l shadow-xl overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="item-detail-title"
+          aria-describedby="item-detail-description"
         >
           {/* Header */}
           <div className="sticky top-0 z-10 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 border-b p-4">
@@ -71,40 +80,59 @@ export function CalendarItemDetail({ item, isOpen, onClose, onUpdate, onDelete }
                     type="text"
                     value={editedItem.title}
                     onChange={(e) => setEditedItem({ ...editedItem, title: e.target.value })}
-                    className="text-xl font-semibold bg-transparent border-b border-primary focus:outline-none w-full"
+                    className="text-xl font-semibold bg-transparent border-b border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring w-full"
                     autoFocus
+                    aria-label={t('calendar:dialog.editTitle')}
                   />
                 ) : (
-                  <h2 className="text-xl font-semibold">{item.title}</h2>
+                  <h2 id="item-detail-title" className="text-xl font-semibold">{item.title}</h2>
                 )}
               </div>
               <button
                 onClick={onClose}
-                className="p-1 rounded-lg hover:bg-accent transition-colors"
+                className="p-1 rounded-lg hover:bg-accent transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                aria-label={t('common:close')}
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Action buttons */}
-            <div className="flex items-center gap-2 mt-4">
+            <div className="flex items-center gap-2 mt-4" role="group" aria-label={t('calendar:dialog.actions')}>
+              {isPending && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mr-auto">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Saving...
+                </div>
+              )}
               {isEditing ? (
                 <>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleSave}
-                    className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
+                    disabled={isSaving}
+                    className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    aria-label={t('common:save')}
                   >
-                    Save
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      t('common:save')
+                    )}
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleCancel}
-                    className="px-3 py-1.5 rounded-lg bg-muted text-sm font-medium"
+                    disabled={isSaving}
+                    className="px-3 py-1.5 rounded-lg bg-muted text-sm font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label={t('common:cancel')}
                   >
-                    Cancel
+                    {t('common:cancel')}
                   </motion.button>
                 </>
               ) : (
@@ -113,8 +141,10 @@ export function CalendarItemDetail({ item, isOpen, onClose, onUpdate, onDelete }
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsEditing(true)}
-                    className="p-2 rounded-lg hover:bg-accent transition-colors"
-                    title="Edit"
+                    disabled={isSaving || isPending}
+                    className="p-2 rounded-lg hover:bg-accent transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={t('calendar:event.edit')}
+                    aria-label={t('calendar:event.edit')}
                   >
                     <Edit2 className="h-4 w-4" />
                   </motion.button>
@@ -122,10 +152,12 @@ export function CalendarItemDetail({ item, isOpen, onClose, onUpdate, onDelete }
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={onDelete}
-                    className="p-2 rounded-lg hover:bg-destructive hover:text-destructive-foreground transition-colors"
-                    title="Delete"
+                    disabled={isSaving || isPending}
+                    className="p-2 rounded-lg hover:bg-destructive hover:text-destructive-foreground transition-colors focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={t('calendar:event.delete')}
+                    aria-label={t('calendar:event.delete')}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    {isSaving || isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                   </motion.button>
                 </>
               )}

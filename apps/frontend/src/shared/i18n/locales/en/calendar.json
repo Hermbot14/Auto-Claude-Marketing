@@ -1,0 +1,146 @@
+{
+  "views": {
+    "month": "Month",
+    "week": "Week",
+    "day": "Day",
+    "list": "List",
+    "timeline": "Timeline",
+    "agenda": "Agenda"
+  },
+  "navigation": {
+    "previous": "Previous",
+    "next": "Next",
+    "today": "Today",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "goToToday": "Go to today"
+  },
+  "header": {
+    "title": "Marketing Calendar",
+    "itemsCount": "{{count}} items",
+    "itemsCount_plural": "{{count}} items",
+    "eventsCount": "{{count}} events",
+    "eventsCount_plural": "{{count}} events"
+  },
+  "event": {
+    "allDay": "All day",
+    "multiDay": "Multi-day",
+    "more": "more",
+    "moreEvents": "+{{count}} more",
+    "moreEvents_plural": "+{{count}} more",
+    "viewAll": "View all",
+    "create": "Create Event",
+    "edit": "Edit",
+    "delete": "Delete",
+    "duplicate": "Duplicate",
+    "details": "Event Details"
+  },
+  "eventCard": {
+    "title": "{{title}}",
+    "time": "{{startTime}} - {{endTime}}",
+    "status": "Status: {{status}}",
+    "assignee": "Assignee: {{assignee}}",
+    "untimed": "No time set"
+  },
+  "week": {
+    "allDayRow": "All Day",
+    "workingHours": "Working hours",
+    "currentTime": "Current time"
+  },
+  "grid": {
+    "weekDays": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    },
+    "weekDaysFull": {
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
+    },
+    "today": "Today",
+    "otherMonth": "Other month",
+    "selectedDate": "Selected date",
+    "clickToSelect": "Click to select this date"
+  },
+  "legend": {
+    "eventTypes": "Event Types"
+  },
+  "empty": {
+    "noEvents": "No events scheduled for this period",
+    "createFirst": "Create your first event",
+    "noEventsToday": "No events scheduled for today"
+  },
+  "keyboard": {
+    "shortcuts": "Keyboard Shortcuts",
+    "navigate": "Navigate",
+    "select": "Select",
+    "actions": "Actions",
+    "arrowKeys": "Arrow keys to navigate",
+    "enter": "Enter to select",
+    "escape": "Escape to cancel",
+    "delete": "Delete to remove",
+    "n": "N for today",
+    "t": "T for today"
+  },
+  "a11y": {
+    "calendarGrid": "Calendar grid for {{month}} {{year}}",
+    "dayCell": "{{day}}, {{date}}",
+    "eventCard": "{{title}}, {{type}}, {{date}} at {{time}}, {{status}}",
+    "viewSwitcher": "Calendar views",
+    "switchToView": "Switch to {{view}} view",
+    "nextPeriod": "Navigate to next period",
+    "previousPeriod": "Navigate to previous period",
+    "loading": "Loading calendar...",
+    "syncing": "Syncing roadmap data...",
+    "loadError": "Failed to load calendar",
+    "retry": "Retry",
+    "toolbar": "Calendar toolbar",
+    "toggleFilters": "Toggle filters",
+    "export": "Export to ICS",
+    "import": "Import from ICS file",
+    "timelineView": "Timeline view",
+    "navigation": "Navigation",
+    "zoomControls": "Zoom controls",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "filters": "Filters panel",
+    "saving": "Saving...",
+    "pending": "Saving changes..."
+  },
+  "filters": {
+    "title": "Filters",
+    "active": "active",
+    "clearAll": "Clear All",
+    "searchPlaceholder": "Search items...",
+    "types": "Type",
+    "status": "Status",
+    "sources": "Source"
+  },
+  "dialog": {
+    "addTitle": "Add Calendar Item",
+    "addDescription": "Create a new campaign, content, or event",
+    "editTitle": "Edit title",
+    "actions": "Actions"
+  },
+  "errorBoundary": {
+    "title": "Calendar Error",
+    "description": "Something went wrong with the calendar",
+    "message": "The calendar encountered an unexpected error. Your data is safe, and you can try reloading the calendar.",
+    "retry": "Retry",
+    "reportIssue": "Report Issue",
+    "errorDetails": "Error details"
+  }
+}

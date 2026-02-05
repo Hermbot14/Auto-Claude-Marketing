@@ -5,3 +5,4 @@ export { CalendarItem } from './CalendarItem';
 export { CalendarItemDetail } from './CalendarItemDetail';
 export { CalendarFilters } from './CalendarFilters';
 export { CalendarAddItemDialog } from './CalendarAddItemDialog';
+export { CalendarErrorBoundary, withCalendarErrorBoundary } from './CalendarErrorBoundary';

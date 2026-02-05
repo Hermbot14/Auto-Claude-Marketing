@@ -1,4 +1,4 @@
-import { memo, useRef, useEffect, useState, useCallback } from 'react';
+import { memo, useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   format,
@@ -23,6 +23,7 @@ import {
   CalendarDays,
   LayoutGrid,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { CalendarItem as CalendarItemType, CalendarZoomLevel } from '../../../shared/types';
 import { CALENDAR_COLORS, CALENDAR_ITEM_TYPE_LABELS } from '../../../shared/constants';
 import { CalendarItem } from './CalendarItem';
@@ -99,6 +100,7 @@ export const CalendarTimeline = memo<CalendarTimelineProps>(({
   onDateClick,
   selectedItem,
 }) => {
+  const { t } = useTranslation(['calendar', 'common']);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState(0);
@@ -108,9 +110,29 @@ export const CalendarTimeline = memo<CalendarTimelineProps>(({
 
   // Get date range based on zoom level
   const getDateRange = useCallback(() => {
-    const monthsToShow = zoomLevel === 'quarter' ? 3 : zoomLevel === 'month' ? 1 : 1;
     const startDate = startOfMonth(currentDate);
-    const endDate = endOfMonth(addMonths(startDate, monthsToShow - 1));
+    let endDate: Date;
+
+    switch (zoomLevel) {
+      case 'quarter':
+        // Show 3 months
+        endDate = endOfMonth(addMonths(startDate, 2));
+        break;
+      case 'month':
+        // Show 1 month
+        endDate = endOfMonth(startDate);
+        break;
+      case 'week':
+        // Show 4 weeks (approximately 1 month for consistency)
+        endDate = addDays(startDate, 27);
+        break;
+      case 'day':
+        // Show 7 days (1 week)
+        endDate = addDays(startDate, 6);
+        break;
+      default:
+        endDate = endOfMonth(startDate);
+    }
 
     return { startDate, endDate };
   }, [currentDate, zoomLevel]);
@@ -177,10 +199,20 @@ export const CalendarTimeline = memo<CalendarTimelineProps>(({
     return dragDeltaDays;
   }, [draggedItem, dragStart, getDateRange]);
 
-  // Get visible items with lane assignments
-  const visibleItems = getVisibleItems();
-  const laneAssignments = assignLanes(visibleItems);
-  const maxLanes = Math.max(4, laneAssignments.length > 0 ? Math.max(...laneAssignments.map(l => l.lane)) + 1 : 4);
+  // Memoize visible items - only recompute when items or date range changes
+  const visibleItems = useMemo(() => {
+    return getVisibleItems();
+  }, [items, currentDate, zoomLevel]);
+
+  // Memoize lane assignments - O(n²) algorithm, only recompute when visible items change
+  const laneAssignments = useMemo(() => {
+    return assignLanes(visibleItems);
+  }, [visibleItems]);
+
+  // Memoize max lanes - only recompute when lane assignments change
+  const maxLanes = useMemo(() => {
+    return Math.max(4, laneAssignments.length > 0 ? Math.max(...laneAssignments.map(l => l.lane)) + 1 : 4);
+  }, [laneAssignments]);
 
   // Lane labels based on actual lanes used
   const laneLabels = maxLanes <= 4
@@ -217,17 +249,17 @@ export const CalendarTimeline = memo<CalendarTimelineProps>(({
     }
   }, [currentDate, zoomLevel, getDateRange]);
 
-  // Mouse drag scrolling for timeline
-  const handleMouseDown = (e: React.MouseEvent) => {
+  // Mouse drag scrolling for timeline - stable callback
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
     // Only start drag if clicking on empty space (not an item)
     if (e.button === 0 && (e.target as HTMLElement).closest('.calendar-item') === null) {
       setIsDragging(true);
       setDragStart(e.clientX);
     }
-  };
+  }, []);
 
-  // Double-click handler for quick add
-  const handleDoubleClick = (e: React.MouseEvent) => {
+  // Double-click handler for quick add - stable callback
+  const handleDoubleClick = useCallback((e: React.MouseEvent) => {
     if (!onDateClick || (e.target as HTMLElement).closest('.calendar-item')) return;
 
     if (scrollContainerRef.current) {
@@ -241,9 +273,9 @@ export const CalendarTimeline = memo<CalendarTimelineProps>(({
       const clickedDate = addDays(startDate, clickDayOffset);
       onDateClick(clickedDate);
     }
-  };
+  }, [onDateClick, getDateRange]);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (isDragging && scrollContainerRef.current) {
       const delta = e.clientX - dragStart;
       scrollContainerRef.current.scrollLeft -= delta * 1.5;
@@ -256,9 +288,9 @@ export const CalendarTimeline = memo<CalendarTimelineProps>(({
       const newDate = addDays(dragStartDate!, offsetDays);
       setDragCurrentDate(newDate);
     }
-  };
+  }, [isDragging, dragStart, draggedItem, onItemDateChange, dragStartDate, calculateDragOffset]);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     if (draggedItem && dragCurrentDate && onItemDateChange) {
       const offsetDays = calculateDragOffset(dragStart); // Use the last known position
       const newStartDate = addDays(draggedItem.startDate, offsetDays);
@@ -274,20 +306,43 @@ export const CalendarTimeline = memo<CalendarTimelineProps>(({
     setDraggedItem(null);
     setDragStartDate(null);
     setDragCurrentDate(null);
-  };
+  }, [draggedItem, dragCurrentDate, dragStart, onItemDateChange, calculateDragOffset]);
 
-  // Handle item drag start
-  const handleItemDragStart = (e: React.MouseEvent, item: CalendarItemType) => {
+  // Handle item drag start - stable callback using data attributes
+  const handleItemMouseDown = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onItemDateChange) {
-      setDraggedItem(item);
-      setDragStartDate(item.startDate);
-      setDragCurrentDate(item.startDate);
-      setDragStart(e.clientX);
-    }
-  };
+    const target = e.currentTarget as HTMLElement;
+    const itemId = target.dataset.itemId;
 
-  const timeSlots = getTimeSlots();
+    if (itemId && onItemDateChange) {
+      const item = items.find(i => i.id === itemId);
+      if (item) {
+        setDraggedItem(item);
+        setDragStartDate(item.startDate);
+        setDragCurrentDate(item.startDate);
+        setDragStart(e.clientX);
+      }
+    }
+  }, [items, onItemDateChange]);
+
+  // Handle item click - stable callback using data attributes
+  const handleItemClick = useCallback((e: React.MouseEvent) => {
+    const target = e.currentTarget as HTMLElement;
+    const itemId = target.dataset.itemId;
+
+    // Don't trigger click if we're dragging this item
+    if (itemId && draggedItem?.id !== itemId && onItemClick) {
+      const item = items.find(i => i.id === itemId);
+      if (item) {
+        onItemClick(item);
+      }
+    }
+  }, [items, draggedItem, onItemClick]);
+
+  // Memoize time slots - only recompute when zoom level or date range changes
+  const timeSlots = useMemo(() => {
+    return getTimeSlots();
+  }, [zoomLevel, currentDate]);
   const { startDate: viewStartDate, endDate: viewEndDate } = getDateRange();
   const totalDays = Math.ceil((viewEndDate.getTime() - viewStartDate.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -304,57 +359,83 @@ export const CalendarTimeline = memo<CalendarTimelineProps>(({
   };
 
   // Get date range text for display
-  const getDateRangeText = () => {
+  const getDateRangeText = useCallback(() => {
     const { startDate, endDate } = getDateRange();
     return `${format(startDate, 'MMM d')} - ${format(endDate, 'MMM d, yyyy')}`;
-  };
+  }, [getDateRange]);
+
+  // Navigation handlers - stable callbacks
+  const handleNavigate = useCallback((direction: 'prev' | 'next' | 'today') => {
+    onNavigate(direction);
+  }, [onNavigate]);
+
+  const handleZoomChange = useCallback((level: CalendarZoomLevel) => {
+    onZoomChange(level);
+  }, [onZoomChange]);
+
+  const handleZoomOut = useCallback(() => {
+    const levels: CalendarZoomLevel[] = ['day', 'week', 'month', 'quarter'];
+    const currentIndex = levels.indexOf(zoomLevel);
+    if (currentIndex < levels.length - 1) {
+      onZoomChange(levels[currentIndex + 1]);
+    }
+  }, [zoomLevel, onZoomChange]);
+
+  const handleZoomIn = useCallback(() => {
+    const levels: CalendarZoomLevel[] = ['day', 'week', 'month', 'quarter'];
+    const currentIndex = levels.indexOf(zoomLevel);
+    if (currentIndex > 0) {
+      onZoomChange(levels[currentIndex - 1]);
+    }
+  }, [zoomLevel, onZoomChange]);
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-background" role="region" aria-label={t('calendar:a11y.timelineView')}>
       {/* Main Header - TeamUp style */}
-      <div className="flex items-center justify-between px-4 py-3 border-b bg-card shadow-sm">
+      <div className="flex items-center justify-between px-4 py-3 border-b bg-card shadow-sm" role="banner">
         {/* Left: Title and Date Range */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <CalendarDays className="h-5 w-5 text-primary" />
-            <h1 className="text-xl font-bold text-foreground">Marketing Calendar</h1>
+            <CalendarDays className="h-5 w-5 text-primary" aria-hidden="true" />
+            <h1 className="text-xl font-bold text-foreground">{t('calendar:header.title')}</h1>
           </div>
-          <div className="h-6 w-px bg-border" />
+          <div className="h-6 w-px bg-border" aria-hidden="true" />
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-foreground">
+            <span className="text-sm font-semibold text-foreground" aria-live="polite">
               {getDateRangeText()}
             </span>
             <span className="text-xs text-muted-foreground">
-              ({visibleItems.length} events)
+              ({visibleItems.length} {t('calendar:header.itemsCount', { count: visibleItems.length })})
             </span>
           </div>
         </div>
 
         {/* Center: Navigation - Enhanced with stronger visual hierarchy */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" role="group" aria-label={t('calendar:a11y.navigation')}>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onNavigate('prev')}
-            className="p-2.5 rounded-lg bg-background hover:bg-accent transition-all border-2 border-border shadow-sm hover:shadow-md"
-            aria-label="Previous period"
+            onClick={() => handleNavigate('prev')}
+            className="p-2.5 rounded-lg bg-background hover:bg-accent transition-all border-2 border-border shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label={t('calendar:a11y.previousPeriod')}
           >
             <ChevronLeft className="h-4 w-4" />
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onNavigate('today')}
-            className="px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-all border-2 border-primary shadow-md hover:shadow-lg"
+            onClick={() => handleNavigate('today')}
+            className="px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-all border-2 border-primary shadow-md hover:shadow-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label={t('calendar:navigation.goToToday')}
           >
-            Today
+            {t('calendar:navigation.today')}
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onNavigate('next')}
-            className="p-2.5 rounded-lg bg-background hover:bg-accent transition-all border-2 border-border shadow-sm hover:shadow-md"
-            aria-label="Next period"
+            onClick={() => handleNavigate('next')}
+            className="p-2.5 rounded-lg bg-background hover:bg-accent transition-all border-2 border-border shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label={t('calendar:a11y.nextPeriod')}
           >
             <ChevronRight className="h-4 w-4" />
           </motion.button>
@@ -363,7 +444,7 @@ export const CalendarTimeline = memo<CalendarTimelineProps>(({
         {/* Right: View toggles and Zoom */}
         <div className="flex items-center gap-3">
           {/* View toggles */}
-          <div className="hidden md:flex items-center gap-1 bg-muted rounded-lg p-1">
+          <div className="hidden md:flex items-center gap-1 bg-muted rounded-lg p-1" role="radiogroup" aria-label={t('calendar:a11y.viewSwitcher')}>
             {(['Month', 'Week', 'Timeline'] as const).map((view) => {
               const isActive = zoomLevel === (view === 'Timeline' ? 'month' : view.toLowerCase() as CalendarZoomLevel);
               return (
@@ -371,12 +452,15 @@ export const CalendarTimeline = memo<CalendarTimelineProps>(({
                   key={view}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => onZoomChange(view.toLowerCase() as CalendarZoomLevel)}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  onClick={() => handleZoomChange(view.toLowerCase() as CalendarZoomLevel)}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                     isActive
                       ? 'bg-background text-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
+                  role="radio"
+                  aria-checked={isActive}
+                  aria-label={t('calendar:a11y.switchToView', { view })}
                 >
                   {view}
                 </motion.button>
@@ -385,35 +469,23 @@ export const CalendarTimeline = memo<CalendarTimelineProps>(({
           </div>
 
           {/* Zoom controls */}
-          <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-muted rounded-lg p-1" role="group" aria-label={t('calendar:a11y.zoomControls')}>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                const levels: CalendarZoomLevel[] = ['day', 'week', 'month', 'quarter'];
-                const currentIndex = levels.indexOf(zoomLevel);
-                if (currentIndex < levels.length - 1) {
-                  onZoomChange(levels[currentIndex + 1]);
-                }
-              }}
-              className="p-1.5 rounded-md hover:bg-background transition-colors text-foreground"
-              aria-label="Zoom out"
+              onClick={handleZoomOut}
+              className="p-1.5 rounded-md hover:bg-background transition-colors text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              aria-label={t('calendar:a11y.zoomOut')}
             >
               <Minus className="h-3.5 w-3.5" />
             </motion.button>
-            <div className="w-px h-4 bg-border/50" />
+            <div className="w-px h-4 bg-border/50" aria-hidden="true" />
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                const levels: CalendarZoomLevel[] = ['day', 'week', 'month', 'quarter'];
-                const currentIndex = levels.indexOf(zoomLevel);
-                if (currentIndex > 0) {
-                  onZoomChange(levels[currentIndex - 1]);
-                }
-              }}
-              className="p-1.5 rounded-md hover:bg-background transition-colors text-foreground"
-              aria-label="Zoom in"
+              onClick={handleZoomIn}
+              className="p-1.5 rounded-md hover:bg-background transition-colors text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              aria-label={t('calendar:a11y.zoomIn')}
             >
               <Plus className="h-3.5 w-3.5" />
             </motion.button>
@@ -588,8 +660,8 @@ export const CalendarTimeline = memo<CalendarTimelineProps>(({
                 style={{ gridTemplateColumns: `repeat(${timeSlots.length}, 1fr)` }}
               >
                 {timeSlots.map((slot, i) => {
-                  const slotStart = index === 0 ? viewStartDate : slot;
-                  const slotEnd = index === timeSlots.length - 1 ? viewEndDate :
+                  const slotStart = i === 0 ? viewStartDate : slot;
+                  const slotEnd = i === timeSlots.length - 1 ? viewEndDate :
                     zoomLevel === 'month' ? endOfMonth(slot) :
                     zoomLevel === 'week' ? addDays(slot, 6) : slot;
 
@@ -650,12 +722,9 @@ export const CalendarTimeline = memo<CalendarTimelineProps>(({
                         cursor: onItemDateChange ? 'grab' : 'pointer',
                         zIndex: isDraggingItem ? 100 : 1,
                       }}
-                      onClick={(e) => {
-                        if (!isDraggingItem) {
-                          onItemClick?.(item);
-                        }
-                      }}
-                      onMouseDown={(e) => handleItemDragStart(e, item)}
+                      data-item-id={item.id}
+                      onClick={handleItemClick}
+                      onMouseDown={handleItemMouseDown}
                     >
                       <div className="relative h-full p-2 overflow-hidden">
                         <CalendarItem
@@ -664,7 +733,6 @@ export const CalendarTimeline = memo<CalendarTimelineProps>(({
                           endDate={offsetDays !== 0 && item.endDate ? addDays(item.endDate, offsetDays) : item.endDate}
                           viewMode={zoomLevel === 'day' ? 'day' : zoomLevel === 'week' ? 'week' : 'month'}
                           isSelected={selectedItem?.id === item.id}
-                          onClick={() => onItemClick?.(item)}
                         />
                         {isDraggingItem && (
                           <div className="absolute inset-0 bg-primary/30 rounded-md pointer-events-none" />

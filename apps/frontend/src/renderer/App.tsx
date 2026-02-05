@@ -35,7 +35,7 @@ import { AppSettingsDialog, type AppSection } from './components/settings/AppSet
 import type { ProjectSettingsSection } from './components/settings/ProjectSettingsContent';
 import { TerminalGrid } from './components/TerminalGrid';
 import { Roadmap } from './components/Roadmap';
-import { CalendarView } from './components/calendar';
+import { CalendarView, CalendarErrorBoundary } from './components/calendar';
 import { Context } from './components/Context';
 import { Ideation } from './components/Ideation';
 import { Insights } from './components/Insights';
@@ -878,7 +878,13 @@ export function App() {
                   <Roadmap projectId={activeProjectId || selectedProjectId!} onGoToTask={handleGoToTask} />
                 )}
                 {activeView === 'calendar' && (
-                  <CalendarView projectId={activeProjectId || selectedProjectId || 'demo'} />
+                  <CalendarErrorBoundary
+                    onError={(error, errorInfo) => {
+                      console.error('[App] Calendar error caught by boundary:', error, errorInfo);
+                    }}
+                  >
+                    <CalendarView projectId={activeProjectId || selectedProjectId || 'demo'} />
+                  </CalendarErrorBoundary>
                 )}
                 {activeView === 'context' && (activeProjectId || selectedProjectId) && (
                   <Context projectId={activeProjectId || selectedProjectId!} />

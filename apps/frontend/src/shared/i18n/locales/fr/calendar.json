@@ -1,0 +1,146 @@
+{
+  "views": {
+    "month": "Mois",
+    "week": "Semaine",
+    "day": "Jour",
+    "list": "Liste",
+    "timeline": "Chronologie",
+    "agenda": "Agenda"
+  },
+  "navigation": {
+    "previous": "Précédent",
+    "next": "Suivant",
+    "today": "Aujourd'hui",
+    "previousMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "previousWeek": "Semaine précédente",
+    "nextWeek": "Semaine suivante",
+    "previousDay": "Jour précédent",
+    "nextDay": "Jour suivant",
+    "goToToday": "Aller à aujourd'hui"
+  },
+  "header": {
+    "title": "Calendrier marketing",
+    "itemsCount": "{{count}} éléments",
+    "itemsCount_plural": "{{count}} éléments",
+    "eventsCount": "{{count}} événements",
+    "eventsCount_plural": "{{count}} événements"
+  },
+  "event": {
+    "allDay": "Toute la journée",
+    "multiDay": "Plusieurs jours",
+    "more": "plus",
+    "moreEvents": "+{{count}} plus",
+    "moreEvents_plural": "+{{count}} plus",
+    "viewAll": "Voir tout",
+    "create": "Créer un événement",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "duplicate": "Dupliquer",
+    "details": "Détails de l'événement"
+  },
+  "eventCard": {
+    "title": "{{title}}",
+    "time": "{{startTime}} - {{endTime}}",
+    "status": "Statut : {{status}}",
+    "assignee": "Assigné à : {{assignee}}",
+    "untimed": "Aucune heure définie"
+  },
+  "week": {
+    "allDayRow": "Toute la journée",
+    "workingHours": "Heures de travail",
+    "currentTime": "Heure actuelle"
+  },
+  "grid": {
+    "weekDays": {
+      "sun": "Dim",
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mer",
+      "thu": "Jeu",
+      "fri": "Ven",
+      "sat": "Sam"
+    },
+    "weekDaysFull": {
+      "sunday": "Dimanche",
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi"
+    },
+    "today": "Aujourd'hui",
+    "otherMonth": "Autre mois",
+    "selectedDate": "Date sélectionnée",
+    "clickToSelect": "Cliquez pour sélectionner cette date"
+  },
+  "legend": {
+    "eventTypes": "Types d'événements"
+  },
+  "empty": {
+    "noEvents": "Aucun événement prévu pour cette période",
+    "createFirst": "Créez votre premier événement",
+    "noEventsToday": "Aucun événement prévu aujourd'hui"
+  },
+  "keyboard": {
+    "shortcuts": "Raccourcis clavier",
+    "navigate": "Naviguer",
+    "select": "Sélectionner",
+    "actions": "Actions",
+    "arrowKeys": "Flèches pour naviguer",
+    "enter": "Entrée pour sélectionner",
+    "escape": "Échap pour annuler",
+    "delete": "Supprimer pour retirer",
+    "n": "N pour aujourd'hui",
+    "t": "T pour aujourd'hui"
+  },
+  "a11y": {
+    "calendarGrid": "Grille du calendrier pour {{month}} {{year}}",
+    "dayCell": "{{day}}, {{date}}",
+    "eventCard": "{{title}}, {{type}}, {{date}} à {{time}}, {{status}}",
+    "viewSwitcher": "Vues du calendrier",
+    "switchToView": "Basculer vers la vue {{view}}",
+    "nextPeriod": "Naviguer vers la période suivante",
+    "previousPeriod": "Naviguer vers la période précédente",
+    "loading": "Chargement du calendrier...",
+    "syncing": "Synchronisation des données de la feuille de route...",
+    "loadError": "Échec du chargement du calendrier",
+    "retry": "Réessayer",
+    "toolbar": "Barre d'outils du calendrier",
+    "toggleFilters": "Activer/désactiver les filtres",
+    "export": "Exporter au format ICS",
+    "import": "Importer depuis un fichier ICS",
+    "timelineView": "Vue chronologique",
+    "navigation": "Navigation",
+    "zoomControls": "Contrôles de zoom",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière",
+    "filters": "Panneau de filtres",
+    "saving": "Enregistrement...",
+    "pending": "Enregistrement des modifications..."
+  },
+  "filters": {
+    "title": "Filtres",
+    "active": "actifs",
+    "clearAll": "Tout effacer",
+    "searchPlaceholder": "Rechercher des éléments...",
+    "types": "Type",
+    "status": "Statut",
+    "sources": "Source"
+  },
+  "dialog": {
+    "addTitle": "Ajouter un élément au calendrier",
+    "addDescription": "Créer une nouvelle campagne, du contenu ou un événement",
+    "editTitle": "Modifier le titre",
+    "actions": "Actions"
+  },
+  "errorBoundary": {
+    "title": "Erreur de calendrier",
+    "description": "Un problème est survenu avec le calendrier",
+    "message": "Le calendrier a rencontré une erreur inattendue. Vos données sont en sécurité, vous pouvez essayer de recharger le calendrier.",
+    "retry": "Réessayer",
+    "reportIssue": "Signaler le problème",
+    "errorDetails": "Détails de l'erreur"
+  }
+}

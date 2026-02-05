@@ -1,15 +1,19 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { format, addDays, addWeeks, addMonths } from 'date-fns';
+import { format, addDays, addWeeks, addMonths, startOfMonth } from 'date-fns';
 import { Loader2, AlertCircle, RefreshCw, Plus, Filter, CalendarDays, Grid3x3, Download, Upload } from 'lucide-react';
-import { useCalendarStore, loadCalendarData, saveCalendarData, aggregateFromRoadmap } from '../../stores/calendarStore';
+import { useTranslation } from 'react-i18next';
+import { useCalendarStore, loadCalendarData, saveCalendarData, aggregateFromRoadmap, addItemWithOptimisticUpdate, updateItemWithOptimisticUpdate, deleteItemWithOptimisticUpdate } from '../../stores/calendarStore';
 import type { CalendarItem as CalendarItemType, CalendarZoomLevel } from '../../../shared/types';
 import { CalendarTimeline } from './CalendarTimeline';
 import { CalendarMonthView } from './CalendarMonthView';
 import { CalendarItemDetail } from './CalendarItemDetail';
 import { CalendarFilters } from './CalendarFilters';
 import { CalendarAddItemDialog } from './CalendarAddItemDialog';
+import { CalendarSkeleton } from './CalendarSkeleton';
 import { downloadICS, readICSFile } from './calendarUtils';
+// SECURITY: Permission denied UI component
+import { PermissionDeniedPage } from './PermissionDeniedBanner';
 
 interface CalendarViewProps {
   projectId: string;
@@ -18,15 +22,21 @@ interface CalendarViewProps {
 
 type CalendarLayout = 'timeline' | 'month';
 
+// State machine for calendar load operations
+type CalendarLoadState = 'idle' | 'loading' | 'loaded' | 'syncing';
+
 export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
+  const { t } = useTranslation(['calendar', 'common']);
   const {
     calendarData,
     selectedItem,
     isLoading,
+    isSaving,
     error,
     currentDate,
     zoomLevel,
     filters,
+    pendingItemIds,
     setSelectedItem,
     setError,
     setCurrentDate,
@@ -45,16 +55,31 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load calendar data on mount
-  useEffect(() => {
+  // State machine for coordinating calendar operations
+  const [loadState, setLoadState] = useState<CalendarLoadState>('idle');
+
+  // Stable references for functions used in effects
+  const handleLoadCalendarData = useCallback(() => {
     loadCalendarData(projectId);
   }, [projectId]);
 
-  // Generate mock data for development/testing
-  useEffect(() => {
-    if (calendarData && calendarData.items.length === 0) {
-      const now = new Date();
-      const mockEvents: Omit<CalendarItemType, 'id' | 'createdAt' | 'updatedAt'>[] = [
+  const handleSaveCalendarData = useCallback(() => {
+    saveCalendarData(projectId);
+  }, [projectId]);
+
+  // Track if we've already initialized mock data to prevent re-running
+  const hasInitializedMockData = useRef(false);
+
+  // Track which roadmap phases we've already synced to prevent infinite loops
+  const syncedRoadmapPhases = useRef<Set<string>>(new Set());
+
+  // Track if roadmap sync has been completed
+  const hasCompletedRoadmapSync = useRef(false);
+
+  // Mock data definition (extracted for reusability)
+  const getMockEvents = useCallback((): Omit<CalendarItemType, 'id' | 'createdAt' | 'updatedAt'>[] => {
+    const now = new Date();
+    return [
         // Campaign - Multi-week campaign
         {
           title: 'Q1 Product Launch Campaign',
@@ -339,125 +364,268 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
           assignee: 'PPC Team',
         },
       ];
+  }, []);
 
-      // Add all mock events
-      mockEvents.forEach((event) => {
-        addItem(event);
-      });
-
-      // Save the mock data
-      saveCalendarData(projectId);
-    }
-  }, [calendarData]);
-
-  // Sync roadmap phases to calendar
+  // Coordinated calendar initialization with state machine
   useEffect(() => {
-    if (roadmap && roadmap.phases) {
-      const roadmapItems = aggregateFromRoadmap(roadmap);
-      roadmapItems.forEach((item) => {
-        // Check if item already exists
-        const exists = calendarData?.items.some(
-          (i) => i.linkedFeatureId === item.linkedFeatureId && i.source === 'roadmap'
-        );
-        if (!exists) {
-          addItem(item);
-        }
-      });
-      // Save calendar after sync
-      if (calendarData) {
-        saveCalendarData(projectId);
-      }
-    }
-  }, [roadmap]);
+    let isMounted = true;
+    let timeoutId: NodeJS.Timeout | null = null;
 
-  // Handle navigation
-  const handleNavigate = (direction: 'prev' | 'next' | 'today') => {
-    switch (direction) {
-      case 'prev':
-        setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)));
-        break;
-      case 'next':
-        setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)));
-        break;
-      case 'today':
-        setCurrentDate(new Date());
-        break;
+    const loadAndSync = async () => {
+      // Prevent concurrent operations
+      if (loadState !== 'idle' || !isMounted) {
+        return;
+      }
+
+      setLoadState('loading');
+
+      try {
+        // Step 1: Load calendar data from storage
+        await handleLoadCalendarData();
+
+        // Wait for calendarData to be available
+        const waitForCalendarData = () => {
+          return new Promise<void>((resolve) => {
+            const checkData = () => {
+              const currentData = useCalendarStore.getState().calendarData;
+              if (currentData !== undefined) {
+                resolve();
+              } else {
+                timeoutId = setTimeout(checkData, 100);
+              }
+            };
+            checkData();
+          });
+        };
+
+        await waitForCalendarData();
+
+        if (!isMounted) return;
+
+        const currentCalendarData = useCalendarStore.getState().calendarData;
+
+        // Step 2: Add mock data if needed (only once)
+        if (!hasInitializedMockData.current && currentCalendarData?.items.length === 0) {
+          const mockEvents = getMockEvents();
+          mockEvents.forEach((event) => {
+            addItem(event);
+          });
+          await handleSaveCalendarData();
+          hasInitializedMockData.current = true;
+        }
+
+        setLoadState('loaded');
+
+        // Step 3: Sync roadmap after data is loaded (only once)
+        if (roadmap?.phases && !hasCompletedRoadmapSync.current) {
+          setLoadState('syncing');
+
+          const roadmapItems = aggregateFromRoadmap(roadmap);
+          let hasNewItems = false;
+
+          roadmapItems.forEach((item) => {
+            // Create a unique identifier for this roadmap item
+            const syncKey = `${item.linkedFeatureId || item.title}-${item.startDate.getTime()}`;
+
+            // Skip if we've already synced this item
+            if (syncedRoadmapPhases.current.has(syncKey)) {
+              return;
+            }
+
+            // Check if item already exists in calendar
+            const calendarData = useCalendarStore.getState().calendarData;
+            const exists = calendarData?.items.some(
+              (i) => i.linkedFeatureId === item.linkedFeatureId && i.source === 'roadmap'
+            );
+
+            if (!exists) {
+              addItem(item);
+              syncedRoadmapPhases.current.add(syncKey);
+              hasNewItems = true;
+            }
+          });
+
+          // Save calendar only if we added new items
+          if (hasNewItems) {
+            await handleSaveCalendarData();
+          }
+
+          hasCompletedRoadmapSync.current = true;
+          setLoadState('loaded');
+        }
+      } catch (error) {
+        console.error('Calendar initialization failed:', error);
+        setError(error instanceof Error ? error.message : 'Failed to load calendar');
+        setLoadState('idle');
+      }
+    };
+
+    loadAndSync();
+
+    return () => {
+      isMounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, roadmap?.phases]); // Only re-run if projectId or roadmap phases change
+
+  // Create a combined loading state
+  const isOperationInProgress = isLoading || loadState === 'loading' || loadState === 'syncing';
+
+  // Handle navigation based on zoom level
+  const handleNavigate = useCallback((direction: 'prev' | 'next' | 'today') => {
+    if (direction === 'today') {
+      setCurrentDate(new Date());
+      return;
     }
-  };
+
+    // For timeline view, navigation depends on zoom level
+    if (layout === 'timeline') {
+      const multiplier = direction === 'next' ? 1 : -1;
+      switch (zoomLevel) {
+        case 'quarter':
+          // Navigate by 3 months
+          setCurrentDate(addMonths(currentDate, 3 * multiplier));
+          break;
+        case 'month':
+          // Navigate by 1 month
+          setCurrentDate(addMonths(currentDate, 1 * multiplier));
+          break;
+        case 'week':
+          // Navigate by 1 week (7 days)
+          setCurrentDate(addDays(currentDate, 7 * multiplier));
+          break;
+        case 'day':
+          // Navigate by 1 day
+          setCurrentDate(addDays(currentDate, 1 * multiplier));
+          break;
+      }
+    } else {
+      // For month view, navigate by month
+      const multiplier = direction === 'next' ? 1 : -1;
+      setCurrentDate(addMonths(currentDate, 1 * multiplier));
+    }
+  }, [layout, zoomLevel, currentDate]);
 
   // Handle zoom change
-  const handleZoomChange = (level: CalendarZoomLevel) => {
+  const handleZoomChange = useCallback((level: CalendarZoomLevel) => {
     setZoomLevel(level);
-  };
+  }, []);
 
   // Handle item click
-  const handleItemClick = (item: CalendarItemType) => {
+  const handleItemClick = useCallback((item: CalendarItemType) => {
     setSelectedItem(item);
     setShowDetail(true);
-  };
+  }, [setSelectedItem]);
 
   // Handle close detail
-  const handleCloseDetail = () => {
+  const handleCloseDetail = useCallback(() => {
     setShowDetail(false);
     setTimeout(() => setSelectedItem(null), 300);
-  };
+  }, [setSelectedItem]);
 
-  // Handle refresh
-  const handleRefresh = async () => {
-    await loadCalendarData(projectId);
-  };
-
-  // Handle add new item
-  const handleAddItem = () => {
-    setShowAddDialog(true);
-  };
-
-  // Handle add item from dialog
-  const handleAddItemSubmit = (item: Omit<CalendarItemType, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const id = addItem(item);
-    const newItem = calendarData?.items.find((i) => i.id === id);
-    if (newItem) {
-      handleItemClick(newItem);
+  // Handle refresh (only when not loading)
+  const handleRefresh = useCallback(async () => {
+    if (isOperationInProgress) {
+      return;
     }
-    // Save after adding
-    saveCalendarData(projectId);
-  };
+    setLoadState('idle'); // Reset state to trigger reload
+    await handleLoadCalendarData();
+  }, [handleLoadCalendarData, isOperationInProgress]);
+
+  // Handle add new item (prevent during load)
+  const handleAddItem = useCallback(() => {
+    if (isOperationInProgress) {
+      return;
+    }
+    setShowAddDialog(true);
+  }, [isOperationInProgress]);
+
+  // Handle add item from dialog with optimistic update
+  const handleAddItemSubmit = useCallback(async (item: Omit<CalendarItemType, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      // Use optimistic update - item added immediately, then saved
+      const id = await addItemWithOptimisticUpdate(projectId, item);
+      const newItem = useCalendarStore.getState().calendarData?.items.find((i) => i.id === id);
+      if (newItem) {
+        handleItemClick(newItem);
+      }
+      // Close dialog after successful save
+      setShowAddDialog(false);
+    } catch (error) {
+      // Error handled by optimistic update function (rollback + error state)
+      console.error('Failed to add item:', error);
+    }
+  }, [projectId, handleItemClick]);
 
   // Handle item date change from drag-and-drop
-  const handleItemDateChange = (itemId: string, newStartDate: Date, newEndDate: Date) => {
+  const handleItemDateChange = useCallback((itemId: string, newStartDate: Date, newEndDate: Date) => {
     updateItem(itemId, { startDate: newStartDate, endDate: newEndDate });
     // Save after drag operation
-    saveCalendarData(projectId);
-  };
+    handleSaveCalendarData();
+  }, [updateItem, handleSaveCalendarData]);
 
   // Handle export to ICS
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     const itemsToExport = filteredItems.length > 0 ? filteredItems : (calendarData?.items || []);
     const filename = `marketing-calendar-${format(currentDate, 'yyyy-MM-dd')}.ics`;
     downloadICS(itemsToExport, filename);
-  };
+  }, [filteredItems, calendarData, currentDate]);
 
   // Handle import from ICS
-  const handleImportClick = () => {
+  const handleImportClick = useCallback(() => {
     fileInputRef.current?.click();
-  };
+  }, []);
 
-  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsImporting(true);
+    setError(null); // Clear any existing errors
+
     try {
       const importedItems = await readICSFile(file);
+
+      if (importedItems.length === 0) {
+        setError('No valid events found in ICS file');
+        return;
+      }
+
       // Add each imported item to the calendar
       importedItems.forEach((item) => {
         addItem(item);
       });
+
       // Save after importing
-      await saveCalendarData(projectId);
+      await handleSaveCalendarData();
+
+      // Show success feedback
+      setError(null);
     } catch (error) {
       console.error('Failed to import calendar:', error);
-      setError('Failed to import calendar file');
+
+      // Provide user-friendly error messages
+      if (error instanceof Error) {
+        const errorMessage = error.message;
+
+        // Security-related errors
+        if (errorMessage.includes('exceeds maximum size')) {
+          setError('File too large. Maximum size is 5MB.');
+        } else if (errorMessage.includes('Invalid file type')) {
+          setError('Invalid file type. Only .ics files are allowed.');
+        } else if (errorMessage.includes('security') || errorMessage.includes('pollution') || errorMessage.includes('XSS')) {
+          setError('Security check failed. The file may be malicious.');
+        } else if (errorMessage.includes('parse')) {
+          setError('Failed to parse ICS file. Please ensure it is a valid format.');
+        } else {
+          setError(`Failed to import: ${errorMessage}`);
+        }
+      } else {
+        setError('Failed to import calendar file. Please try again.');
+      }
     } finally {
       setIsImporting(false);
       // Reset file input
@@ -465,29 +633,48 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
         fileInputRef.current.value = '';
       }
     }
-  };
+  }, [addItem, handleSaveCalendarData, setError]);
 
-  // Get filtered items
-  const filteredItems = getFilteredItems();
+  // Memoize filtered items - only recompute when calendar data or filters change
+  const filteredItems = useMemo(() => {
+    return getFilteredItems();
+  }, [calendarData?.items, filters]);
 
-  if (isLoading) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <div className="text-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-          <p className="text-sm text-muted-foreground">Loading calendar...</p>
-        </div>
-      </div>
-    );
+  // Show loading state for initial load or coordinated operations
+  if (isLoading || isOperationInProgress) {
+    return <CalendarSkeleton layout={layout} />;
   }
 
   if (error) {
+    // SECURITY: Check if this is a permission denied error
+    // Permission errors should not show a retry button as they won't be fixed by retrying
+    const isPermissionError =
+      error.toLowerCase().includes('permission') ||
+      error.toLowerCase().includes('forbidden') ||
+      error.toLowerCase().includes('access denied') ||
+      error.toLowerCase().includes('unauthorized');
+
+    if (isPermissionError) {
+      return (
+        <PermissionDeniedPage
+          error={error}
+          code="FORBIDDEN"
+          onRequestAccess={handleRefresh}
+        />
+      );
+    }
+
+    // Other errors show the standard error UI with retry
     return (
-      <div className="flex h-full items-center justify-center">
+      <div
+        className="flex h-full items-center justify-center"
+        role="alert"
+        aria-live="assertive"
+      >
         <div className="text-center space-y-4 max-w-md">
-          <AlertCircle className="h-12 w-12 mx-auto text-destructive" />
+          <AlertCircle className="h-12 w-12 mx-auto text-destructive" aria-hidden="true" />
           <div>
-            <h3 className="text-lg font-semibold">Failed to load calendar</h3>
+            <h3 className="text-lg font-semibold">{t('calendar:a11y.loadError')}</h3>
             <p className="text-sm text-muted-foreground mt-1">{error}</p>
           </div>
           <motion.button
@@ -495,9 +682,10 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
             whileTap={{ scale: 0.95 }}
             onClick={handleRefresh}
             className="px-4 py-2 rounded-lg bg-primary text-primary-foreground flex items-center gap-2 mx-auto"
+            aria-label={t('calendar:a11y.retry')}
           >
             <RefreshCw className="h-4 w-4" />
-            Retry
+            {t('calendar:a11y.retry')}
           </motion.button>
         </div>
       </div>
@@ -507,17 +695,17 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
   return (
     <div className="h-full flex flex-col relative">
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b bg-card">
+      <div className="flex items-center justify-between px-4 py-2 border-b bg-card" role="banner">
         <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold">Marketing Calendar</h2>
-          <span className="text-sm text-muted-foreground">
-            ({filteredItems.length} items)
+          <h2 className="text-lg font-semibold" id="calendar-title">{t('calendar:header.title')}</h2>
+          <span className="text-sm text-muted-foreground" aria-live="polite">
+            ({filteredItems.length} {t('calendar:header.itemsCount', { count: filteredItems.length })})
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" role="toolbar" aria-label={t('calendar:a11y.toolbar')}>
           {/* Layout toggle */}
-          <div className="hidden sm:flex items-center gap-1 bg-muted rounded-lg p-1 mr-2">
+          <div className="hidden sm:flex items-center gap-1 bg-muted rounded-lg p-1 mr-2" role="radiogroup" aria-label={t('calendar:a11y.viewSwitcher')}>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -525,7 +713,10 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
               className={`p-2 rounded-md transition-colors ${
                 layout === 'timeline' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
               }`}
-              title="Timeline view"
+              title={t('calendar:views.timeline')}
+              role="radio"
+              aria-checked={layout === 'timeline'}
+              aria-label={t('calendar:a11y.switchToView', { view: t('calendar:views.timeline') })}
             >
               <CalendarDays className="h-4 w-4" />
             </motion.button>
@@ -536,7 +727,10 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
               className={`p-2 rounded-md transition-colors ${
                 layout === 'month' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
               }`}
-              title="Month grid view"
+              title={t('calendar:views.month')}
+              role="radio"
+              aria-checked={layout === 'month'}
+              aria-label={t('calendar:a11y.switchToView', { view: t('calendar:views.month') })}
             >
               <Grid3x3 className="h-4 w-4" />
             </motion.button>
@@ -547,10 +741,19 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleAddItem}
-            className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground flex items-center gap-2 text-sm font-medium"
+            disabled={isOperationInProgress || isSaving}
+            className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground flex items-center gap-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label={t('calendar:event.create')}
+            aria-busy={isOperationInProgress || isSaving}
           >
-            <Plus className="h-4 w-4" />
-            Add Item
+            {isSaving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline">
+              {isSaving ? t('calendar:a11y.saving') : t('calendar:event.create')}
+            </span>
           </motion.button>
 
           {/* Filters button */}
@@ -558,10 +761,11 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowFilters(!showFilters)}
-            className={`p-2 rounded-lg transition-colors ${
+            className={`p-2 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
               showFilters ? 'bg-accent' : 'hover:bg-accent'
             }`}
-            aria-label="Toggle filters"
+            aria-label={t('calendar:a11y.toggleFilters')}
+            aria-pressed={showFilters}
           >
             <Filter className="h-5 w-5" />
           </motion.button>
@@ -571,8 +775,9 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleExport}
-            className="hidden sm:flex p-2 rounded-lg bg-green-500/10 text-green-600 hover:bg-green-500/20 transition-colors"
-            title="Export to ICS"
+            className="hidden sm:flex p-2 rounded-lg bg-green-500/10 text-green-600 hover:bg-green-500/20 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            title={t('calendar:a11y.export')}
+            aria-label={t('calendar:a11y.export')}
           >
             <Download className="h-5 w-5" />
           </motion.button>
@@ -583,8 +788,10 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
             whileTap={{ scale: 0.95 }}
             onClick={handleImportClick}
             disabled={isImporting}
-            className="hidden sm:flex p-2 rounded-lg bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-colors disabled:opacity-50"
-            title="Import from ICS"
+            className="hidden sm:flex p-2 rounded-lg bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-colors disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:focus-visible:ring-0"
+            title={t('calendar:a11y.import')}
+            aria-label={t('calendar:a11y.import')}
+            aria-busy={isImporting}
           >
             <Upload className="h-5 w-5" />
           </motion.button>
@@ -596,6 +803,7 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
             accept=".ics"
             onChange={handleImportFile}
             className="hidden"
+            aria-hidden="true"
           />
         </div>
       </div>
@@ -609,6 +817,8 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="border-b bg-card overflow-hidden"
+            role="region"
+            aria-label={t('calendar:a11y.filters')}
           >
             <CalendarFilters
               filters={filters}
@@ -626,7 +836,7 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
       </AnimatePresence>
 
       {/* Calendar View */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden" role="main" aria-labelledby="calendar-title">
         {layout === 'timeline' ? (
           <CalendarTimeline
             items={filteredItems}
@@ -646,7 +856,6 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
             onNavigate={handleNavigate}
             onItemClick={handleItemClick}
             onDateClick={(date) => {
-              // Open add dialog with the clicked date
               setShowAddDialog(true);
             }}
             selectedItem={selectedItem}
@@ -661,11 +870,23 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
             item={selectedItem}
             isOpen={showDetail}
             onClose={handleCloseDetail}
-            onUpdate={(updates) => updateItem(selectedItem.id, updates)}
-            onDelete={() => {
-              deleteItem(selectedItem.id);
-              handleCloseDetail();
+            onUpdate={async (updates) => {
+              try {
+                await updateItemWithOptimisticUpdate(projectId, selectedItem.id, updates);
+              } catch (error) {
+                console.error('Failed to update item:', error);
+              }
             }}
+            onDelete={async () => {
+              try {
+                await deleteItemWithOptimisticUpdate(projectId, selectedItem.id);
+                handleCloseDetail();
+              } catch (error) {
+                console.error('Failed to delete item:', error);
+              }
+            }}
+            isSaving={isSaving}
+            isPending={pendingItemIds.has(selectedItem.id)}
           />
         )}
       </AnimatePresence>
@@ -676,6 +897,7 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
         onClose={() => setShowAddDialog(false)}
         onAdd={handleAddItemSubmit}
         defaultDate={currentDate}
+        isSubmitting={isSaving}
       />
     </div>
   );
