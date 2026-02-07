@@ -368,10 +368,9 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
               variant="ghost"
               size="sm"
               className={cn(
-                "w-full justify-start gap-2 text-xs",
+                "w-full justify-start gap-2 text-xs min-h-[44px]",
                 status === "not-found" || status === "error" ? "text-destructive" : "",
-                status === "outdated" ? "text-yellow-600 dark:text-yellow-500" : "",
-                className
+                status === "outdated" ? "text-yellow-600 dark:text-yellow-500" : ""
               )}
             >
               <div className="relative">

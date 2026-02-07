@@ -4,11 +4,17 @@
 
 import { DEFAULT_APP_SETTINGS } from '../../../shared/constants';
 
+// Browser mode should skip onboarding by default
+const BROWSER_MODE_SETTINGS = {
+  ...DEFAULT_APP_SETTINGS,
+  onboardingCompleted: true // Skip onboarding wizard in browser preview mode
+};
+
 export const settingsMock = {
   // Settings
   getSettings: async () => ({
     success: true,
-    data: DEFAULT_APP_SETTINGS
+    data: BROWSER_MODE_SETTINGS
   }),
 
   saveSettings: async () => ({ success: true }),

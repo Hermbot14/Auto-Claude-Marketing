@@ -526,6 +526,11 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
     setTimeout(() => setSelectedItem(null), 300);
   }, [setSelectedItem]);
 
+  // Memoize filtered items - must be defined before callbacks that use it
+  const filteredItems = useMemo(() => {
+    return getFilteredItems();
+  }, [calendarData?.items, filters]);
+
   // Handle refresh (only when not loading)
   const handleRefresh = useCallback(async () => {
     if (isOperationInProgress) {
@@ -634,11 +639,6 @@ export function CalendarView({ projectId, roadmap }: CalendarViewProps) {
       }
     }
   }, [addItem, handleSaveCalendarData, setError]);
-
-  // Memoize filtered items - only recompute when calendar data or filters change
-  const filteredItems = useMemo(() => {
-    return getFilteredItems();
-  }, [calendarData?.items, filters]);
 
   // Show loading state for initial load or coordinated operations
   if (isLoading || isOperationInProgress) {

@@ -118,7 +118,7 @@ export function ProjectTabBar({
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-11 w-11"
           onClick={onAddProject}
           aria-label={t('projectTab.addProjectAriaLabel')}
         >

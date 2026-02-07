@@ -332,13 +332,13 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
           {isReviewColumn && onSelectAll && onDeselectAll && (
             <Tooltip delayDuration={200}>
               <TooltipTrigger asChild>
-                <div className="flex items-center">
+                <div className="flex items-center justify-center min-w-[44px] min-h-[44px]">
                   <Checkbox
                     checked={selectAllCheckedState}
                     onCheckedChange={handleSelectAllChange}
                     disabled={taskCount === 0}
                     aria-label={isAllSelected ? t('kanban.deselectAll') : t('kanban.selectAll')}
-                    className="h-4 w-4"
+                    className="h-11 w-11"
                   />
                 </div>
               </TooltipTrigger>
@@ -370,7 +370,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors"
+                  className="h-11 w-11 hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors"
                   onClick={onQueueAll}
                   title={t('queue.queueAll')}
                 >
@@ -381,7 +381,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 hover:bg-primary/10 hover:text-primary transition-colors"
+                  className="h-11 w-11 hover:bg-primary/10 hover:text-primary transition-colors"
                   onClick={onAddClick}
                   aria-label={t('kanban.addTaskAriaLabel')}
                 >
@@ -394,7 +394,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors"
+              className="h-11 w-11 hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors"
               onClick={onQueueSettings}
               title={t('kanban.queueSettings')}
             >
@@ -405,7 +405,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 hover:bg-muted-foreground/10 hover:text-muted-foreground transition-colors"
+              className="h-11 w-11 hover:bg-muted-foreground/10 hover:text-muted-foreground transition-colors"
               onClick={onArchiveAll}
               aria-label={t('tooltips.archiveAllDone')}
             >
@@ -419,7 +419,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    'h-7 w-7 transition-colors relative',
+                    'h-11 w-11 transition-colors relative',
                     showArchived
                       ? 'text-primary bg-primary/10 hover:bg-primary/20'
                       : 'hover:bg-muted-foreground/10 hover:text-muted-foreground'
@@ -1113,7 +1113,7 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
             size="sm"
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="gap-2 text-muted-foreground hover:text-foreground"
+            className="gap-2 text-muted-foreground hover:text-foreground min-h-[44px]"
           >
             <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
             {isRefreshing ? t('common:buttons.refreshing') : t('tasks:refreshTasks')}

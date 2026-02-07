@@ -72,7 +72,7 @@ export function SortableProjectTab({
             className={cn(
               'flex-1 flex items-center gap-1 sm:gap-2',
               // Responsive padding: tighter on mobile, normal on desktop
-              'px-2 sm:px-3 md:px-4 py-2 sm:py-2.5',
+              'px-2 sm:px-3 md:px-4 py-3 min-h-[44px]',
               'text-xs sm:text-sm',
               'min-w-0 truncate hover:bg-muted/50 transition-colors',
               'border-b-2 border-transparent cursor-pointer',
@@ -122,7 +122,7 @@ export function SortableProjectTab({
                 <button
                   type="button"
                   className={cn(
-                    'h-5 w-5 sm:h-6 sm:w-6 p-0 rounded',
+                    'h-11 w-11 p-0 rounded',
                     'flex items-center justify-center',
                     'text-muted-foreground hover:text-foreground',
                     'hover:bg-muted/50 transition-colors',
@@ -134,7 +134,7 @@ export function SortableProjectTab({
                   }}
                   aria-label={t('projectTab.settings')}
                 >
-                  <Settings2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <Settings2 className="h-4 w-4" />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="bottom">

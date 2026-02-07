@@ -373,7 +373,7 @@ export const TaskCard = memo(function TaskCard({
         <div className={isSelectable ? 'flex gap-3' : undefined}>
           {/* Checkbox for selectable mode - stops event propagation */}
           {isSelectable && (
-            <div className="flex-shrink-0 pt-0.5">
+            <div className="flex-shrink-0 flex items-center justify-center min-w-[44px] min-h-[44px]">
               <Checkbox
                 checked={isSelected}
                 onCheckedChange={onToggleSelect}
@@ -609,7 +609,7 @@ export const TaskCard = memo(function TaskCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 px-2.5 hover:bg-muted-foreground/10"
+                className="min-h-[44px] px-3 hover:bg-muted-foreground/10"
                 onClick={handleArchive}
                 title={t('tooltips.archiveTask')}
               >
@@ -644,7 +644,7 @@ export const TaskCard = memo(function TaskCard({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 w-7 p-0"
+                    className="h-11 w-11 p-0"
                     onClick={(e) => e.stopPropagation()}
                     aria-label={t('actions.taskActions')}
                   >

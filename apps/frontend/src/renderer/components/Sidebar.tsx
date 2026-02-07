@@ -278,16 +278,16 @@ export function Sidebar({
         disabled={requiresProject && !selectedProjectId}
         aria-keyshortcuts={item.shortcut}
         className={cn(
-          'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200',
+          'flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200 min-h-[44px]',
           'hover:bg-accent hover:text-accent-foreground',
           'disabled:pointer-events-none disabled:opacity-50',
           isActive && 'bg-accent text-accent-foreground'
         )}
       >
         <Icon className="h-4 w-4 shrink-0" />
-        <span className="flex-1 text-left">{t(item.labelKey)}</span>
+        <span className="flex-1 text-left truncate">{t(item.labelKey)}</span>
         {item.shortcut && (
-          <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded-md border border-border bg-secondary px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
+          <kbd className="pointer-events-none hidden h-5 shrink-0 select-none items-center gap-1 rounded-md border border-border bg-secondary px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
             {item.shortcut}
           </kbd>
         )}
@@ -343,7 +343,7 @@ export function Sidebar({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex-1 justify-start gap-2"
+                  className="flex-1 justify-start gap-2 min-h-[44px]"
                   onClick={onSettingsClick}
                 >
                   <Settings className="h-4 w-4" />
@@ -357,6 +357,7 @@ export function Sidebar({
                 <Button
                   variant="ghost"
                   size="icon"
+                  className="min-h-[44px] min-w-[44px]"
                   onClick={() => window.open('https://github.com/AndyMik90/Auto-Marketing/issues', '_blank')}
                   aria-label={t('tooltips.help')}
                 >
@@ -369,7 +370,7 @@ export function Sidebar({
 
           {/* New Task button */}
           <Button
-            className="w-full"
+            className="w-full min-h-[44px]"
             onClick={onNewTaskClick}
             disabled={!selectedProjectId || !selectedProject?.autoBuildPath}
           >
