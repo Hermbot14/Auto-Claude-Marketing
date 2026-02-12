@@ -1,0 +1,80 @@
+# PowerShell script to navigate Edge to localhost:5173 and take screenshot
+
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+Add-Type -AssemblyName System.Web
+
+# Add Windows API functions
+Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
+[DllImport("user32.dll")]
+public static extern bool SetForegroundWindow(IntPtr hWnd);
+[DllImport("user32.dll")]
+public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+[DllImport("user32.dll")]
+public static extern bool IsIconic(IntPtr hWnd);
+[DllImport("user32.dll")]
+public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+[DllImport("user32.dll")]
+public static extern IntPtr GetForegroundWindow();
+"@
+
+Write-Host "Step 1: Starting Edge browser with localhost:5173..."
+
+# Close all existing Edge windows to avoid confusion
+Get-Process msedge -ErrorAction SilentlyContinue | Stop-Process -Force
+Start-Sleep -Seconds 2
+
+# Start fresh Edge with the calendar URL
+Start-Process "msedge.exe" -ArgumentList "http://localhost:5173", "--start-maximized"
+Write-Host "Waiting for page to load (5 seconds)..."
+Start-Sleep -Seconds 5
+
+# Find and activate Edge window
+Write-Host "Step 2: Activating Edge window..."
+$edge = Get-Process msedge -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -ne "" } | Select-Object -First 1
+
+if ($edge -ne $null) {
+    $handle = $edge.MainWindowHandle
+    Write-Host "Found window: $($edge.MainWindowTitle)"
+
+    # Maximize and bring to front
+    [Win32.User32]::ShowWindow($handle, 3)     # SW_MAXIMIZE
+    [Win32.User32]::SetForegroundWindow($handle)
+
+    Write-Host "Waiting for window to fully render (3 seconds)..."
+    Start-Sleep -Seconds 3
+} else {
+    Write-Host "ERROR: Could not find Edge window!"
+    exit 1
+}
+
+# Verify we have the foreground window
+$foreground = [Win32.User32]::GetForegroundWindow()
+Write-Host "Foreground window handle: $foreground"
+Write-Host "Edge window handle: $($edge.MainWindowHandle)"
+
+# Take screenshot
+Write-Host "Step 3: Taking screenshot..."
+$screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+$bmp = New-Object System.Drawing.Bitmap $screen.Width, $screen.Height
+$graphics = [System.Drawing.Graphics]::FromImage($bmp)
+$graphics.CopyFromScreen($screen.Location, [System.Drawing.Point]::Empty, $screen.Size)
+
+$outputPath = 'C:\Projects\Auto-Claude-Marketing\screenshot.png'
+$bmp.Save($outputPath, [System.Drawing.Imaging.ImageFormat]::Png)
+$graphics.Dispose()
+$bmp.Dispose()
+
+Write-Host "Screenshot saved to $outputPath"
+
+# Also save a small thumbnail for quick preview
+$thumbnail = New-Object System.Drawing.Bitmap 400, 200
+$thumbGraphics = [System.Drawing.Graphics]::FromImage($thumbnail)
+$thumbGraphics.DrawImage($bmp, 0, 0, 400, 200)
+$thumbPath = 'C:\Projects\Auto-Claude-Marketing\screenshot-thumb.png'
+$thumbnail.Save($thumbPath, [System.Drawing.Imaging.ImageFormat]::Png)
+$thumbGraphics.Dispose()
+$thumbnail.Dispose()
+
+Write-Host "Thumbnail saved to $thumbPath"
+Write-Host "Done!"

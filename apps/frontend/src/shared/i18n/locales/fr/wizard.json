@@ -1,0 +1,256 @@
+{
+  "title": "Assistant de Campagne IA",
+  "description": "Créez des campagnes marketing avec l'assistance de l'IA",
+  "steps": {
+    "overview": {
+      "title": "Aperçu de la Campagne",
+      "description": "Commençons par les bases de votre campagne",
+      "campaignName": {
+        "label": "Nom de la Campagne",
+        "placeholder": "Entrez un nom pour votre campagne",
+        "hint": "Choisissez un nom mémorable qui décrit votre campagne"
+      },
+      "objective": {
+        "label": "Objectif de la Campagne",
+        "placeholder": "Que souhaitez-vous accomplir?",
+        "hint": "Soyez spécifique concernant vos objectifs",
+        "suggestions": {
+          "brandAwareness": "Augmenter la Notoriete de la Marque",
+          "leadGeneration": "Générer des Leads",
+          "productLaunch": "Lancer un Produit",
+          "engagement": "Augmenter l'Engagement",
+          "sales": "Stimuler les Ventes",
+          "traffic": "Augmenter le Trafic Web"
+        }
+      },
+      "campaignType": {
+        "label": "Type de Campagne",
+        "hint": "Sélectionnez le type qui correspond le mieux à vos objectifs",
+        "types": {
+          "brand": "Notoriete de la Marque",
+          "product": "Lancement de Produit",
+          "promotion": "Promotionnel",
+          "event": "Marketing d'Événement",
+          "content": "Série de Contenus",
+          "retention": "Rétention Client",
+          "acquisition": "Acquisition de Clients"
+        }
+      }
+    },
+    "audience": {
+      "title": "Public Cible",
+      "description": "Définissez qui vous souhaitez atteindre avec cette campagne",
+      "audienceType": {
+        "label": "Type de Public",
+        "types": {
+          "b2c": "B2C (Direct au Consommateur)",
+          "b2b": "B2B (Business à Business)",
+          "both": "Mixte B2B & B2C"
+        }
+      },
+      "demographics": {
+        "label": "Démographiques",
+        "ageRange": "Tranche d'Âge",
+        "location": "Localisation",
+        "interests": "Intérêts et Comportements",
+        "placeholders": {
+          "ageRange": "ex., 25-34",
+          "location": "ex., France, Zones Urbaines",
+          "interests": "ex., Passionnés de tech, Cuisine à domicile, Amateurs de fitness"
+        }
+      },
+      "painPoints": {
+        "label": "Points de Douleur du Public",
+        "placeholder": "Quels problèmes votre public rencontre-t-il?",
+        "hint": "Comprendre les points de douleur aide à élaborer de meilleurs messages"
+      },
+      "aiSuggestions": {
+        "title": "Suggestions IA pour le Public",
+        "description": "Basé sur votre type de campagne, voici quelques recommandations d'audience:",
+        "apply": "Appliquer la Suggestion",
+        "regenerate": "Régénérer"
+      }
+    },
+    "channels": {
+      "title": "Canaux Marketing",
+      "description": "Choisissez où promouvoir votre campagne",
+      "channelTypes": {
+        "social": "Réseaux Sociaux",
+        "email": "Marketing par Email",
+        "paid": "Publicité Payante",
+        "organic": "Recherche Organique",
+        "content": "Marketing de Contenu",
+        "events": "Événements et Webinaires",
+        "partnership": "Partenariats"
+      },
+      "platforms": {
+        "social": {
+          "label": "Plateformes Sociales",
+          "options": {
+            "facebook": "Facebook",
+            "instagram": "Instagram",
+            "linkedin": "LinkedIn",
+            "twitter": "X (Twitter)",
+            "tiktok": "TikTok",
+            "youtube": "YouTube",
+            "pinterest": "Pinterest"
+          }
+        },
+        "search": {
+          "label": "Moteurs de Recherche",
+          "options": {
+            "google": "Google",
+            "bing": "Bing",
+            "seo": "SEO Organique"
+          }
+        }
+      },
+      "budgetAllocation": {
+        "title": "Allocation du Budget",
+        "total": "Budget Total",
+        "perChannel": "Par Canal",
+        "hint": "Faites glisser les curseurs pour ajuster l'allocation"
+      }
+    },
+    "messaging": {
+      "title": "Messages de la Campagne",
+      "description": "Élaborez vos messages clés et proposition de valeur",
+      "valueProposition": {
+        "label": "Proposition de Valeur",
+        "placeholder": "Qu'est-ce qui rend votre offre unique?",
+        "hint": "Concentrez-vous sur les avantages, pas seulement les fonctionnalités"
+      },
+      "keyMessages": {
+        "label": "Messages Clés",
+        "placeholder": "Points principaux à communiquer",
+        "hint": "Gardez-le clair et mémorable",
+        "addMessage": "Ajouter un Message",
+        "removeMessage": "Supprimer"
+      },
+      "callToAction": {
+        "label": "Appel à l'Action",
+        "placeholder": "Que les gens devraient-ils faire ensuite?",
+        "examples": {
+          "shopNow": "Achetez Maintenant",
+          "learnMore": "En Savoir Plus",
+          "signUp": "Inscrivez-vous Aujourd'hui",
+          "getQuote": "Obtenir un Devis",
+          "download": "Téléchargez Maintenant",
+          "contactUs": "Contactez-nous"
+        }
+      },
+      "tone": {
+        "label": "Ton des Messages",
+        "options": {
+          "professional": "Professionnel",
+          "friendly": "Amical",
+          "urgent": "Urgent",
+          "inspirational": "Inspirant",
+          "humorous": "Humoristique",
+          "educational": "Éducatif"
+        }
+      }
+    },
+    "timeline": {
+      "title": "Chronologie et Budget",
+      "description": "Définissez la durée de votre campagne et les jalons clés",
+      "duration": {
+        "label": "Durée de la Campagne",
+        "options": {
+          "flash": "Vente Éclair (1-3 jours)",
+          "short": "Court (1-2 semaines)",
+          "medium": "Moyen (1-3 mois)",
+          "long": "Long (3-6 mois)",
+          "ongoing": "Continu"
+        }
+      },
+      "startDate": {
+        "label": "Date de Début",
+        "placeholder": "Quand la campagne devrait-elle commencer?"
+      },
+      "endDate": {
+        "label": "Date de Fin",
+        "placeholder": "Quand devrait-elle se terminer?"
+      },
+      "budget": {
+        "label": "Budget Total",
+        "amount": "Montant en $",
+        "placeholder": "Entrez votre budget"
+      },
+      "milestones": {
+        "label": "Jalons Clés",
+        "placeholder": "Ajoutez des dates importantes ou points de contrôle",
+        "addMilestone": "Ajouter un Jalon",
+        "removeMilestone": "Supprimer"
+      }
+    },
+    "review": {
+      "title": "Examen et Lancement",
+      "description": "Examinez votre plan de campagne avant de le lancer",
+      "summary": {
+        "title": "Résumé de la Campagne",
+        "preview": "Aperçu de la Campagne",
+        "editStep": "Modifier Cette Étape"
+      },
+      "checklist": {
+        "title": "Liste de Pré-Lancement",
+        "objectives": "Les objectifs de la campagne sont clairs",
+        "audience": "Le public cible est défini",
+        "channels": "Les canaux marketing sont sélectionnés",
+        "budget": "Le budget est alloué",
+        "messaging": "Les messages clés sont élaborés",
+        "timeline": "La chronologie est définie",
+        "assets": "Les éléments créatifs sont prêts"
+      },
+      "actions": {
+        "createCampaign": "Créer la Campagne",
+        "saveAsDraft": "Enregistrer comme Brouillon",
+        "goBack": "Retourner",
+        "editCampaign": "Modifier la Campagne"
+      }
+    }
+  },
+  "progress": {
+    "current": "Étape {{current}} sur {{total}}",
+    "completion": "{{percentage}}% Completé",
+    "estimatedTime": "Durée estimée: {{minutes}} min",
+    "stepsCompleted": "{{completed}} étapes terminées"
+  },
+  "navigation": {
+    "next": "Suivant",
+    "previous": "Précédent",
+    "skip": "Passer Cette Étape",
+    "finish": "Terminer",
+    "cancel": "Annuler l'Assistant",
+    "saveProgress": "Enregistrer la Progression",
+    "editStep": "Modifier Cette Étape"
+  },
+  "errors": {
+    "required": "Ce champ est requis",
+    "invalid": "Veuillez entrer une valeur valide",
+    "incomplete": "Veuillez compléter cette étape pour continuer",
+    "generic": "Un problème est survenu. Veuillez réessayer."
+  },
+  "success": {
+    "created": "Campagne créée avec succès!",
+    "saved": "Campagne enregistrée comme brouillon",
+    "updated": "Campagne mise à jour"
+  },
+  "accessibility": {
+    "wizardTitle": "Assistant de Campagne IA",
+    "stepIndicator": "Étape {{number}} sur {{total}}",
+    "currentStep": "Actuellement à l'étape: {{stepName}}",
+    "navigateNext": "Aller à l'étape suivante",
+    "navigatePrevious": "Aller à l'étape précédente",
+    "skipStep": "Passer cette étape optionnelle",
+    "editStep": "Modifier les informations de cette étape"
+  },
+  "ai": {
+    "generating": "L'IA génère des suggestions...",
+    "regenerate": "Régénérer les Suggestions",
+    "applySuggestion": "Appliquer la Suggestion",
+    "suggestionApplied": "Suggestion appliquée",
+    "noSuggestions": "Aucune suggestion disponible",
+    "analyzing": "L'IA analyse vos saisies..."
+  }
+}

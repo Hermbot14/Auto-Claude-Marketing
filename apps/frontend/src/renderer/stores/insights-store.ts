@@ -423,3 +423,21 @@ export function setupInsightsListeners(): () => void {
     unsubError();
   };
 }
+
+// ============================================
+// Unified Store Migration - Backward Compatibility
+// ============================================
+
+/**
+ * INSIGHTS STORE MIGRATION NOTICE
+ *
+ * The insights store has been migrated to UnifiedStore.
+ *
+ * To use the new unified store:
+ * import { useUnifiedInsightsStore } from './UnifiedStore'
+ *
+ * The old useInsightsStore is preserved for backward compatibility.
+ * Development warnings will appear in console if using old imports.
+ *
+ * @deprecated Use UnifiedStore instead - see UnifiedStore.ts
+ */

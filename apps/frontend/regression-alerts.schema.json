@@ -1,0 +1,155 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Regression Alerts Configuration Schema",
+  "description": "Schema for configuring performance regression alerting rules and channels",
+  "type": "object",
+  "required": ["version", "enabled", "channels", "thresholds", "rules"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Configuration version"
+    },
+    "enabled": {
+      "type": "boolean",
+      "description": "Master switch for regression alerts"
+    },
+    "channels": {
+      "type": "object",
+      "description": "Notification channel configurations",
+      "properties": {
+        "github": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "onPullRequest": { "type": "boolean" },
+            "onCommit": { "type": "boolean" },
+            "commentFormat": { "type": "string" }
+          }
+        },
+        "slack": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "webhookUrl": { "type": "string" },
+            "channel": { "type": "string" },
+            "username": { "type": "string" },
+            "icon": { "type": "string" }
+          }
+        },
+        "email": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "recipients": { "type": "array", "items": { "type": "string" } },
+            "subject": { "type": "string" }
+          }
+        }
+      }
+    },
+    "thresholds": {
+      "type": "object",
+      "properties": {
+        "regression": {
+          "type": "object",
+          "properties": {
+            "percentage": { "type": "number", "minimum": 0, "maximum": 100 },
+            "absolute": { "type": "object" }
+          }
+        },
+        "improvement": {
+          "type": "object",
+          "properties": {
+            "percentage": { "type": "number" },
+            "announce": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "rules": {
+      "type": "object",
+      "description": "Alert rule definitions",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "enabled": { "type": "boolean" },
+          "conditions": { "type": "object" },
+          "actions": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["block_pr", "notify_urgently", "add_label", "post_comment", "create_issue", "require_review"] }
+          }
+        }
+      }
+    },
+    "exemptions": {
+      "type": "object",
+      "properties": {
+        "branches": { "type": "array", "items": { "type": "string" } },
+        "authors": { "type": "array", "items": { "type": "string" } },
+        "filePatterns": { "type": "array", "items": { "type": "string" } },
+        "commitMessages": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "baselines": {
+      "type": "object",
+      "properties": {
+        "storage": { "type": "string", "enum": ["git", "s3", "database"] },
+        "branch": { "type": "string" },
+        "path": { "type": "string" },
+        "updateStrategy": {
+          "type": "object",
+          "properties": {
+            "onMergeToMain": { "type": "boolean" },
+            "manualTrigger": { "type": "boolean" },
+            "onImprovement": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "history": {
+      "type": "object",
+      "properties": {
+        "retention": {
+          "type": "object",
+          "properties": {
+            "days": { "type": "number" },
+            "snapshots": { "type": "number" }
+          }
+        },
+        "aggregation": {
+          "type": "object",
+          "properties": {
+            "window": { "type": "string" },
+            "percentile": { "type": "number" }
+          }
+        }
+      }
+    },
+    "notifications": {
+      "type": "object",
+      "properties": {
+        "cooldown": {
+          "type": "object",
+          "properties": {
+            "duration": { "type": "string" },
+            "sameIssue": { "type": "boolean" }
+          }
+        },
+        "grouping": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "window": { "type": "string" }
+          }
+        },
+        "templates": {
+          "type": "object",
+          "properties": {
+            "regression": { "type": "object" },
+            "improvement": { "type": "object" },
+            "critical": { "type": "object" }
+          }
+        }
+      }
+    }
+  }
+}

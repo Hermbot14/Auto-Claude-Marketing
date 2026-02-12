@@ -1,0 +1,256 @@
+{
+  "title": "AI Campaign Wizard",
+  "description": "Create marketing campaigns with AI assistance",
+  "steps": {
+    "overview": {
+      "title": "Campaign Overview",
+      "description": "Let's start with the basics of your campaign",
+      "campaignName": {
+        "label": "Campaign Name",
+        "placeholder": "Enter a name for your campaign",
+        "hint": "Choose a memorable name that describes your campaign"
+      },
+      "objective": {
+        "label": "Campaign Objective",
+        "placeholder": "What do you want to achieve?",
+        "hint": "Be specific about your goals",
+        "suggestions": {
+          "brandAwareness": "Increase Brand Awareness",
+          "leadGeneration": "Generate Leads",
+          "productLaunch": "Launch Product",
+          "engagement": "Boost Engagement",
+          "sales": "Drive Sales",
+          "traffic": "Increase Website Traffic"
+        }
+      },
+      "campaignType": {
+        "label": "Campaign Type",
+        "hint": "Select the type that best fits your goals",
+        "types": {
+          "brand": "Brand Awareness",
+          "product": "Product Launch",
+          "promotion": "Promotional",
+          "event": "Event Marketing",
+          "content": "Content Series",
+          "retention": "Customer Retention",
+          "acquisition": "Customer Acquisition"
+        }
+      }
+    },
+    "audience": {
+      "title": "Target Audience",
+      "description": "Define who you want to reach with this campaign",
+      "audienceType": {
+        "label": "Audience Type",
+        "types": {
+          "b2c": "B2C (Direct to Consumer)",
+          "b2b": "B2B (Business to Business)",
+          "both": "Mixed B2B & B2C"
+        }
+      },
+      "demographics": {
+        "label": "Demographics",
+        "ageRange": "Age Range",
+        "location": "Location",
+        "interests": "Interests & Behaviors",
+        "placeholders": {
+          "ageRange": "e.g., 25-34",
+          "location": "e.g., United States, Urban Areas",
+          "interests": "e.g., Tech enthusiasts, Home cooks, Fitness lovers"
+        }
+      },
+      "painPoints": {
+        "label": "Audience Pain Points",
+        "placeholder": "What problems does your audience face?",
+        "hint": "Understanding pain points helps craft better messaging"
+      },
+      "aiSuggestions": {
+        "title": "AI Audience Suggestions",
+        "description": "Based on your campaign type, here are some audience recommendations:",
+        "apply": "Apply Suggestion",
+        "regenerate": "Regenerate"
+      }
+    },
+    "channels": {
+      "title": "Marketing Channels",
+      "description": "Choose where to promote your campaign",
+      "channelTypes": {
+        "social": "Social Media",
+        "email": "Email Marketing",
+        "paid": "Paid Advertising",
+        "organic": "Organic Search",
+        "content": "Content Marketing",
+        "events": "Events & Webinars",
+        "partnership": "Partnerships"
+      },
+      "platforms": {
+        "social": {
+          "label": "Social Platforms",
+          "options": {
+            "facebook": "Facebook",
+            "instagram": "Instagram",
+            "linkedin": "LinkedIn",
+            "twitter": "X (Twitter)",
+            "tiktok": "TikTok",
+            "youtube": "YouTube",
+            "pinterest": "Pinterest"
+          }
+        },
+        "search": {
+          "label": "Search Engines",
+          "options": {
+            "google": "Google",
+            "bing": "Bing",
+            "seo": "Organic SEO"
+          }
+        }
+      },
+      "budgetAllocation": {
+        "title": "Budget Allocation",
+        "total": "Total Budget",
+        "perChannel": "Per Channel",
+        "hint": "Drag sliders to adjust allocation"
+      }
+    },
+    "messaging": {
+      "title": "Campaign Messaging",
+      "description": "Craft your key messages and value proposition",
+      "valueProposition": {
+        "label": "Value Proposition",
+        "placeholder": "What makes your offer unique?",
+        "hint": "Focus on benefits, not just features"
+      },
+      "keyMessages": {
+        "label": "Key Messages",
+        "placeholder": "Main points to communicate",
+        "hint": "Keep it clear and memorable",
+        "addMessage": "Add Message",
+        "removeMessage": "Remove"
+      },
+      "callToAction": {
+        "label": "Call to Action",
+        "placeholder": "What should people do next?",
+        "examples": {
+          "shopNow": "Shop Now",
+          "learnMore": "Learn More",
+          "signUp": "Sign Up Today",
+          "getQuote": "Get a Quote",
+          "download": "Download Now",
+          "contactUs": "Contact Us"
+        }
+      },
+      "tone": {
+        "label": "Messaging Tone",
+        "options": {
+          "professional": "Professional",
+          "friendly": "Friendly",
+          "urgent": "Urgent",
+          "inspirational": "Inspirational",
+          "humorous": "Humorous",
+          "educational": "Educational"
+        }
+      }
+    },
+    "timeline": {
+      "title": "Timeline & Budget",
+      "description": "Set your campaign duration and key milestones",
+      "duration": {
+        "label": "Campaign Duration",
+        "options": {
+          "flash": "Flash Sale (1-3 days)",
+          "short": "Short (1-2 weeks)",
+          "medium": "Medium (1-3 months)",
+          "long": "Long (3-6 months)",
+          "ongoing": "Ongoing"
+        }
+      },
+      "startDate": {
+        "label": "Start Date",
+        "placeholder": "When should the campaign launch?"
+      },
+      "endDate": {
+        "label": "End Date",
+        "placeholder": "When should it conclude?"
+      },
+      "budget": {
+        "label": "Total Budget",
+        "amount": "$ Amount",
+        "placeholder": "Enter your budget"
+      },
+      "milestones": {
+        "label": "Key Milestones",
+        "placeholder": "Add important dates or checkpoints",
+        "addMilestone": "Add Milestone",
+        "removeMilestone": "Remove"
+      }
+    },
+    "review": {
+      "title": "Review & Launch",
+      "description": "Review your campaign plan before launching",
+      "summary": {
+        "title": "Campaign Summary",
+        "preview": "Campaign Preview",
+        "editStep": "Edit This Step"
+      },
+      "checklist": {
+        "title": "Pre-Launch Checklist",
+        "objectives": "Campaign objectives are clear",
+        "audience": "Target audience is defined",
+        "channels": "Marketing channels selected",
+        "budget": "Budget is allocated",
+        "messaging": "Key messages are crafted",
+        "timeline": "Timeline is set",
+        "assets": "Creative assets are ready"
+      },
+      "actions": {
+        "createCampaign": "Create Campaign",
+        "saveAsDraft": "Save as Draft",
+        "goBack": "Go Back",
+        "editCampaign": "Edit Campaign"
+      }
+    }
+  },
+  "progress": {
+    "current": "Step {{current}} of {{total}}",
+    "completion": "{{percentage}}% Complete",
+    "estimatedTime": "Est. time: {{minutes}} min",
+    "stepsCompleted": "{{completed}} steps completed"
+  },
+  "navigation": {
+    "next": "Next",
+    "previous": "Previous",
+    "skip": "Skip This Step",
+    "finish": "Finish",
+    "cancel": "Cancel Wizard",
+    "saveProgress": "Save Progress",
+    "editStep": "Edit This Step"
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalid": "Please enter a valid value",
+    "incomplete": "Please complete this step to continue",
+    "generic": "Something went wrong. Please try again."
+  },
+  "success": {
+    "created": "Campaign created successfully!",
+    "saved": "Campaign saved as draft",
+    "updated": "Campaign updated"
+  },
+  "accessibility": {
+    "wizardTitle": "AI Campaign Wizard",
+    "stepIndicator": "Step {{number}} of {{total}}",
+    "currentStep": "Currently on step: {{stepName}}",
+    "navigateNext": "Go to next step",
+    "navigatePrevious": "Go to previous step",
+    "skipStep": "Skip this optional step",
+    "editStep": "Edit information in this step"
+  },
+  "ai": {
+    "generating": "AI is generating suggestions...",
+    "regenerate": "Regenerate Suggestions",
+    "applySuggestion": "Apply Suggestion",
+    "suggestionApplied": "Suggestion applied",
+    "noSuggestions": "No suggestions available",
+    "analyzing": "AI is analyzing your inputs..."
+  }
+}

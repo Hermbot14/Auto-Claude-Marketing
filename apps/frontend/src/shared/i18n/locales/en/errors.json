@@ -1,9 +1,43 @@
 {
-  "task": {
-    "parseImplementationPlan": "Failed to parse implementation_plan.json for {{specId}}: {{error}}",
-    "jsonError": {
-      "titleSuffix": "(JSON Error)",
-      "description": "⚠️ JSON Parse Error: {{error}}\n\nThe implementation_plan.json file is malformed. Run the backend auto-fix or manually repair the file."
+  "optimistic": {
+    "toggleExpand": "Toggle pending operations",
+    "clearAll": "Clear all operations",
+    "offline": "Offline",
+    "syncFailed": "{{count}} sync failed",
+    "syncing": "{{count}} operation(s) pending",
+    "synced": "All synced",
+    "offlineMessage": "You're offline",
+    "offlineMessageDescription": "Changes will be saved and synced when you're back online.",
+    "processing": "Processing...",
+    "retry": "Retry",
+    "retryAll": "Retry All",
+    "clearFailed": "Clear Failed",
+    "targetId": "ID: {{id}}",
+    "retryAttempt": "Retry {{attempt}}/{{max}}",
+    "mutationTypes": {
+      "updateTaskStatus": "Updating task status",
+      "updateTaskTitle": "Updating task title",
+      "updateTaskDescription": "Updating task description",
+      "createTask": "Creating task",
+      "deleteTask": "Deleting task",
+      "updateFeatureStatus": "Updating feature status",
+      "updateFeatureTitle": "Updating feature title",
+      "updateFeatureDescription": "Updating feature description",
+      "addFeature": "Adding feature",
+      "deleteFeature": "Deleting feature",
+      "reorderFeatures": "Reordering features",
+      "reorderPhases": "Reordering phases",
+      "updateRoadmapMetadata": "Updating roadmap"
+    },
+    "errors": {
+      "networkError": "Network error - check your connection",
+      "serverError": "Server error - please try again",
+      "conflictDetected": "Conflict detected - changes were made by another user",
+      "versionMismatch": "Version conflict - server has a newer version",
+      "rollbackFailed": "Failed to rollback changes",
+      "maxRetriesExceeded": "Maximum retry attempts exceeded",
+      "queueFull": "Sync queue is full - some changes may be lost",
+      "mutationNotFound": "Operation not found"
     }
   }
 }

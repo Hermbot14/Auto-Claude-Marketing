@@ -1,0 +1,8 @@
+{
+  "prdId": "ui-ux-improvement",
+  "gitBranch": "prd/ui-ux-improvement",
+  "worktreePath": ".git/worktrees/ui-ux-improvement/tree",
+  "createdAt": "2025-02-06T22:40:00Z",
+  "status": "created",
+  "notes": "PRD created without git worktree. Use --branch option to create git isolation."
+}

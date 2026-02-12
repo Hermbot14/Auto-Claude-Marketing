@@ -1,0 +1,169 @@
+{
+  "$schema": "./performance-budget.schema.json",
+  "version": "1.0.0",
+  "budgets": {
+    "performance": {
+      "timeToInteractive": {
+        "budget": 2500,
+        "warning": 2000,
+        "unit": "ms",
+        "description": "Time to Interactive (TTI) - measures how long it takes for the page to become fully interactive",
+        "rationale": "2.5s threshold aligns with Google's 'Good' TTI score. Users perceive delays > 3s as slow."
+      },
+      "firstContentfulPaint": {
+        "budget": 1500,
+        "warning": 1200,
+        "unit": "ms",
+        "description": "First Contentful Paint (FCP) - when the first piece of content is rendered",
+        "rationale": "1.5s threshold aligns with Google's 'Good' FCP score. Critical for perceived performance."
+      },
+      "largestContentfulPaint": {
+        "budget": 2500,
+        "warning": 2000,
+        "unit": "ms",
+        "description": "Largest Contentful Paint (LCP) - when the largest content element renders",
+        "rationale": "2.5s threshold aligns with Core Web Vitals 'Good' LCP score."
+      },
+      "cumulativeLayoutShift": {
+        "budget": 0.1,
+        "warning": 0.05,
+        "unit": "score",
+        "description": "Cumulative Layout Shift (CLS) - measures visual stability",
+        "rationale": "0.1 threshold aligns with Core Web Vitals 'Good' CLS score."
+      },
+      "firstInputDelay": {
+        "budget": 100,
+        "warning": 50,
+        "unit": "ms",
+        "description": "First Input Delay (FID) - measures input responsiveness",
+        "rationale": "100ms threshold ensures app feels responsive to user interactions."
+      },
+      "timeToFirstByte": {
+        "budget": 600,
+        "warning": 400,
+        "unit": "ms",
+        "description": "Time to First Byte (TTFB) - server response time",
+        "rationale": "600ms threshold allows for local Electron app IPC overhead."
+      }
+    },
+    "resources": {
+      "bundleSize": {
+        "main": {
+          "budget": 1500000,
+          "warning": 1200000,
+          "unit": "bytes",
+          "description": "Main JavaScript bundle size",
+          "rationale": "1.5MB limit ensures reasonable load times. Consider code splitting for larger bundles."
+        },
+        "renderer": {
+          "budget": 1000000,
+          "warning": 800000,
+          "unit": "bytes",
+          "description": "Renderer process JavaScript bundle",
+          "rationale": "1MB limit for renderer to keep Electron main process lightweight."
+        },
+        "preload": {
+          "budget": 500000,
+          "warning": 400000,
+          "unit": "bytes",
+          "description": "Preload script bundle size",
+          "rationale": "500KB limit for preload scripts which should be minimal."
+        },
+        "css": {
+          "budget": 300000,
+          "warning": 200000,
+          "unit": "bytes",
+          "description": "Total CSS size",
+          "rationale": "300KB limit with Tailwind CSS and component styles."
+        }
+      },
+      "assets": {
+        "images": {
+          "budget": 500000,
+          "warning": 300000,
+          "unit": "bytes",
+          "description": "Total image assets size",
+          "rationale": "500KB limit for images, use WebP with compression."
+        },
+        "fonts": {
+          "budget": 200000,
+          "warning": 150000,
+          "unit": "bytes",
+          "description": "Total font files size",
+          "rationale": "200KB limit for fonts, consider system fonts fallbacks."
+        }
+      }
+    },
+    "memory": {
+      "heapSize": {
+        "budget": 150000000,
+        "warning": 120000000,
+        "unit": "bytes",
+        "description": "JavaScript heap size limit",
+        "rationale": "150MB limit prevents memory leaks from impacting UX."
+      },
+      "jsHeapSizeLimit": {
+        "budget": 200000000,
+        "warning": 150000000,
+        "unit": "bytes",
+        "description": "JS heap size limit (Chrome/Electron)",
+        "rationale": "200MB based on typical Electron app constraints."
+      }
+    },
+    "network": {
+      "requests": {
+        "budget": 50,
+        "warning": 30,
+        "unit": "count",
+        "description": "Maximum number of network requests on page load",
+        "rationale": "50 request limit reduces HTTP overhead and improves load time."
+      },
+      "totalTransferSize": {
+        "budget": 3000000,
+        "warning": 2000000,
+        "unit": "bytes",
+        "description": "Total transferred data size",
+        "rationale": "3MB limit for initial page load including all resources."
+      }
+    }
+  },
+  "lighthouse": {
+    "categories": {
+      "performance": {
+        "budget": 90,
+        "warning": 85
+      },
+      "accessibility": {
+        "budget": 95,
+        "warning": 90
+      },
+      "best-practices": {
+        "budget": 90,
+        "warning": 85
+      },
+      "seo": {
+        "budget": 85,
+        "warning": 80
+      }
+    }
+  },
+  "thresholds": {
+    "critical": 0.8,
+    "warning": 0.9
+  },
+  "exemptions": {
+    "development": true,
+    "electron": {
+      "timeToFirstByte": {
+        "reason": "Electron IPC adds overhead to local resource loading",
+        "multiplier": 1.5
+      }
+    },
+    "web": {
+      "bundleSize": {
+        "reason": "Web mode requires additional polyfills and compatibility code",
+        "multiplier": 1.2
+      }
+    }
+  }
+}

@@ -357,6 +357,50 @@
       "useClaudeMd": "Use CLAUDE.md",
       "useClaudeMdDescription": "Include CLAUDE.md instructions in agent context"
     },
+    "vault": {
+      "title": "Secure Vault",
+      "description": "Manage encrypted credentials with automatic rotation",
+      "overview": "Secure credential storage with AES-256-GCM encryption and OS keychain integration",
+      "features": {
+        "encryption": "AES-256-GCM encryption for all credentials at rest",
+        "keychain": "OS keychain integration for master encryption keys",
+        "tenantIsolation": "Per-tenant isolation for multi-tenancy support",
+        "rotation": "Automatic credential rotation with configurable intervals",
+        "auditLogging": "Comprehensive audit logging for all access"
+      },
+      "credentials": {
+        "title": "Stored Credentials",
+        "description": "Credentials currently stored in the secure vault"
+      },
+      "addCredential": {
+        "title": "Add Credential",
+        "description": "Store a new credential in the vault"
+      },
+      "migrate": {
+        "title": "Migrate Legacy Credentials",
+        "description": "Import credentials from environment variables or plaintext files"
+      },
+      "rotation": {
+        "title": "Credential Rotation",
+        "description": "Automatic credential rotation settings"
+      },
+      "auditLog": {
+        "title": "Audit Log",
+        "description": "Access history and security events"
+      },
+      "tenantIsolation": {
+        "title": "Tenant Isolation",
+        "description": "Multi-tenancy support for isolated credential storage"
+      },
+      "security": {
+        "title": "Security Information",
+        "description": "Encryption details and keychain status"
+      }
+    },
+    "vault": {
+      "title": "Secure Vault",
+      "description": "Manage encrypted credentials with automatic rotation"
+    },
     "claude": {
       "title": "Claude Auth",
       "description": "Claude authentication"
@@ -759,6 +803,35 @@
       "createAnthropicKey": "Create Anthropic API Key",
       "openai": "This looks like an OpenAI API. You'll need an API key.",
       "createOpenaiKey": "Create OpenAI API Key"
+    }
+  },
+  "performance": {
+    "title": "Performance Dashboard",
+    "description": "Monitor application performance metrics against budgets",
+    "refresh": "Refresh",
+    "totalMetrics": "Total Metrics",
+    "passed": "Passed",
+    "warnings": "Warnings",
+    "failed": "Failed",
+    "all": "All",
+    "performance": "Performance",
+    "resources": "Resources",
+    "memory": "Memory",
+    "network": "Network",
+    "metrics": "Metrics",
+    "metric": "Metric",
+    "actual": "Actual",
+    "budget": "Budget",
+    "usage": "Usage",
+    "status": "Status",
+    "lastUpdate": "Last update",
+    "rationaleTitle": "Budget Rationale",
+    "rationaleDescription": "Why these budgets were chosen and what they measure",
+    "categories": {
+      "performance": "Performance",
+      "resources": "Resources",
+      "memory": "Memory",
+      "network": "Network"
     }
   }
 }

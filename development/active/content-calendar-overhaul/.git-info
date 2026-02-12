@@ -1,0 +1,7 @@
+{
+  "branch": "prd/content-calendar-overhaul",
+  "worktreePath": ".git/worktrees/content-calendar-overhaul",
+  "createdAt": "2026-02-05T18:51:00Z",
+  "baseCommit": "7a46a9b6",
+  "baseBranch": "develop"
+}

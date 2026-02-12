@@ -1,0 +1,174 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Performance Budget Configuration Schema",
+  "description": "Schema for defining performance budgets for the Auto Claude Marketing Hub application",
+  "type": "object",
+  "required": ["version", "budgets"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Configuration version following semantic versioning"
+    },
+    "budgets": {
+      "type": "object",
+      "description": "Performance budget definitions",
+      "required": ["performance", "resources", "memory", "network", "lighthouse"],
+      "properties": {
+        "performance": {
+          "type": "object",
+          "description": "Web performance metrics budgets",
+          "properties": {
+            "timeToInteractive": { "$ref": "#/definitions/metricBudget" },
+            "firstContentfulPaint": { "$ref": "#/definitions/metricBudget" },
+            "largestContentfulPaint": { "$ref": "#/definitions/metricBudget" },
+            "cumulativeLayoutShift": { "$ref": "#/definitions/metricBudget" },
+            "firstInputDelay": { "$ref": "#/definitions/metricBudget" },
+            "timeToFirstByte": { "$ref": "#/definitions/metricBudget" }
+          }
+        },
+        "resources": {
+          "type": "object",
+          "description": "Resource size budgets",
+          "properties": {
+            "bundleSize": {
+              "type": "object",
+              "properties": {
+                "main": { "$ref": "#/definitions/sizeBudget" },
+                "renderer": { "$ref": "#/definitions/sizeBudget" },
+                "preload": { "$ref": "#/definitions/sizeBudget" },
+                "css": { "$ref": "#/definitions/sizeBudget" }
+              }
+            },
+            "assets": {
+              "type": "object",
+              "properties": {
+                "images": { "$ref": "#/definitions/sizeBudget" },
+                "fonts": { "$ref": "#/definitions/sizeBudget" }
+              }
+            }
+          }
+        },
+        "memory": {
+          "type": "object",
+          "description": "Memory usage budgets",
+          "properties": {
+            "heapSize": { "$ref": "#/definitions/sizeBudget" },
+            "jsHeapSizeLimit": { "$ref": "#/definitions/sizeBudget" }
+          }
+        },
+        "network": {
+          "type": "object",
+          "description": "Network request budgets",
+          "properties": {
+            "requests": { "$ref": "#/definitions/countBudget" },
+            "totalTransferSize": { "$ref": "#/definitions/sizeBudget" }
+          }
+        },
+        "lighthouse": {
+          "type": "object",
+          "description": "Lighthouse category score budgets",
+          "properties": {
+            "performance": { "$ref": "#/definitions/scoreBudget" },
+            "accessibility": { "$ref": "#/definitions/scoreBudget" },
+            "best-practices": { "$ref": "#/definitions/scoreBudget" },
+            "seo": { "$ref": "#/definitions/scoreBudget" }
+          }
+        }
+      }
+    },
+    "thresholds": {
+      "type": "object",
+      "description": "Percentage thresholds for budget status",
+      "properties": {
+        "critical": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Critical threshold (0-1), below this is critical status"
+        },
+        "warning": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Warning threshold (0-1), below this but above critical is warning"
+        }
+      }
+    },
+    "exemptions": {
+      "type": "object",
+      "description": "Platform-specific exemptions and multipliers",
+      "properties": {
+        "development": {
+          "type": "boolean",
+          "description": "Whether budgets are enforced in development mode"
+        },
+        "electron": {
+          "type": "object",
+          "description": "Electron-specific exemptions",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "reason": { "type": "string" },
+              "multiplier": { "type": "number" }
+            }
+          }
+        },
+        "web": {
+          "type": "object",
+          "description": "Web mode specific exemptions",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "reason": { "type": "string" },
+              "multiplier": { "type": "number" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "metricBudget": {
+      "type": "object",
+      "required": ["budget", "unit", "description", "rationale"],
+      "properties": {
+        "budget": { "type": "number" },
+        "warning": { "type": "number" },
+        "unit": { "type": "string", "enum": ["ms", "score"] },
+        "description": { "type": "string" },
+        "rationale": { "type": "string" }
+      }
+    },
+    "sizeBudget": {
+      "type": "object",
+      "required": ["budget", "unit", "description", "rationale"],
+      "properties": {
+        "budget": { "type": "number" },
+        "warning": { "type": "number" },
+        "unit": { "type": "string", "enum": ["bytes"] },
+        "description": { "type": "string" },
+        "rationale": { "type": "string" }
+      }
+    },
+    "countBudget": {
+      "type": "object",
+      "required": ["budget", "unit", "description", "rationale"],
+      "properties": {
+        "budget": { "type": "number" },
+        "warning": { "type": "number" },
+        "unit": { "type": "string", "enum": ["count"] },
+        "description": { "type": "string" },
+        "rationale": { "type": "string" }
+      }
+    },
+    "scoreBudget": {
+      "type": "object",
+      "required": ["budget", "unit"],
+      "properties": {
+        "budget": { "type": "number", "minimum": 0, "maximum": 100 },
+        "warning": { "type": "number", "minimum": 0, "maximum": 100 },
+        "unit": { "type": "string", "enum": ["score"] }
+      }
+    }
+  }
+}

@@ -1,4 +1,57 @@
 {
+  "quickStart": {
+    "title": "Quick Start Guide",
+    "description": "Follow these steps to create your first task with hands-on guidance"
+  },
+  "tour": {
+    "title": "Feature Tour",
+    "description": "Learn about key features with this interactive tour",
+    "stepIndicator": "Step {{current}} of {{total}}",
+    "pressEscToSkip": "Press Escape to skip",
+    "actions": {
+      "navigateTo": "Go to {{route}}",
+      "clickElement": "Click this element",
+      "enterValue": "Enter: {{value}}",
+      "completeTour": "Complete Tour"
+    }
+  },
+  "help": {
+    "title": "Help",
+    "learnMore": "Learn more",
+    "dismissTooltip": "Don't show again",
+    "tooltipDismissed": "Tooltip dismissed",
+    "showTooltip": "Tooltip shown"
+  },
+  "emptyStates": {
+    "createTask": {
+      "title": "Create Your First Task",
+      "description": "Start by creating a task to see Auto Claude in action.",
+      "action": "Create Task"
+    },
+    "noWorkflows": {
+      "title": "No Workflows Yet",
+      "description": "Create your first visual workflow to automate your development process.",
+      "action": "Create Workflow"
+    },
+    "noTemplates": {
+      "title": "No Templates Available",
+      "description": "Workflow templates will appear here once you create custom ones.",
+      "action": "Browse Documentation"
+    }
+  },
+  "steps": {
+    "1": "1. Welcome",
+    "2": "2. Authentication",
+    "3": "3. Memory Setup",
+    "4": "4. First Task",
+    "5": "5. Complete"
+  },
+  "validation": {
+    "validating": "Validating...",
+    "valid": "Valid",
+    "invalid": "Invalid",
+    "fixRequired": "Fix required before proceeding"
+  },
   "wizard": {
     "title": "Setup Wizard",
     "description": "Configure your Auto Claude environment in a few simple steps",
@@ -38,10 +91,104 @@
     "badges": {
       "default": "Default",
       "active": "Active",
-      "authenticated": "Authenticated",
-      "needsAuth": "Needs Auth"
+  "steps": {
+    "welcome": "Welcome",
+    "authChoice": "Auth Method",
+    "auth": "Auth",
+    "claudeCode": "CLI",
+    "devtools": "Dev Tools",
+    "privacy": "Privacy",
+    "memory": "Memory",
+    "done": "Done"
+  },
+  "privacy": {
+    "title": "Help Improve Auto Claude",
+    "subtitle": "Anonymous error reporting helps us fix bugs faster",
+    "whatWeCollect": {
+      "title": "What we collect",
+      "crashReports": "Crash reports and error stack traces",
+      "errorMessages": "Error messages (with file paths anonymized)",
+      "appVersion": "App version and platform info"
     },
-    "buttons": {
+    "whatWeNeverCollect": {
+      "title": "What we never collect",
+      "code": "Your code or project files",
+      "filenames": "Full file paths (usernames are masked)",
+      "apiKeys": "API keys or tokens",
+      "personalData": "Personal information or usage data"
+    },
+    "toggle": {
+      "label": "Send anonymous error reports",
+      "description": "Help us identify and fix issues"
+    }
+  },
+  "claudeCode": {
+    "title": "Claude Code CLI",
+    "description": "Install or update Claude Code CLI to enable AI-powered features",
+    "detecting": "Checking Claude Code installation...",
+    "info": {
+      "title": "What is Claude Code?",
+      "description": "Claude Code is Anthropic's official CLI that powers Auto Claude's AI features. It provides secure authentication and direct access to Claude models."
+    },
+    "status": {
+      "installed": "Installed",
+      "outdated": "Update Available",
+      "notFound": "Not Installed"
+    },
+    "version": {
+      "current": "Current Version",
+      "latest": "Latest Version"
+    },
+    "install": {
+      "button": "Install Claude Code",
+      "updating": "Update Claude Code",
+      "inProgress": "Installing...",
+      "success": "Installation command sent to terminal. Please complete the installation there.",
+      "instructions": "The installer will open in your terminal. Follow the prompts to complete installation."
+    },
+    "learnMore": "Learn more about Claude Code"
+  },
+  "devtools": {
+    "title": "Developer Tools",
+    "description": "Choose your preferred IDE and terminal for working with Auto Claude worktrees",
+    "detecting": "Detecting installed tools...",
+    "detectAgain": "Detect Again",
+    "whyConfigure": "Why configure these?",
+    "whyConfigureDescription": "When Auto Claude builds features in isolated worktrees, you can open them directly in your preferred IDE or terminal to test and review changes.",
+    "ide": {
+      "label": "Preferred IDE",
+      "description": "Auto Claude will open worktrees in this editor",
+      "customPath": "Custom IDE Path"
+    },
+    "terminal": {
+      "label": "Preferred Terminal",
+      "description": "Auto Claude will open terminal sessions here",
+      "customPath": "Custom Terminal Path"
+    },
+    "detectedSummary": "Detected on your system:",
+    "noToolsDetected": "No additional tools detected (VS Code and system terminal will be used)",
+    "custom": "Custom...",
+    "saveAndContinue": "Save & Continue"
+  },
+  "ollama": {
+    "notInstalled": {
+      "title": "Ollama not installed",
+      "description": "Ollama provides free, local embedding models for semantic search. Install it with one click to enable this feature.",
+      "installSuccess": "Installation started in your terminal. Complete the installation there, then click Retry.",
+      "installButton": "Install Ollama",
+      "installing": "Installing...",
+      "retry": "Retry",
+      "learnMore": "Learn more",
+      "fallbackNote": "Memory will still work with keyword search even without Ollama."
+    },
+    "notRunning": {
+      "title": "Ollama not running",
+      "description": "Ollama is installed but not running. Start Ollama to use local embedding models.",
+      "retry": "Retry",
+      "fallbackNote": "Memory will still work with keyword search even without embeddings."
+    }
+  }
+}
       "authenticate": "Authenticate",
       "setActive": "Set Active",
       "rename": "Rename",

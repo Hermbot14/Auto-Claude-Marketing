@@ -1,0 +1,945 @@
+{
+  "id": "ui-ux-improvement",
+  "title": "UI/UX Improvements for Auto-Claude-Marketing - Ultrathink Edition",
+  "description": "Comprehensive UI/UX improvements based on Playwright testing with 7-dimensional analysis (Psychological, Technical, Accessibility, Scalability, Performance, Security, DX).",
+  "metadata": {
+    "createdAt": "2025-02-06T22:40:00Z",
+    "updatedAt": "2025-02-06T23:00:00Z",
+    "version": "2.0.0-ultrathink",
+    "gitBranch": "prd/ui-ux-improvement",
+    "testReference": "UI_UX_IMPROVEMENT_REPORT.md",
+    "overallScore": "7.7/10",
+    "targetScore": "9.5/10",
+    "analysis": "ultrathink-7d"
+  },
+  "rootCauseAnalysis": {
+    "modalBlockingIssue": {
+      "psychological": "User frustration when navigation is blocked - creates feeling of being 'stuck' in the application",
+      "technical": "Radix Dialog uses Portal with z-index 50 and overlay that intercepts all pointer events when open. Multiple dialogs in App.tsx may auto-open on page load (onboarding, init, version warning).",
+      "accessibility": "Modal blocking navigation prevents keyboard users from navigating freely",
+      "scalability": "Modal state management is fragmented across multiple useState hooks in App.tsx",
+      "performance": "Multiple dialog re-renders due to useEffect dependency array issues",
+      "security": "N/A",
+      "dx": "Difficult to debug which modal is open - no centralized dialog state management"
+    },
+    "navigationTextIssue": {
+      "psychological": "Confusing label 'Kanban BoardK' breaks mental model of clean navigation",
+      "technical": "Playwright test shows truncated text - likely kbd element rendering or i18n issue",
+      "accessibility": "Screen readers may announce 'Kanban BoardK' instead of proper label",
+      "scalability": "Navigation item rendering is inlined in Sidebar.tsx - should be extracted",
+      "performance": "N/A",
+      "security": "N/A",
+      "dx": "Navigation pattern needs reusable component for consistency"
+    }
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Fix Critical Modal Blocking Navigation Issue (ULTRATHINK)",
+      "status": "pending",
+      "priority": "CRITICAL",
+      "estimatedEffort": "4 hours",
+      "complexity": "complex",
+      "acceptanceCriteria": [
+        "No modal auto-opens on page load in web preview mode",
+        "All navigation buttons are clickable on first render",
+        "Modal overlay has proper z-index stacking",
+        "onInteractOutside properly closes modal",
+        "Focus trap works correctly in modals",
+        "No JavaScript errors related to modal interaction",
+        "Keyboard (Esc) closes all modals"
+      ],
+      "dependencies": [],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/App.tsx",
+        "apps/frontend/src/renderer/components/ui/dialog.tsx",
+        "apps/frontend/src/renderer/lib/mocks/browser-mock.ts",
+        "apps/frontend/src/renderer/lib/mocks/project-mock.ts"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-001-01",
+          "title": "Identify Which Modal is Auto-Opening",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Identified the specific modal blocking navigation",
+            "Understood trigger conditions",
+            "Documented modal state management flow"
+          ],
+          "microtasks": [
+            "Add console.log to each modal's open prop in App.tsx",
+            "Run web dev server and check console output",
+            "Identify which dialog has open={true} on page load",
+            "Check useEffect hooks for modal triggers (lines 260-275, 357-372)",
+            "Review browser-mock.ts for mock state issues"
+          ]
+        },
+        {
+          "id": "TASK-001-02",
+          "title": "Implement Centralized Modal State Management",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Created ModalManager Zustand store",
+            "All modals use centralized state",
+            "Easy to debug which modals are open",
+            "Prevents multiple modals from opening simultaneously"
+          ],
+          "microtasks": [
+            "Create apps/frontend/src/renderer/stores/modal-store.ts",
+            "Define modal types and state interface",
+            "Add modal registry for tracking open modals",
+            "Add modal stack for managing modal priority",
+            "Create useModal hook for component access"
+          ]
+        },
+        {
+          "id": "TASK-001-03",
+          "title": "Fix onInteractOutside Behavior",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "All dialogs have onInteractOutside callback",
+            "Clicking outside closes modal",
+            "Event propagation properly handled",
+            "No click-through to underlying elements"
+          ],
+          "microtasks": [
+            "Add onInteractOutside prop to Dialog components in App.tsx",
+            "Ensure setOpen(false) is called correctly",
+            "Test click-outside behavior doesn't trigger button clicks",
+            "Add event.stopPropagation() where needed",
+            "Verify overlay prevents pointer events to background"
+          ]
+        },
+        {
+          "id": "TASK-001-04",
+          "title": "Fix Modal Z-Index and Stacking",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Modal z-index follows design system tokens",
+            "Multiple modals stack correctly",
+            "Navigation sidebar (z-index 40) below modals (z-index 50)",
+            "Toasts (z-index 100) above all modals"
+          ],
+          "microtasks": [
+            "Define z-index scale in apps/frontend/src/shared/constants.ts",
+            "Update Dialog component (ui/dialog.tsx) to use token",
+            "Update Toaster component to use token",
+            "Test modal stacking behavior with multiple dialogs"
+          ]
+        },
+        {
+          "id": "TASK-001-05",
+          "title": "Fix Web Preview Mock Modal State",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Web preview doesn't auto-open unnecessary modals",
+            "Mock projects have correct autoBuildPath",
+            "Onboarding wizard respects mock state",
+            "Clean initial state for web preview"
+          ],
+          "microtasks": [
+            "Review project-mock.ts mock data (autoBuildPath set correctly)",
+            "Update browser-mock.ts to skip auto-open modals",
+            "Add WEB_PREVIEW_MODE flag to browser mock",
+            "Test in browser at localhost:3000",
+            "Verify clean initial state"
+          ]
+        },
+        {
+          "id": "TASK-001-06",
+          "title": "Verify Navigation Works After Modal Fix",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "All navigation buttons are clickable",
+            "Page navigation works correctly",
+            "No console errors during navigation",
+            "Playwright test suite passes"
+          ],
+          "microtasks": [
+            "Run Playwright test suite (playwright-test-interactions.mjs)",
+            "Manually test all navigation items",
+            "Verify no pointer-events blocking",
+            "Test keyboard navigation (Tab key)",
+            "Test keyboard shortcuts (K, A, N, D, E, I, L, C, M, W)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Fix Navigation Button Text Display (ULTRATHINK)",
+      "status": "pending",
+      "priority": "HIGH",
+      "estimatedEffort": "2 hours",
+      "complexity": "medium",
+      "acceptanceCriteria": [
+        "Navigation buttons show clean text ('Kanban Board' not 'Kanban BoardK')",
+        "Keyboard shortcuts display in separate kbd element",
+        "Consistent formatting across all navigation items",
+        "i18n translations work correctly (EN/FR)",
+        "Screen readers announce text first, then shortcut hint"
+      ],
+      "dependencies": [],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/components/Sidebar.tsx",
+        "apps/frontend/src/shared/i18n/locales/en/navigation.json",
+        "apps/frontend/src/shared/i18n/locales/fr/navigation.json"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-002-01",
+          "title": "Debug Navigation Text Rendering",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Found root cause of text truncation/concatenation",
+            "Understood i18n translation flow"
+          ],
+          "microtasks": [
+            "Inspect navigation button DOM in browser DevTools",
+            "Check translation files for correct strings",
+            "Verify kbd element rendering (line 290 in Sidebar.tsx)",
+            "Check for CSS text-overflow issues",
+            "Review Playwright test screenshot evidence"
+          ]
+        },
+        {
+          "id": "TASK-002-02",
+          "title": "Extract NavigationItem Component",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Created NavigationItem.tsx component",
+            "Reusable across sidebar and other nav areas",
+            "Accepts icon, labelKey, shortcut, isActive props",
+            "Proper TypeScript interfaces"
+          ],
+          "microtasks": [
+            "Create apps/frontend/src/renderer/components/navigation/NavigationItem.tsx",
+            "Define NavigationItemProps interface",
+            "Extract renderNavItem logic from Sidebar.tsx (lines 268-296)",
+            "Add proper className and accessibility props",
+            "Export and use in Sidebar component"
+          ]
+        },
+        {
+          "id": "TASK-002-03",
+          "title": "Fix Text and Shortcut Display",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Button text displays cleanly without shortcut character",
+            "Keyboard shortcut in separate kbd element",
+            "Proper ARIA attributes (aria-keyshortcuts)",
+            "Responsive kbd element (hidden on mobile)"
+          ],
+          "microtasks": [
+            "Review Sidebar.tsx line 288 span element rendering",
+            "Check i18n translation 'navigation:items.kanban' content",
+            "Verify kbd element (line 290-292) doesn't overlap text",
+            "Update CSS if needed for proper spacing",
+            "Test with multiple viewport widths (mobile, tablet, desktop)"
+          ]
+        },
+        {
+          "id": "TASK-002-04",
+          "title": "Test All Navigation Items",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "All 10+ navigation items display correctly",
+            "Keyboard shortcuts visible (desktop) or on hover (mobile)",
+            "Text truncation resolved",
+            "i18n works for both EN and FR"
+          ],
+          "microtasks": [
+            "Visual inspection of all nav items (Kanban, Terminals, Insights, Roadmap, Calendar, Ideation, Changelog, Context, Agent Tools, Worktrees)",
+            "Test keyboard shortcut visibility",
+            "Verify accessibility with screen reader",
+            "Test French translation (fr/navigation.json)",
+            "Run Playwright navigation test"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Fix Accessibility Issues (ULTRATHINK)",
+      "status": "pending",
+      "priority": "HIGH",
+      "estimatedEffort": "3 hours",
+      "complexity": "medium",
+      "acceptanceCriteria": [
+        "All buttons have accessible labels",
+        "All interactive elements meet 44x44px minimum touch target",
+        "Color contrast meets WCAG 2.1 AA standards (4.5:1 for text)",
+        "No accessibility warnings in browser DevTools",
+        "Keyboard navigation works throughout app",
+        "Screen reader announces all interactive elements correctly"
+      ],
+      "dependencies": ["TASK-001"],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/components/**/*.tsx",
+        "apps/frontend/src/renderer/components/ui/button.tsx",
+        "apps/frontend/tailwind.config.js"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-003-01",
+          "title": "Add Label to Unlabeled Button",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "1 button without label now has aria-label or visible text",
+            "Screen reader announces button purpose",
+            "Button in modal or dialog identified"
+          ],
+          "microtasks": [
+            "Find the unlabeled button using audit findings",
+            "Determine if button needs visible text or aria-label",
+            "Add descriptive aria-label attribute",
+            "Test with NVDA/JAWS screen reader",
+            "Verify in browser accessibility inspector"
+          ]
+        },
+        {
+          "id": "TASK-003-02",
+          "title": "Fix Small Touch Targets",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "All 5 elements with <44px touch targets resized",
+            "Minimum 44x44px clickable area for touch",
+            "Padding/margins adjusted for touch devices",
+            "No overlap between clickable elements"
+          ],
+          "microtasks": [
+            "Locate the 5 elements with small touch targets via Playwright",
+            "Add min-width and min-height CSS (44px minimum)",
+            "Increase padding for small buttons",
+            "Test on mobile viewport (375x667)",
+            "Verify touch targets don't overlap"
+          ]
+        },
+        {
+          "id": "TASK-003-03",
+          "title": "Establish WCAG 2.1 AA Color Contrast System",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "All text colors meet WCAG 2.1 AA (4.5:1 for normal text)",
+            "All large text meets WCAG 2.1 AA (3:1 for 18pt+)",
+            "UI components meet 3:1 contrast ratio",
+            "Design tokens enforce contrast minimums"
+          ],
+          "microtasks": [
+            "Run axe-core or WAVE contrast analysis tool",
+            "Document current color palette contrast ratios",
+            "Create color contrast issue list",
+            "Update color tokens in theme if needed",
+            "Add contrast validation to design system",
+            "Re-verify after changes"
+          ]
+        },
+        {
+          "id": "TASK-003-04",
+          "title": "Improve Keyboard Navigation",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Tab order follows visual layout",
+            "Focus indicators visible on all interactive elements",
+            "Skip links for main content",
+            "No keyboard traps"
+          ],
+          "microtasks": [
+            "Audit tab order with keyboard only",
+            "Add focus-visible CSS class for keyboard users",
+            "Ensure all interactive elements can receive focus",
+            "Test keyboard-only navigation through entire app",
+            "Add skip-to-content link if needed"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Fix Performance Issues - useEffect Dependencies",
+      "status": "pending",
+      "priority": "MEDIUM",
+      "estimatedEffort": "2 hours",
+      "complexity": "medium",
+      "acceptanceCriteria": [
+        "Tab restore useEffect warning eliminated",
+        "No excessive re-renders",
+        "useEffect dependency arrays optimized",
+        "React DevTools Profiler shows minimal re-renders"
+      ],
+      "dependencies": [],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/App.tsx",
+        "apps/frontend/src/renderer/components/Sidebar.tsx"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-004-01",
+          "title": "Fix Tab Restore useEffect Warnings",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "useEffect dependency arrays properly optimized",
+            "No console warnings about tab restore",
+            "Tab state correctly restored without loops"
+          ],
+          "microtasks": [
+            "Review App.tsx lines 199-246 (tab restore useEffect)",
+            "Understand why projectTabs is intentionally omitted",
+            "Add useMemo for projectTabs if needed",
+            "Consider useRef for stable references",
+            "Test tab restoration after fix"
+          ]
+        },
+        {
+          "id": "TASK-004-02",
+          "title": "Optimize Other useEffect Hooks",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "All useEffect hooks have proper dependencies",
+            "No stale closures",
+            "No infinite loops"
+          ],
+          "microtasks": [
+            "Audit all useEffect hooks in App.tsx and Sidebar.tsx",
+            "Run ESLint with react-hooks/exhaustive-deps",
+            "Fix dependency array warnings",
+            "Add useCallback/useMemo where appropriate",
+            "Verify no performance regressions after changes"
+          ]
+        },
+        {
+          "id": "TASK-004-03",
+          "title": "Add Performance Monitoring",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "React DevTools Profiler integrated",
+            "Performance marks for key interactions",
+            "Metrics baseline established"
+          ],
+          "microtasks": [
+            "Install why-did-you-render or use React DevTools Profiler",
+            "Add performance.mark() calls for key interactions",
+            "Document baseline metrics (601ms load time)",
+            "Create performance monitoring guide for team"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Enhance Visual Design System",
+      "status": "pending",
+      "priority": "MEDIUM",
+      "estimatedEffort": "4 hours",
+      "complexity": "medium",
+      "acceptanceCriteria": [
+        "Consistent type scale (12px, 14px, 16px, 18px, 20px, 24px, 30px, 36px)",
+        "Design tokens for spacing, colors, typography, z-index",
+        "Theme toggle (dark/light mode) implemented",
+        "Loading states (skeleton, spinner, progress)",
+        "Error boundaries for graceful failure"
+      ],
+      "dependencies": ["TASK-001"],
+      "filesInvolved": [
+        "apps/frontend/src/shared/theme/**/*",
+        "apps/frontend/src/renderer/components/ui/**/*",
+        "apps/frontend/tailwind.config.js"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-005-01",
+          "title": "Establish Design Token System",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Typography tokens (font sizes, line heights, weights)",
+            "Color tokens (primary, secondary, accent, semantic)",
+            "Spacing tokens (scale: 4px base unit)",
+            "Z-index tokens (defined scale: base=0, dropdown=10, sidebar=40, modal=50, toast=100)",
+            "Border radius tokens (sm, md, lg, xl)",
+            "Shadow tokens for elevation"
+          ],
+          "microtasks": [
+            "Create apps/frontend/src/shared/theme/tokens.ts",
+            "Define typography scale with REM values",
+            "Define color palette with CSS variables",
+            "Define spacing scale (4, 8, 12, 16, 20, 24, 32, 40, 48, 64)",
+            "Define z-index scale with documentation",
+            "Export tokens for Tailwind config"
+          ]
+        },
+        {
+          "id": "TASK-005-02",
+          "title": "Apply Type Scale to Components",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "All font sizes use design tokens",
+            "Consistent line heights (1.5 for body, 1.2 for headings)",
+            "No magic numbers for font sizes"
+          ],
+          "microtasks": [
+            "Audit components for hardcoded font sizes (grep -r 'text-\\[1-9\\]')",
+            "Replace with token references (e.g., text-lg, text-xl)",
+            "Update Tailwind config with custom token values",
+            "Verify consistent spacing with type scale"
+          ]
+        },
+        {
+          "id": "TASK-005-03",
+          "title": "Implement Theme Toggle",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Theme toggle button in header or settings",
+            "Dark mode color palette defined",
+            "Theme persists in localStorage",
+            "Smooth transition between themes (200ms ease-in-out)",
+            "Respects system preference initially"
+          ],
+          "microtasks": [
+            "Create dark mode color tokens (invert light tokens)",
+            "Add ThemeToggle component with sun/moon icon",
+            "Implement theme provider/context with React Context",
+            "Add localStorage persistence (useEffect)",
+            "Add CSS transition for theme change (transition-colors duration-200)",
+            "Test system preference detection with matchMedia"
+          ]
+        },
+        {
+          "id": "TASK-005-04",
+          "title": "Add Loading States",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Skeleton component for cards/lists during data loading",
+            "Spinner component for async operations",
+            "Progress indicators for long-running tasks",
+            "Loading state management pattern documented"
+          ],
+          "microtasks": [
+            "Create apps/frontend/src/renderer/components/ui/skeleton.tsx",
+            "Create apps/frontend/src/renderer/components/ui/spinner.tsx",
+            "Create apps/frontend/src/renderer/components/ui/progress.tsx",
+            "Add loading prop to Card component (show skeleton when loading=true)",
+            "Document loading state patterns in docs/"
+          ]
+        },
+        {
+          "id": "TASK-005-05",
+          "title": "Implement Error Boundaries",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "ErrorBoundary catches component errors gracefully",
+            "Fallback error UI displayed (friendly message + retry button)",
+            "Error logging to console/service (Sentry)",
+            "Retry mechanism for recoverable errors"
+          ],
+          "microtasks": [
+            "Create apps/frontend/src/renderer/components/ErrorBoundary.tsx",
+            "Add componentDidCatch and getDerivedStateFromError",
+            "Create FallbackErrorUI component",
+            "Wrap major route components (Kanban, Calendar, Roadmap, etc.)",
+            "Add error reporting to Sentry/logging service",
+            "Test with故意 errors (throw new Error('test'))"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Fix Console Errors - 404 and Missing Resources",
+      "status": "pending",
+      "priority": "LOW",
+      "estimatedEffort": "1 hour",
+      "complexity": "simple",
+      "acceptanceCriteria": [
+        "404 error resolved",
+        "No missing resources",
+        "All imports resolve correctly",
+        "Clean console on page load (no errors, only expected warnings)"
+      ],
+      "dependencies": [],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/**/*"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-006-01",
+          "title": "Identify Missing Resource",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Found the 404 error source",
+            "Understood why resource is missing"
+          ],
+          "microtasks": [
+            "Open browser Network tab during page load (localhost:3000)",
+            "Filter Network tab by Status 404",
+            "Identify missing file path from response URL",
+            "Search codebase for import statement (grep -r filename)"
+          ]
+        },
+        {
+          "id": "TASK-006-02",
+          "title": "Fix Missing Import or File",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Missing resource fixed or import removed",
+            "No 404 errors in console"
+          ],
+          "microtasks": [
+            "Fix import path or remove unused import",
+            "Create missing file if needed (rare case)",
+            "Verify file exists in build output (dist-web/)",
+            "Test in both dev (bun run dev:web) and production build"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-007",
+      "title": "Re-test Content Calendar After Modal Fix",
+      "status": "pending",
+      "priority": "MEDIUM",
+      "estimatedEffort": "2 hours",
+      "complexity": "medium",
+      "acceptanceCriteria": [
+        "Content Calendar accessible from navigation",
+        "All 6 calendar views work (month, week, day, timeline, list, agenda)",
+        "Event interactions work correctly (click, hover, drag)",
+        "Calendar responsive on all viewports (desktop, tablet, mobile)",
+        "Calendar performance is good with 100+ events"
+      ],
+      "dependencies": ["TASK-001", "TASK-002"],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/components/calendar/**/*.tsx"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-007-01",
+          "title": "Navigate to Content Calendar",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Content Calendar button clickable",
+            "Calendar page loads without errors",
+            "Initial render shows mock events from browser-mock.ts"
+          ],
+          "microtasks": [
+            "Click Content Calendar navigation button (shortcut: E)",
+            "Verify page loads correctly (no white screen)",
+            "Check for console errors (should be none)",
+            "Verify events from mock data display (5 mock events in browser-mock.ts)"
+          ]
+        },
+        {
+          "id": "TASK-007-02",
+          "title": "Test All Calendar Views",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Month view works correctly (grid layout)",
+            "Week view works correctly (7 columns)",
+            "Day view works correctly (time slots)",
+            "Timeline view works correctly (Gantt-style)",
+            "List view works correctly (event list)",
+            "Agenda view works correctly (schedule)"
+          ],
+          "microtasks": [
+            "Test each view button in view switcher",
+            "Verify view switches smoothly (no flicker)",
+            "Check responsive behavior per view (mobile, tablet, desktop)",
+            "Verify events display correctly in each view",
+            "Test view switcher animations"
+          ]
+        },
+        {
+          "id": "TASK-007-03",
+          "title": "Test Event Interactions",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Events can be clicked to show detail modal",
+            "Event hover state shows tooltip/preview",
+            "Event drag-and-drop works for rescheduling (if implemented)",
+            "Multi-selection works for batch operations (if implemented)"
+          ],
+          "microtasks": [
+            "Click on events and verify detail modal opens",
+            "Hover over events and verify tooltip displays",
+            "Test drag functionality (check @dnd-kit implementation)",
+            "Test event creation flow (Add Event button)",
+            "Test event editing flow (click existing event)"
+          ]
+        },
+        {
+          "id": "TASK-007-04",
+          "title": "Test Calendar Performance",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Calendar handles 100+ events smoothly",
+            "View switching is fast (< 500ms)",
+            "Scrolling is smooth (60fps target)",
+            "No memory leaks with many events"
+          ],
+          "microtasks": [
+            "Generate 100+ mock events in browser-mock.ts",
+            "Measure render time with Chrome DevTools Performance tab",
+            "Test scrolling performance (Chrome DevTools Rendering)",
+            "Check memory usage with Chrome DevTools Memory profiler",
+            "Optimize if needed (virtualization with @tanstack/react-virtual)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-008",
+      "title": "Documentation and Knowledge Transfer",
+      "status": "pending",
+      "priority": "LOW",
+      "estimatedEffort": "2 hours",
+      "complexity": "simple",
+      "acceptanceCriteria": [
+        "All changes documented in code comments",
+        "UI_UX_IMPROVEMENT_REPORT.md updated with results",
+        "Before/after screenshots captured",
+        "Component documentation updated",
+        "Design system documented for team"
+      ],
+      "dependencies": ["TASK-001", "TASK-002", "TASK-003", "TASK-004", "TASK-005", "TASK-006", "TASK-007"],
+      "filesInvolved": [
+        "UI_UX_IMPROVEMENT_REPORT.md",
+        "docs/**/*.md",
+        "apps/frontend/src/renderer/components/**/*.tsx"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-008-01",
+          "title": "Update Improvement Report",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Report updated with all fix statuses",
+            "Before/after comparisons included",
+            "New overall score calculated (target: 9.5/10)",
+            "Lessons learned documented"
+          ],
+          "microtasks": [
+            "Mark completed items as fixed in report",
+            "Add before/after screenshots from /tmp/",
+            "Update overall score with new metrics (7.7 → 9.5)",
+            "Add lessons learned section (what worked, what didn't)",
+            "Include regression testing guide for future updates"
+          ]
+        },
+        {
+          "id": "TASK-008-02",
+          "title": "Document Design System",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Design tokens documented in README",
+            "Component patterns documented",
+            "Accessibility guidelines documented",
+            "Contributing guide for UI updates"
+          ],
+          "microtasks": [
+            "Create docs/design-system/README.md",
+            "Document all design tokens (typography, color, spacing, z-index)",
+            "Create component documentation with props and examples",
+            "Add accessibility checklist (WCAG 2.1 AA)",
+            "Create UI contribution guide for team members"
+          ]
+        },
+        {
+          "id": "TASK-008-03",
+          "title": "Create Regression Testing Guide",
+          "status": "pending",
+          "acceptanceCriteria": [
+            "Playwright test suite documented",
+            "Manual testing checklist created",
+            "CI/CD integration documented",
+            "Team knows how to prevent regressions"
+          ],
+          "microtasks": [
+            "Document Playwright test setup (playwright-test-*.mjs files)",
+            "Create testing checklist PDF/markdown",
+            "Add to developer onboarding documentation",
+            "Update CI/CD pipeline docs (if applicable)"
+          ]
+        }
+      ]
+    }
+  ],
+  "successCriteria": [
+    "Navigation works without blocking - 10/10 buttons clickable on first render",
+    "All accessibility issues resolved - 0 a11y errors in axe-core/WAVE",
+    "WCAG 2.1 AA compliance achieved - all color contrast >= 4.5:1",
+    "Theme toggle implemented - smooth transitions (200ms)",
+    "No console errors on page load - clean console",
+    "Content Calendar fully functional - all 6 views working",
+    "Performance maintained - < 1s page load, 60fps scrolling",
+    "Overall UI/UX score improved to 9.5/10",
+    "Regression tests prevent future issues",
+    "Team trained on new patterns"
+  ],
+  "ultrathinkAnalysis": {
+    "psychological": {
+      "userFrustration": "Modal blocking navigation creates 'stuck' feeling - users lose control of the application",
+      "mentalModel": "Users expect navigation to always be available and accessible",
+      "trust": "Broken navigation reduces trust in application reliability and professionalism",
+      "cognitiveLoad": "Truncated text ('Kanban BoardK') increases cognitive load and confusion",
+      "recommendations": [
+        "Always keep navigation accessible - avoid modals that block nav",
+        "Provide clear visual feedback for all user actions",
+        "Use familiar UI patterns (don't reinvent navigation)",
+        "Minimize modal usage for critical navigation flows",
+        "Add loading states to prevent user uncertainty"
+      ]
+    },
+    "technical": {
+      "rootCause": "Multiple useState hooks for modals + useEffect auto-triggers + browser mock state inconsistency",
+      "radixDialog": "Dialog uses Portal with z-index 50 and full-screen overlay that blocks pointer events when open",
+      "stateManagement": "Fragmented modal state across 13+ useState hooks in App.tsx alone - no centralized tracking",
+      "reactEffects": "useEffect dependency array issues cause excessive re-renders (tab restore warning)",
+      "webPreviewMode": "Browser mock may not match Electron behavior - state inconsistencies",
+      "recommendations": [
+        "Implement centralized modal store with Zustand for predictable state",
+        "Add modal stack for priority management (only one modal at a time)",
+        "Fix useEffect dependencies with useMemo/useCallback to prevent loops",
+        "Add modal lifecycle debugging (console.log on mount/unmount)",
+        "Ensure web preview mode has consistent initial state"
+      ]
+    },
+    "accessibility": {
+      "currentScore": "8/10 - good but needs improvement",
+      "wcagCompliance": "Currently WCAG 2.1 partially compliant - need full AA",
+      "touchTargets": "5 elements < 44px violate WCAG SC 2.5.5 (Touch Targets)",
+      "colorContrast": "Secondary text rgb(92, 105, 116) may fail 4.5:1 on some backgrounds",
+      "keyboardNav": "Tab works but focus indicators need improvement for visibility",
+      "screenReader": "Need to verify with NVDA/JAWS - i18n may affect announcement order",
+      "recommendations": [
+        "Enforce 44x44px minimum touch targets with CSS utilities",
+        "Create automated color contrast validation tool in build process",
+        "Add focus-visible styling for keyboard users (outline)",
+        "Test with real screen readers (NVDA on Windows, VoiceOver on Mac)",
+        "Ensure i18n translations preserve accessibility (shortcuts announced separately)",
+        "Add ARIA live regions for dynamic content updates"
+      ]
+    },
+    "scalability": {
+      "currentIssue": "Navigation items inlined in Sidebar.tsx - not reusable",
+      "designTokens": "Hardcoded values throughout - prevents consistent theming",
+      "patternLibrary": "No centralized component documentation - knowledge silos",
+      "maintenance": "Adding new nav items requires editing Sidebar.tsx directly",
+      "recommendations": [
+        "Extract NavigationItem component for reusability",
+        "Create design token system (apps/frontend/src/shared/theme/)",
+        "Build component documentation site (Storybook or similar)",
+        "Establish UI contribution guidelines for team",
+        "Create UI kit library for consistency across projects"
+      ]
+    },
+    "performance": {
+      "currentMetrics": {
+        "pageLoadTime": "601ms - Excellent (target: < 1s)",
+        "domSize": "460 elements - Lightweight (target: < 1000)",
+        "reRenderIssue": "useEffect warnings indicate excessive re-renders"
+      },
+      "rootCauses": [
+        "Tab restore useEffect triggers multiple times (line 200 console warning)",
+        "projectTabs computed on every render (new array reference)",
+        "Modal state changes trigger cascade re-renders"
+      ],
+      "recommendations": [
+        "Fix useEffect dependencies - omit projectTabs, add useMemo",
+        "Add React.memo for expensive components (NavigationItem, Calendar)",
+        "Use useCallback for event handlers to prevent prop changes",
+        "Monitor with React DevTools Profiler after fixes",
+        "Set performance budget in Lighthouse CI"
+      ]
+    },
+    "security": {
+      "xss": "No immediate concerns - React escapes by default, but validate user inputs",
+      "csp": "Consider adding Content-Security-Policy headers for production",
+      "apiKeys": "Ensure no hardcoded API keys in frontend (check .env files)",
+      "recommendations": [
+        "Audit dynamic content rendering for XSS vectors",
+        "Add CSP headers for production build",
+        "Review .env files to ensure no secrets in frontend",
+        "Add Subresource Integrity (SRI) for external scripts"
+      ]
+    },
+    "dx": {
+      "debugging": "Difficult to debug which modal is open - need better tooling for modal state",
+      "testing": "Playwright tests need better organization - currently scattered in /tmp/",
+      "documentation": "Component documentation is sparse - hard to understand props",
+      "onboarding": "New developers struggle to understand UI architecture",
+      "recommendations": [
+        "Add modal debugging tool (React DevTools or custom)",
+        "Organize Playwright tests by feature in e2e/ directory",
+        "Document component props with JSDoc/TypeScript interfaces",
+        "Add Storybook for interactive component development",
+        "Create UI architecture documentation for onboarding",
+        "Add comments explaining non-obvious decisions (why projectTabs omitted)"
+      ]
+    }
+  },
+  "implementationStrategy": {
+    "approach": "Parallel execution where possible, fix critical blockers first (modal issue)",
+    "phases": [
+      {
+        "phase": 1,
+        "name": "Critical Fixes (Week 1)",
+        "tasks": ["TASK-001", "TASK-002"],
+        "canRunInParallel": false,
+        "reason": "TASK-002 should wait for modal fix to verify navigation works"
+      },
+      {
+        "phase": 2,
+        "name": "Accessibility & Performance (Week 1-2)",
+        "tasks": ["TASK-003", "TASK-004"],
+        "canRunInParallel": true,
+        "reason": "Independent focus areas - can be split across team members"
+      },
+      {
+        "phase": 3,
+        "name": "Design System Foundation (Week 2)",
+        "tasks": ["TASK-005"],
+        "canRunInParallel": false,
+        "reason": "Design tokens are foundation for all UI work"
+      },
+      {
+        "phase": 4,
+        "name": "Testing & Polish (Week 2)",
+        "tasks": ["TASK-006", "TASK-007", "TASK-008"],
+        "canRunInParallel": true,
+        "reason": "Can fix 404 while testing calendar - documentation waits for completion"
+      }
+    ],
+    "testingStrategy": {
+      "unitTests": "Vitest for component logic (buttons, navigation, modal state)",
+      "integrationTests": "Playwright for user flows (navigation, calendar, modals)",
+      "accessibilityTests": "axe-core or WAVE for automated a11y testing",
+      "visualRegression": "Percy or Chromatic for visual diffs (before/after)",
+      "performanceTests": "Lighthouse CI for metrics (Performance, Accessibility, Best Practices)",
+      "manualTesting": "Exploratory testing on real devices (Windows, Mac, mobile)"
+    },
+    "rollbackPlan": {
+      "if": "Modal fix breaks critical functionality",
+      "then": "Revert changes, use git worktree to isolate fix attempt",
+      "alternative": "Implement less invasive fix (add ESC key listener to close modal)"
+    }
+  },
+  "notes": [
+    "Testing was done with Playwright browser automation (3 test scripts in /tmp/)",
+    "Web server runs on localhost:3000 via 'bun run dev:web' (PRIMARY development method)",
+    "All screenshots saved to /tmp/ during testing (auto-marketing-*.png)",
+    "Modal issue is CRITICAL - blocks all navigation on first render",
+    "Use ultrathink analysis (7 dimensions) for all architectural decisions",
+    "Document patterns and lessons learned for future maintenance",
+    "Consider Electron desktop app differences when testing (web preview vs Electron)"
+  ],
+  "references": [
+    "Radix UI Dialog: https://www.radix-ui.com/docs/primitives/components/dialog",
+    "Radix UI onInteractOutside: https://www.radix-ui.com/docs/primitives/components/dialog#API",
+    "WCAG 2.1 AA: https://www.w3.org/WAI/WCAG21/quickref/",
+    "Touch Targets (SC 2.5.5): https://www.w3.org/WAI/WCAG21/Understanding/target-size.html",
+    "Color Contrast: https://webaim.org/resources/contrastchecker/",
+    "Playwright: https://playwright.dev/",
+    "React Profiler: https://react.dev/learn/react-developer-tools#profiling-components-with-the-react-profiler",
+    "Zustand: https://github.com/pmndrs/zustand",
+    "ShadCN UI: https://ui.shadcn.com/ (used for component base)"
+  ]
+}

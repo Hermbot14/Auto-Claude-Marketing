@@ -1,0 +1,174 @@
+// Notification Service gRPC Definitions
+syntax = "proto3";
+
+package notification.v1;
+
+service NotificationService {
+  // Send notification
+  rpc SendNotification(SendNotificationRequest) returns (SendNotificationResponse);
+
+  // Get notification
+  rpc GetNotification(GetNotificationRequest) returns (GetNotificationResponse);
+
+  // List notifications
+  rpc ListNotifications(ListNotificationsRequest) returns (ListNotificationsResponse);
+
+  // Mark as read
+  rpc MarkAsRead(MarkAsReadRequest) returns (MarkAsReadResponse);
+
+  // Create template
+  rpc CreateTemplate(CreateTemplateRequest) returns (CreateTemplateResponse);
+
+  // Get user preferences
+  rpc GetPreferences(GetPreferencesRequest) returns (GetPreferencesResponse);
+
+  // Update preferences
+  rpc UpdatePreferences(UpdatePreferencesRequest) returns (UpdatePreferencesResponse);
+}
+
+// Message types
+enum NotificationType {
+  NOTIFICATION_TYPE_UNSPECIFIED = 0;
+  NOTIFICATION_TYPE_EMAIL = 1;
+  NOTIFICATION_TYPE_SMS = 2;
+  NOTIFICATION_TYPE_PUSH = 3;
+  NOTIFICATION_TYPE_IN_APP = 4;
+}
+
+enum NotificationStatus {
+  NOTIFICATION_STATUS_UNSPECIFIED = 0;
+  NOTIFICATION_STATUS_PENDING = 1;
+  NOTIFICATION_STATUS_QUEUED = 2;
+  NOTIFICATION_STATUS_SENT = 3;
+  NOTIFICATION_STATUS_FAILED = 4;
+  NOTIFICATION_STATUS_DELIVERED = 5;
+}
+
+message Notification {
+  string id = 1;
+  string user_id = 2;
+  NotificationType type = 3;
+  NotificationStatus status = 4;
+  string subject = 5;
+  string body = 6;
+  map<string, string> data = 7;
+  string template_id = 8;
+  string to = 9;
+  string from = 10;
+  string scheduled_for = 11;
+  string sent_at = 12;
+  string delivered_at = 13;
+  int32 retry_count = 14;
+  int32 priority = 15;
+  string created_at = 16;
+  string updated_at = 17;
+}
+
+message SendNotificationRequest {
+  string user_id = 1;
+  NotificationType type = 2;
+  string subject = 3;
+  string body = 4;
+  map<string, string> data = 5;
+  string template_id = 6;
+  string to = 7;
+  string scheduled_for = 8;
+  int32 priority = 9;
+}
+
+message SendNotificationResponse {
+  Notification notification = 1;
+}
+
+message GetNotificationRequest {
+  string id = 1;
+  string user_id = 2;
+}
+
+message GetNotificationResponse {
+  Notification notification = 1;
+}
+
+message ListNotificationsRequest {
+  string user_id = 1;
+  int32 skip = 2;
+  int32 limit = 3;
+  NotificationType type = 4;
+  NotificationStatus status = 5;
+}
+
+message ListNotificationsResponse {
+  repeated Notification notifications = 1;
+  int32 total = 2;
+}
+
+message MarkAsReadRequest {
+  string id = 1;
+  string user_id = 2;
+}
+
+message MarkAsReadResponse {
+  bool success = 1;
+}
+
+message Template {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  NotificationType type = 4;
+  string subject_template = 5;
+  string body_template = 6;
+  repeated string variables = 7;
+  string from = 8;
+  bool is_active = 9;
+  string language = 10;
+  string created_at = 11;
+}
+
+message CreateTemplateRequest {
+  string name = 1;
+  string description = 2;
+  NotificationType type = 3;
+  string subject_template = 4;
+  string body_template = 5;
+  repeated string variables = 6;
+  string from = 7;
+  string language = 8;
+  string user_id = 9;
+}
+
+message CreateTemplateResponse {
+  Template template = 1;
+}
+
+message UserPreferences {
+  string user_id = 1;
+  map<string, bool> enabled_types = 2;
+  bool quiet_hours = 3;
+  string quiet_hours_start = 4;
+  string quiet_hours_end = 5;
+  map<string, string> contact_info = 6;
+  map<string, bool> categories = 7;
+}
+
+message GetPreferencesRequest {
+  string user_id = 1;
+}
+
+message GetPreferencesResponse {
+  UserPreferences preferences = 1;
+}
+
+message UpdatePreferencesRequest {
+  string user_id = 1;
+  map<string, bool> enabled_types = 2;
+  bool quiet_hours = 3;
+  string quiet_hours_start = 4;
+  string quiet_hours_end = 5;
+  map<string, string> contact_info = 6;
+  map<string, bool> categories = 7;
+}
+
+message UpdatePreferencesResponse {
+  UserPreferences preferences = 1;
+}

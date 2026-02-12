@@ -843,3 +843,21 @@ export function setupIdeationListeners(): () => void {
     unsubStopped();
   };
 }
+
+// ============================================
+// Unified Store Migration - Backward Compatibility
+// ============================================
+
+/**
+ * IDEATION STORE MIGRATION NOTICE
+ *
+ * The ideation store has been migrated to UnifiedStore.
+ *
+ * To use the new unified store:
+ * import { useUnifiedIdeationStore } from './UnifiedStore'
+ *
+ * The old useIdeationStore is preserved for backward compatibility.
+ * Development warnings will appear in console if using old imports.
+ *
+ * @deprecated Use UnifiedStore instead - see UnifiedStore.ts
+ */

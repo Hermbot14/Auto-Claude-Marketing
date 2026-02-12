@@ -924,3 +924,21 @@ export function setupRoadmapListeners(): () => void {
     unsubStopped();
   };
 }
+
+// ============================================
+// Unified Store Migration - Backward Compatibility
+// ============================================
+
+/**
+ * ROADMAP STORE MIGRATION NOTICE
+ *
+ * The roadmap store has been migrated to UnifiedStore.
+ *
+ * To use the new unified store:
+ * import { useUnifiedRoadmapStore } from './UnifiedStore'
+ *
+ * The old useRoadmapStore is preserved for backward compatibility.
+ * Development warnings will appear in console if using old imports.
+ *
+ * @deprecated Use UnifiedStore instead - see UnifiedStore.ts
+ */

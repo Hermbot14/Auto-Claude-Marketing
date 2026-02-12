@@ -1,0 +1,120 @@
+{
+  "services": [
+    {
+      "ID": "api-gateway",
+      "Name": "api-gateway",
+      "Tags": ["gateway", "routing"],
+      "Address": "api-gateway",
+      "Port": 8080,
+      "Meta": {
+        "version": "0.1.0",
+        "technology": "nginx"
+      },
+      "Check": {
+        "HTTP": "http://api-gateway:8080/health",
+        "Interval": "10s",
+        "Timeout": "3s",
+        "DeregisterCriticalServiceAfter": "30s"
+      },
+      "Connect": {
+        "SidecarService": {
+          "Proxy": {
+            "Config": {
+              "bind_port": 20000
+            }
+          }
+        }
+      }
+    },
+    {
+      "ID": "campaign-service",
+      "Name": "campaign-service",
+      "Tags": ["campaign", "marketing", "python"],
+      "Address": "campaign-service",
+      "Port": 8001,
+      "Meta": {
+        "version": "0.1.0",
+        "technology": "python",
+        "framework": "fastapi"
+      },
+      "Check": {
+        "HTTP": "http://campaign-service:8001/health/ready",
+        "Interval": "10s",
+        "Timeout": "3s",
+        "DeregisterCriticalServiceAfter": "30s"
+      }
+    },
+    {
+      "ID": "content-service",
+      "Name": "content-service",
+      "Tags": ["content", "cms", "node"],
+      "Address": "content-service",
+      "Port": 8002,
+      "Meta": {
+        "version": "0.1.0",
+        "technology": "node",
+        "framework": "express"
+      },
+      "Check": {
+        "HTTP": "http://content-service:8002/health",
+        "Interval": "10s",
+        "Timeout": "3s",
+        "DeregisterCriticalServiceAfter": "30s"
+      }
+    },
+    {
+      "ID": "analytics-service",
+      "Name": "analytics-service",
+      "Tags": ["analytics", "reporting", "python"],
+      "Address": "analytics-service",
+      "Port": 8003,
+      "Meta": {
+        "version": "0.1.0",
+        "technology": "python",
+        "framework": "fastapi"
+      },
+      "Check": {
+        "HTTP": "http://analytics-service:8003/health/ready",
+        "Interval": "10s",
+        "Timeout": "3s",
+        "DeregisterCriticalServiceAfter": "30s"
+      }
+    },
+    {
+      "ID": "notification-service",
+      "Name": "notification-service",
+      "Tags": ["notification", "messaging", "go"],
+      "Address": "notification-service",
+      "Port": 8004,
+      "Meta": {
+        "version": "0.1.0",
+        "technology": "go",
+        "framework": "gin"
+      },
+      "Check": {
+        "HTTP": "http://notification-service:8004/health/live",
+        "Interval": "10s",
+        "Timeout": "3s",
+        "DeregisterCriticalServiceAfter": "30s"
+      }
+    },
+    {
+      "ID": "integration-service",
+      "Name": "integration-service",
+      "Tags": ["integration", "oauth", "python"],
+      "Address": "integration-service",
+      "Port": 8005,
+      "Meta": {
+        "version": "0.1.0",
+        "technology": "python",
+        "framework": "fastapi"
+      },
+      "Check": {
+        "HTTP": "http://integration-service:8005/health/ready",
+        "Interval": "10s",
+        "Timeout": "3s",
+        "DeregisterCriticalServiceAfter": "30s"
+      }
+    }
+  ]
+}

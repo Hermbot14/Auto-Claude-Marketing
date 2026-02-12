@@ -1,0 +1,111 @@
+{
+  "palette": {
+    "title": "Palette de nœuds",
+    "description": "Faites glisser ces nœuds sur le canevas pour construire votre workflow"
+  },
+  "templates": {
+    "title": "Modèles",
+    "description": "Modèles de workflow préconstruits pour les modèles courants",
+    "create": "Créer un modèle",
+    "search": "Rechercher des modèles...",
+    "categories": {
+      "all": "Tous",
+      "favorites": "Favoris",
+      "automation": "Automatisation",
+      "integration": "Intégration",
+      "custom": "Personnalisé"
+    },
+    "complexity": {
+      "simple": "Simple",
+      "standard": "Standard",
+      "complex": "Complexe"
+    },
+    "noResults": {
+      "title": "Aucun modèle trouvé",
+      "description": "Essayez de modifier vos critères de recherche ou de parcourir une autre catégorie."
+    }
+  },
+  "actions": {
+    "save": "Enregistrer",
+    "validate": "Valider",
+    "export": "Exporter",
+    "execute": "Exécuter le workflow"
+  },
+  "status": {
+    "nodes": "{{count}} nœuds",
+    "edges": "{{count}} connexions",
+    "zoom": "Zoom {{level}}%",
+    "readOnly": "Lecture seule",
+    "dragNodes": "Glisser pour ajouter"
+  },
+  "empty": {
+    "title": "Aucun workflow",
+    "description": "Créez votre premier workflow visuel ou chargez un modèle pour commencer",
+    "createFirstNode": "Créer le premier nœud",
+    "browseTemplates": "Parcourir les modèles"
+  },
+  "validation": {
+    "errorsExist": "Des erreurs existent",
+    "noErrors": "Aucune erreur",
+    "warnings": "{{count}} avertissements",
+    "ready": "Prêt à exécuter",
+    "invalid": "Configuration invalide"
+  },
+  "node": {
+    "config": {
+      "title": "Configuration du nœud"
+    },
+    "triggerType": "Type de déclencheur",
+    "actionType": "Type d'action",
+    "schedule": "Planification",
+    "webhookPath": "Chemin du webhook",
+    "taskTitle": "Titre de la tâche",
+    "notificationMessage": "Notification",
+    "operator": "Opérateur",
+    "field": "Champ",
+    "value": "Valeur",
+    "duration": "Durée",
+    "unit": "Unité",
+    "label": "Libellé",
+    "description": "Description",
+    "triggers": {
+      "manual": "Manuel",
+      "schedule": "Planifié",
+      "webhook": "Webhook",
+      "event": "Événement"
+    },
+    "actions": {
+      "createTask": "Créer une tâche",
+      "runAgent": "Exécuter un agent",
+      "sendNotification": "Envoyer une notification",
+      "executeCommand": "Exécuter une commande",
+      "callApi": "Appeler une API"
+    },
+    "operators": {
+      "equals": "Égal à",
+      "notEquals": "Différent de",
+      "contains": "Contient",
+      "notContains": "Ne contient pas",
+      "greaterThan": "Supérieur à",
+      "lessThan": "Inférieur à"
+    },
+    "units": {
+      "seconds": "Secondes",
+      "minutes": "Minutes",
+      "hours": "Heures",
+      "days": "Jours"
+    }
+  },
+  "types": {
+    "trigger": "Déclencheur",
+    "action": "Action",
+    "condition": "Condition",
+    "loop": "Boucle",
+    "parallel": "Parallèle",
+    "merge": "Fusion",
+    "delay": "Délai",
+    "transform": "Transformation",
+    "filter": "Filtre",
+    "output": "Sortie"
+  }
+}

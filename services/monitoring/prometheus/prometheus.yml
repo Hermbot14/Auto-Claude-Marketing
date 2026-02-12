@@ -1,0 +1,139 @@
+# Prometheus Configuration for Auto Claude Marketing Hub
+# Scrape configuration for all microservices
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'marketing-hub'
+    environment: 'production'
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Rule files
+rule_files:
+  - "alerts/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # API Gateway
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['api-gateway:8080']
+        labels:
+          service: 'api-gateway'
+          tier: 'gateway'
+    metrics_path: '/metrics'
+
+  # Campaign Service
+  - job_name: 'campaign-service'
+    static_configs:
+      - targets: ['campaign-service:8001']
+        labels:
+          service: 'campaign-service'
+          tier: 'backend'
+          language: 'python'
+    metrics_path: '/metrics'
+
+  # Content Service
+  - job_name: 'content-service'
+    static_configs:
+      - targets: ['content-service:8002']
+        labels:
+          service: 'content-service'
+          tier: 'backend'
+          language: 'node'
+    metrics_path: '/metrics'
+
+  # Analytics Service
+  - job_name: 'analytics-service'
+    static_configs:
+      - targets: ['analytics-service:8003']
+        labels:
+          service: 'analytics-service'
+          tier: 'backend'
+          language: 'python'
+    metrics_path: '/metrics'
+
+  # Notification Service
+  - job_name: 'notification-service'
+    static_configs:
+      - targets: ['notification-service:8004']
+        labels:
+          service: 'notification-service'
+          tier: 'backend'
+          language: 'go'
+    metrics_path: '/metrics'
+
+  # Integration Service
+  - job_name: 'integration-service'
+    static_configs:
+      - targets: ['integration-service:8005']
+        labels:
+          service: 'integration-service'
+          tier: 'backend'
+          language: 'python'
+    metrics_path: '/metrics'
+
+  # Consul
+  - job_name: 'consul'
+    static_configs:
+      - targets: ['consul:8500']
+        labels:
+          service: 'consul'
+          tier: 'infrastructure'
+    metrics_path: '/v1/agent/metrics'
+
+  # PostgreSQL Exporter (Campaign DB)
+  - job_name: 'postgres-campaign'
+    static_configs:
+      - targets: ['postgres-exporter-campaign:9187']
+        labels:
+          service: 'postgres'
+          database: 'campaign'
+
+  # PostgreSQL Exporter (Content DB - MongoDB)
+  - job_name: 'mongodb-exporter'
+    static_configs:
+      - targets: ['mongodb-exporter:9216']
+        labels:
+          service: 'mongodb'
+          database: 'content'
+
+  # PostgreSQL Exporter (TimescaleDB)
+  - job_name: 'timescaledb'
+    static_configs:
+      - targets: ['postgres-exporter-analytics:9187']
+        labels:
+          service: 'timescaledb'
+          database: 'analytics'
+
+  # Redis Exporter
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'redis'
+
+  # Node Exporter (Infrastructure metrics)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'node'
+          tier: 'infrastructure'
+
+# Remote write configuration (optional)
+# remote_write:
+#   - url: "https://your-remote-storage/api/v1/write"
+#     headers:
+#       X-Custom-Header: "value"

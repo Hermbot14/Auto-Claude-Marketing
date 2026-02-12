@@ -1,0 +1,147 @@
+{
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "description": "Use keyboard shortcuts to navigate quickly. Press {{modifierKey}} + K anywhere to see this help.",
+    "searchPlaceholder": "Search shortcuts...",
+    "searchLabel": "Search keyboard shortcuts",
+    "noResults": "No shortcuts found matching your search",
+    "categories": {
+      "navigation": "Navigation",
+      "actions": "Actions",
+      "taskManagement": "Task Management",
+      "keyboard": "Keyboard Navigation",
+      "uiControls": "UI Controls",
+      "modifierKeys": "Modifier Keys"
+    },
+    "nav": {
+      "kanban": "Kanban Board",
+      "terminals": "Agent Terminals",
+      "insights": "Marketing Intelligence",
+      "roadmap": "Roadmap",
+      "calendar": "Content Calendar",
+      "ideation": "Creative Studio",
+      "changelog": "Changelog",
+      "context": "Context",
+      "agentTools": "MCP Overview",
+      "worktrees": "Worktrees",
+      "githubIssues": "GitHub Issues",
+      "githubPRs": "GitHub Pull Requests",
+      "gitlabIssues": "GitLab Issues",
+      "gitlabMRs": "GitLab Merge Requests"
+    },
+    "actions": {
+      "newTask": "Create New Task",
+      "openProject": "Open Project",
+      "settings": "Open Settings",
+      "search": "Focus Search",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "refresh": "Refresh"
+    },
+    "tasks": {
+      "openTask": "Open selected task",
+      "closeModal": "Close dialog",
+      "saveTask": "Save current task",
+      "refreshTasks": "Refresh tasks",
+      "nextTask": "Next task",
+      "previousTask": "Previous task",
+      "moveTaskUp": "Move task up",
+      "moveTaskDown": "Move task down"
+    },
+    "keyboard": {
+      "nextFocus": "Next focusable element",
+      "previousFocus": "Previous focusable element",
+      "moveDown": "Move down in list",
+      "moveUp": "Move up in list",
+      "firstItem": "Jump to first item",
+      "lastItem": "Jump to last item",
+      "pageDown": "Page down",
+      "pageUp": "Page up",
+      "home": "Go to start",
+      "end": "Go to end"
+    },
+    "ui": {
+      "showShortcuts": "Show keyboard shortcuts",
+      "hideShortcuts": "Hide keyboard shortcuts",
+      "closeDialog": "Close dialog",
+      "confirm": "Confirm action",
+      "nextField": "Next form field",
+      "previousField": "Previous form field",
+      "submitForm": "Submit form",
+      "resetForm": "Reset form"
+    },
+    "modifier": {
+      "platformModifier": "Platform modifier key (varies by OS)",
+      "shift": "Shift key - modify other keys",
+      "alt": "Alt/Option key - alternative actions",
+      "control": "Ctrl key - modifier for shortcuts",
+      "tab": "Tab - navigate between elements",
+      "enter": "Enter - activate or confirm",
+      "esc": "Escape - cancel or go back",
+      "space": "Space - activate or toggle"
+    }
+  },
+  "skipLinks": {
+    "skipToMain": "Skip to main content",
+    "skipToSidebar": "Skip to sidebar",
+    "skipToNavigation": "Skip to navigation",
+    "skipToContent": "Skip to content"
+  },
+  "focus": {
+    "visible": "Focus visible",
+    "indicators": "Focus indicators show which element is active",
+    "mode": "Focus Mode active - use arrow keys to navigate"
+  },
+  "screenReader": {
+    "announcements": "Screen reader announcements",
+    "liveRegion": "Live region for dynamic updates",
+    "status": "Status announcement",
+    "error": "Error announcement"
+  },
+  "highContrast": {
+    "enabled": "High contrast mode enabled",
+    "disabled": "High contrast mode disabled"
+  },
+  "reducedMotion": {
+    "enabled": "Reduced motion enabled",
+    "disabled": "Reduced motion disabled"
+  },
+  "tabNavigation": {
+    "next": "Next",
+    "previous": "Previous",
+    "first": "First",
+    "last": "Last"
+  },
+  "ariaLabels": {
+    "keyboardShortcutsButton": "Show keyboard shortcuts ({{shortcut}})",
+    "focusTrap": "Focus trapped in modal",
+    "menuExpanded": "Menu expanded, press Escape to close",
+    "menuCollapsed": "Menu collapsed"
+  },
+  "announcements": {
+    "taskCreated": "Task created",
+    "taskUpdated": "Task updated",
+    "taskCompleted": "Task completed",
+    "taskDeleted": "Task deleted",
+    "taskFailed": "Task failed",
+    "formSubmitted": "Form submitted",
+    "formError": "Form error, please check your input",
+    "loadingStarted": "Loading started",
+    "loadingComplete": "Loading complete",
+    "notification": "Notification",
+    "navigationChanged": "Navigation changed to {{page}}",
+    "settingsSaved": "Settings saved",
+    "themeChanged": "Theme changed to {{theme}}",
+    "connectionLost": "Connection lost",
+    "connectionRestored": "Connection restored",
+    "copiedToClipboard": "Copied to clipboard"
+  },
+  "contrast": {
+    "highContrastMode": "High Contrast Mode",
+    "highContrastDescription": "Increases color contrast for better visibility",
+    "enhancedContrast": "Enhanced Contrast",
+    "wcagAANote": "Meets WCAG AA standards (4.5:1 contrast)",
+    "wcagAAANote": "Meets WCAG AAA standards (7:1 contrast)"
+  }
+}

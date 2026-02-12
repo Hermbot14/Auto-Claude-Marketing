@@ -1,0 +1,108 @@
+{
+  "palette": {
+    "title": "Node Palette",
+    "description": "Drag these nodes onto the canvas to build your workflow"
+  },
+  "templates": {
+    "title": "Templates",
+    "description": "Pre-built workflow templates for common patterns",
+    "create": "Create Template",
+    "search": "Search templates...",
+    "categories": {
+      "all": "All",
+      "favorites": "Favorites",
+      "automation": "Automation",
+      "integration": "Integration",
+      "custom": "Custom"
+    },
+    "complexity": {
+      "simple": "Simple",
+      "standard": "Standard",
+      "complex": "Complex"
+    },
+    "noResults": {
+      "title": "No templates found",
+      "description": "Try adjusting your search criteria or browse a different category."
+    }
+  },
+  "actions": {
+    "save": "Save",
+    "validate": "Validate",
+    "export": "Export",
+    "execute": "Run Workflow"
+  },
+  "status": {
+    "nodes": "{{count}} nodes",
+    "edges": "{{count}} connections",
+    "zoom": "Zoom {{level}}%",
+    "readOnly": "Read Only"
+  },
+  "empty": {
+    "title": "No Workflow",
+    "description": "Create your first visual workflow or load a template to get started",
+    "createFirstNode": "Create First Node",
+    "browseTemplates": "Browse Templates"
+  },
+  "validation": {
+    "errorsExist": "Errors Exist",
+    "noErrors": "No Errors",
+    "warnings": "{{count}} warnings",
+    "ready": "Ready to Execute",
+    "invalid": "Invalid Configuration"
+  },
+  "node": {
+    "config": "Node Configuration",
+    "triggerType": "Trigger Type",
+    "actionType": "Action Type"
+    "schedule": "Schedule",
+    "webhookPath": "Webhook Path",
+    "taskTitle": "Task Title",
+    "notificationMessage": "Notification",
+    "operator": "Operator",
+    "field": "Field",
+    "value": "Value",
+    "duration": "Duration",
+    "unit": "Unit"
+    "label": "Label",
+    "description": "Description"
+  },
+  "triggers": {
+    "manual": "Manual",
+    "schedule": "Schedule",
+    "webhook": "Webhook",
+    "event": "Event"
+  },
+  "actions": {
+    "createTask": "Create Task",
+    "runAgent": "Run Agent",
+    "sendNotification": "Send Notification",
+    "executeCommand": "Execute Command",
+    "callApi": "Call API"
+  },
+  "operators": {
+    "equals": "Equals",
+    "notEquals": "Not Equals",
+    "contains": "Contains",
+    "notContains": "Does Not Contain",
+    "greaterThan": "Greater Than",
+    "lessThan": "Less Than"
+  },
+  "types": {
+    "trigger": "Trigger",
+    "action": "Action",
+    "condition": "Condition",
+    "loop": "Loop",
+    "parallel": "Parallel",
+    "merge": "Merge",
+    "delay": "Delay",
+    "transform": "Transform",
+    "filter": "Filter",
+    "output": "Output"
+  },
+  "units": {
+    "seconds": "Seconds",
+    "minutes": "Minutes",
+    "hours": "Hours",
+    "days": "Days"
+  }
+}

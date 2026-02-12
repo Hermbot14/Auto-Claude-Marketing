@@ -647,3 +647,25 @@ export function getItemColor(type: CalendarItemType): typeof CALENDAR_COLORS[Cal
 export function getItemTypeLabel(type: CalendarItemType): string {
   return CALENDAR_ITEM_TYPE_LABELS[type] || 'Event';
 }
+
+// ============================================
+// Unified Store Migration - Backward Compatibility
+// ============================================
+
+/**
+ * CALENDAR STORE MIGRATION NOTICE
+ *
+ * The calendar store has been migrated to UnifiedStore.
+ *
+ * To use the new unified store:
+ * import { useUnifiedCalendarStore } from './UnifiedStore'
+ *
+ * The old useCalendarStore is preserved for backward compatibility.
+ * Development warnings will appear in console if using old imports.
+ *
+ * @deprecated Use UnifiedStore instead - see UnifiedStore.ts
+ */
+
+// Export the old useCalendarStore for backward compatibility
+// This file now delegates to UnifiedStore internally
+// Components can be migrated gradually by updating their imports

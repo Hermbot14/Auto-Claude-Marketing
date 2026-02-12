@@ -1,0 +1,654 @@
+{
+  "id": "fix",
+  "title": "Calendar Critical Fixes - Security & Quality",
+  "description": "Fix all critical and high-priority issues identified in comprehensive calendar audit including security vulnerabilities, code quality bugs, performance issues, and missing error handling. This PRD addresses the blocking issues preventing production deployment of the Content Calendar feature.",
+  "metadata": {
+    "createdAt": "2026-02-05T00:00:00Z",
+    "version": "1.0.0",
+    "gitBranch": "prd/fix",
+    "estimatedHours": 24,
+    "priority": "critical"
+  },
+  "phases": [
+    {
+      "id": "PHASE-1",
+      "name": "Critical Security & Data Safety",
+      "description": "Address all CRITICAL severity issues that could cause data corruption, security breaches, or application crashes",
+      "tasks": [
+        {
+          "id": "TASK-001",
+          "title": "ICS File Import Validation (Security Critical)",
+          "status": "pending",
+          "priority": "critical",
+          "severity": "CALC-SEC-001",
+          "estimatedHours": 4,
+          "acceptanceCriteria": [
+            "ICS file parser validates all input fields using Zod schema",
+            "Prototype pollution attacks are prevented",
+            "File size limits are enforced (max 5MB)",
+            "Malformed ICS files return specific error messages",
+            "Unit tests cover all attack vectors",
+            "Security audit passes for ICS import"
+          ],
+          "dependencies": [],
+          "filesInvolved": [
+            "apps/frontend/src/renderer/components/calendar/CalendarView.tsx",
+            "apps/frontend/src/renderer/lib/ics-parser.ts"
+          ],
+          "subtasks": [
+            {
+              "id": "TASK-001-01",
+              "title": "Create Zod validation schema for ICS events",
+              "microtasks": [
+                "Define safe ICS event schema with all required fields",
+                "Add string length limits for all text fields",
+                "Validate date formats strictly",
+                "Reject unknown properties (prevent prototype pollution)"
+              ]
+            },
+            {
+              "id": "TASK-001-02",
+              "title": "Implement safe ICS parser with validation",
+              "microtasks": [
+                "Wrap existing ICS parser with Zod validation",
+                "Add file size check before parsing",
+                "Implement specific error types for parse failures",
+                "Add logging for security events"
+              ]
+            },
+            {
+              "id": "TASK-001-03",
+              "title": "Add unit tests for ICS security",
+              "microtasks": [
+                "Test prototype pollution prevention",
+                "Test file size limits",
+                "Test malformed input handling",
+                "Test XSS injection attempts"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TASK-002",
+          "title": "Fix React Dependency Arrays",
+          "status": "pending",
+          "priority": "critical",
+          "estimatedHours": 2,
+          "acceptanceCriteria": [
+            "All useEffect hooks have complete dependency arrays",
+            "No ESLint react-hooks/exhaustive-deps warnings",
+            "Functions are properly wrapped in useCallback",
+            "No stale closures or infinite loops",
+            "Calendar data loads correctly on mount"
+          ],
+          "dependencies": [],
+          "filesInvolved": [
+            "apps/frontend/src/renderer/components/calendar/CalendarView.tsx"
+          ],
+          "subtasks": [
+            {
+              "id": "TASK-002-01",
+              "title": "Fix missing dependencies in useEffect hooks",
+              "microtasks": [
+                "Add addItem, saveCalendarData, projectId to line 56 useEffect",
+                "Add roadmap dependencies to line 356 useEffect",
+                "Use useCallback for functions passed to effects"
+              ]
+            },
+            {
+              "id": "TASK-002-02",
+              "title": "Verify no race conditions remain",
+              "microtasks": [
+                "Test initial load with mock data",
+                "Test roadmap sync timing",
+                "Test rapid projectId changes"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TASK-003",
+          "title": "Path Traversal Protection",
+          "status": "pending",
+          "priority": "critical",
+          "severity": "CALC-SEC-002",
+          "estimatedHours": 2,
+          "acceptanceCriteria": [
+            "ProjectId parameter is validated and sanitized",
+            "Path traversal attempts are blocked",
+            "Only valid project IDs are accepted",
+            "Security audit passes for path operations",
+            "Error messages don't leak file system info"
+          ],
+          "dependencies": [],
+          "filesInvolved": [
+            "apps/frontend/src/main/ipc-handlers/calendar-handlers.ts"
+          ],
+          "subtasks": [
+            {
+              "id": "TASK-003-01",
+              "title": "Add projectId validation utility",
+              "microtasks": [
+                "Create validateProjectId function",
+                "Check for path traversal patterns (../, ..\\, etc.)",
+                "Validate against allowlist of safe characters",
+                "Return sanitized ID or throw error"
+              ]
+            },
+            {
+              "id": "TASK-003-02",
+              "title": "Apply validation to all calendar IPC handlers",
+              "microtasks": [
+                "Add validation to CALENDAR_GET_DATA",
+                "Add validation to CALENDAR_SAVE_DATA",
+                "Add validation to CALENDAR_ADD_ITEM",
+                "Add validation to CALENDAR_UPDATE_ITEM",
+                "Add validation to CALENDAR_DELETE_ITEM"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TASK-004",
+          "title": "Add Error Boundaries",
+          "status": "pending",
+          "priority": "critical",
+          "estimatedHours": 2,
+          "acceptanceCriteria": [
+            "Error boundary wraps CalendarView component",
+            "Graceful fallback UI displays on error",
+            "Error details logged for debugging",
+            "User can recover from errors without reload",
+            "No white screen of death"
+          ],
+          "dependencies": [],
+          "filesInvolved": [
+            "apps/frontend/src/renderer/components/calendar/CalendarView.tsx",
+            "apps/frontend/src/renderer/components/calendar/CalendarErrorBoundary.tsx"
+          ],
+          "subtasks": [
+            {
+              "id": "TASK-004-01",
+              "title": "Create CalendarErrorBoundary component",
+              "microtasks": [
+                "Implement ErrorBoundary class component",
+                "Add error logging service integration",
+                "Create fallback UI with retry button",
+                "Add error state reporting"
+              ]
+            },
+            {
+              "id": "TASK-004-02",
+              "title": "Wrap CalendarView with error boundary",
+              "microtasks": [
+                "Import and wrap CalendarView in App.tsx",
+                "Test error boundary with thrown errors",
+                "Verify fallback UI displays correctly"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PHASE-2",
+      "name": "High-Priority Fixes",
+      "description": "Address HIGH priority security and quality issues",
+      "tasks": [
+        {
+          "id": "TASK-005",
+          "title": "Input Sanitization",
+          "status": "pending",
+          "priority": "high",
+          "severity": "CALC-SEC-003",
+          "estimatedHours": 3,
+          "acceptanceCriteria": [
+            "All user input is sanitized before storage",
+            "HTML tags are stripped from titles and descriptions",
+            "XSS attacks are prevented",
+            "Maximum length limits enforced",
+            "Security audit passes for input handling"
+          ],
+          "dependencies": [],
+          "filesInvolved": [
+            "apps/frontend/src/renderer/components/calendar/CalendarView.tsx",
+            "apps/frontend/src/main/ipc-handlers/calendar-handlers.ts"
+          ],
+          "subtasks": [
+            {
+              "id": "TASK-005-01",
+              "title": "Create input sanitization utility",
+              "microtasks": [
+                "Install DOMPurify if not present",
+                "Create sanitizeInput function",
+                "Strip HTML and dangerous content",
+                "Enforce length limits"
+              ]
+            },
+            {
+              "id": "TASK-005-02",
+              "title": "Apply sanitization to calendar item inputs",
+              "microtasks": [
+                "Sanitize item titles on add/update",
+                "Sanitize item descriptions on add/update",
+                "Sanitize tag values",
+                "Sanitize assignee names"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TASK-006",
+          "title": "Authorization Checks",
+          "status": "pending",
+          "priority": "high",
+          "severity": "CALC-SEC-005",
+          "estimatedHours": 4,
+          "acceptanceCriteria": [
+            "User permissions verified before operations",
+            "Project access checked on load",
+            "Unauthorized operations return 403",
+            "Security audit passes for authorization",
+            "Permission denied UI displays correctly"
+          ],
+          "dependencies": [],
+          "filesInvolved": [
+            "apps/frontend/src/main/ipc-handlers/calendar-handlers.ts",
+            "apps/frontend/src/renderer/stores/calendarStore.ts"
+          ],
+          "subtasks": [
+            {
+              "id": "TASK-006-01",
+              "title": "Design permission check architecture",
+              "microtasks": [
+                "Define permission levels (read, write, admin)",
+                "Create hasProjectAccess function",
+                "Design permission denial flow"
+              ]
+            },
+            {
+              "id": "TASK-006-02",
+              "title": "Implement permission checks in handlers",
+              "microtasks": [
+                "Add permission check to CALENDAR_GET_DATA",
+                "Add permission check to CALENDAR_SAVE_DATA",
+                "Add permission check to CALENDAR_ADD_ITEM",
+                "Add permission check to CALENDAR_UPDATE_ITEM",
+                "Add permission check to CALENDAR_DELETE_ITEM"
+              ]
+            },
+            {
+              "id": "TASK-006-03",
+              "title": "Add permission UI feedback",
+              "microtasks": [
+                "Create permission denied error component",
+                "Show appropriate message when access denied",
+                "Provide contact for permission requests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TASK-007",
+          "title": "Fix Race Conditions",
+          "status": "pending",
+          "priority": "high",
+          "estimatedHours": 3,
+          "acceptanceCriteria": [
+            "Calendar load operations are sequential",
+            "No duplicate items created on rapid actions",
+            "Mock data only adds once on load",
+            "Roadmap sync waits for initial load",
+            "Loading state prevents concurrent operations"
+          ],
+          "dependencies": ["TASK-002"],
+          "filesInvolved": [
+            "apps/frontend/src/renderer/components/calendar/CalendarView.tsx"
+          ],
+          "subtasks": [
+            {
+              "id": "TASK-007-01",
+              "title": "Add loading state flags",
+              "microtasks": [
+                "Add isLoadingCalendar state",
+                "Add isSyncingRoadmap state",
+                "Add hasLoadedInitialData state"
+              ]
+            },
+            {
+              "id": "TASK-007-02",
+              "title": "Sequentialize calendar operations",
+              "microtasks": [
+                "Consolidate multiple useEffect hooks",
+                "Chain mock data addition after initial load",
+                "Defer roadmap sync until data loaded",
+                "Prevent duplicate additions with flag"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TASK-008",
+          "title": "Add Loading States",
+          "status": "pending",
+          "priority": "high",
+          "estimatedHours": 2,
+          "acceptanceCriteria": [
+            "Load operations show loading indicator",
+            "Save operations disable buttons",
+            "Error states display actionable messages",
+            "Optimistic updates for better UX",
+            "No silent failures"
+          ],
+          "dependencies": [],
+          "filesInvolved": [
+            "apps/frontend/src/renderer/components/calendar/CalendarView.tsx",
+            "apps/frontend/src/renderer/stores/calendarStore.ts"
+          ],
+          "subtasks": [
+            {
+              "id": "TASK-008-01",
+              "title": "Add loading state to store",
+              "microtasks": [
+                "Add isLoading state to calendarStore",
+                "Add isSaving state to calendarStore",
+                "Add error state to calendarStore"
+              ]
+            },
+            {
+              "id": "TASK-008-02",
+              "title": "Add loading indicators to UI",
+              "microtasks": [
+                "Show skeleton loader during initial load",
+                "Show spinner on save button during save",
+                "Disable form during submission",
+                "Display error messages with retry actions"
+              ]
+            },
+            {
+              "id": "TASK-008-03",
+              "title": "Implement optimistic updates",
+              "microtasks": [
+                "Update UI immediately on add",
+                "Rollback on save error",
+                "Show pending indicator during sync"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PHASE-3",
+      "name": "Performance & UX Improvements",
+      "description": "Address IMPORTANT performance issues and UX gaps",
+      "tasks": [
+        {
+          "id": "TASK-009",
+          "title": "Memoize Expensive Computations",
+          "status": "pending",
+          "priority": "medium",
+          "estimatedHours": 3,
+          "acceptanceCriteria": [
+            "Lane assignment wrapped in useMemo",
+            "Filtered items computed only when deps change",
+            "Time slots memoized for zoom level",
+            "No unnecessary recalculations",
+            "Performance improved with 100+ items"
+          ],
+          "dependencies": [],
+          "filesInvolved": [
+            "apps/frontend/src/renderer/components/calendar/CalendarTimeline.tsx",
+            "apps/frontend/src/renderer/components/calendar/CalendarView.tsx"
+          ],
+          "subtasks": [
+            {
+              "id": "TASK-009-01",
+              "title": "Memoize lane assignments",
+              "microtasks": [
+                "Wrap assignLanes result in useMemo",
+                "Add proper dependencies (items, dateRange)",
+                "Test performance with 100+ items"
+              ]
+            },
+            {
+              "id": "TASK-009-02",
+              "title": "Memoize filtered items",
+              "microtasks": [
+                "Wrap getFilteredItems in useMemo",
+                "Add dependencies (items, filters, search)",
+                "Test filter responsiveness"
+              ]
+            },
+            {
+              "id": "TASK-009-03",
+              "title": "Memoize time slots",
+              "microtasks": [
+                "Wrap getTimeSlots in useMemo",
+                "Add dependencies (zoomLevel, dateRange)",
+                "Test zoom performance"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TASK-010",
+          "title": "Stable Event Handlers",
+          "status": "pending",
+          "priority": "medium",
+          "estimatedHours": 2,
+          "acceptanceCriteria": [
+            "All event handlers use useCallback",
+            "No inline functions in render",
+            "Calendar items don't re-render unnecessarily",
+            "Drag performance improved",
+            "Motion animations smoother"
+          ],
+          "dependencies": [],
+          "filesInvolved": [
+            "apps/frontend/src/renderer/components/calendar/CalendarTimeline.tsx"
+          ],
+          "subtasks": [
+            {
+              "id": "TASK-010-01",
+              "title": "Wrap event handlers in useCallback",
+              "microtasks": [
+                "Convert onClick to useCallback",
+                "Convert onMouseDown to useCallback",
+                "Convert onDragStart to useCallback",
+                "Add proper dependencies"
+              ]
+            },
+            {
+              "id": "TASK-010-02",
+              "title": "Optimize calendar item rendering",
+              "microtasks": [
+                "Memo CalendarItem component",
+                "Extract handler functions to stable refs",
+                "Test render performance"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PHASE-4",
+      "name": "Verification & Testing",
+      "description": "Comprehensive testing and validation of all fixes",
+      "tasks": [
+        {
+          "id": "TASK-011",
+          "title": "Security Verification",
+          "status": "pending",
+          "priority": "high",
+          "estimatedHours": 3,
+          "acceptanceCriteria": [
+            "All security vulnerabilities resolved",
+            "Security audit re-run passes",
+            "Penetration testing completed",
+            "OWASP Top 10 compliance verified"
+          ],
+          "dependencies": ["TASK-001", "TASK-003", "TASK-005", "TASK-006"],
+          "filesInvolved": [
+            "apps/frontend/src/renderer/components/calendar/*",
+            "apps/frontend/src/main/ipc-handlers/calendar-handlers.ts"
+          ],
+          "subtasks": [
+            {
+              "id": "TASK-011-01",
+              "title": "Re-run security audit",
+              "microtasks": [
+                "Run security-auditor agent on fixed code",
+                "Verify all CRITICAL issues resolved",
+                "Verify all HIGH issues resolved"
+              ]
+            },
+            {
+              "id": "TASK-011-02",
+              "title": "Manual security testing",
+              "microtasks": [
+                "Test ICS upload with malicious files",
+                "Test path traversal attempts",
+                "Test XSS injection in inputs",
+                "Test permission bypass attempts"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TASK-012",
+          "title": "Code Quality Verification",
+          "status": "pending",
+          "priority": "medium",
+          "estimatedHours": 2,
+          "acceptanceCriteria": [
+            "All code review issues addressed",
+            "ESLint warnings resolved",
+            "TypeScript strict mode passes",
+            "No console errors in browser"
+          ],
+          "dependencies": ["TASK-002", "TASK-004", "TASK-007", "TASK-009", "TASK-010"],
+          "filesInvolved": [
+            "apps/frontend/src/renderer/components/calendar/*"
+          ],
+          "subtasks": [
+            {
+              "id": "TASK-012-01",
+              "title": "Re-run code review",
+              "microtasks": [
+                "Run code-reviewer agent",
+                "Verify all CRITICAL issues resolved",
+                "Verify all IMPORTANT issues resolved"
+              ]
+            },
+            {
+              "id": "TASK-012-02",
+              "title": "Browser testing",
+              "microtasks": [
+                "Load calendar in browser",
+                "Test all interactions",
+                "Check console for errors",
+                "Verify no memory leaks"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TASK-013",
+          "title": "Integration Testing",
+          "status": "pending",
+          "priority": "medium",
+          "estimatedHours": 4,
+          "acceptanceCriteria": [
+            "End-to-end flows tested",
+            "Error recovery tested",
+            "Performance under load tested",
+            "Accessibility verified"
+          ],
+          "dependencies": ["TASK-008"],
+          "filesInvolved": [
+            "apps/frontend/src/renderer/components/calendar/*"
+          ],
+          "subtasks": [
+            {
+              "id": "TASK-013-01",
+              "title": "E2E workflow testing",
+              "microtasks": [
+                "Test create item flow",
+                "Test edit item flow",
+                "Test delete item flow",
+                "Test filter and search",
+                "Test view switching",
+                "Test zoom level changes",
+                "Test drag and drop"
+              ]
+            },
+            {
+              "id": "TASK-013-02",
+              "title": "Error handling testing",
+              "microtasks": [
+                "Test error boundary triggers",
+                "Test permission denied states",
+                "Test network error handling",
+                "Test invalid input handling"
+              ]
+            },
+            {
+              "id": "TASK-013-03",
+              "title": "Performance testing",
+              "microtasks": [
+                "Test with 100 calendar items",
+                "Test with 500 calendar items",
+                "Measure render times",
+                "Check memory usage"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "auditReferences": [
+    {
+      "type": "code-review",
+      "file": "tmp/code-review-calendar-frontend-20260205.json",
+      "issues": 23,
+      "critical": 3,
+      "important": 8,
+      "minor": 12
+    },
+    {
+      "type": "security",
+      "file": "tmp/security-calendar-audit-20260205.json",
+      "vulnerabilities": 12,
+      "critical": 1,
+      "high": 4,
+      "medium": 5,
+      "low": 2
+    },
+    {
+      "type": "feature-ideation",
+      "agent": "general-purpose",
+      "improvements": 50,
+      "topIdeas": 10
+    },
+    {
+      "type": "ux-research",
+      "agent": "ux-researcher-designer",
+      "score": "7.5/10"
+    }
+  ],
+  "successCriteria": [
+    "All CRITICAL security vulnerabilities resolved",
+    "All CRITICAL code quality bugs fixed",
+    "All HIGH priority security issues resolved",
+    "Error boundaries prevent crashes",
+    "Loading states provide user feedback",
+    "No race conditions in data loading",
+    "Performance acceptable with 100+ items",
+    "Security audit passes",
+    "Code review passes",
+    "E2E testing complete"
+  ]
+}

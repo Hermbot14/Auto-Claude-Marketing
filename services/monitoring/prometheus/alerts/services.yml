@@ -1,0 +1,180 @@
+# Prometheus Alert Rules for Auto Claude Marketing Hub
+# Define alert conditions for service health and performance
+
+groups:
+  - name: service_health
+    interval: 30s
+    rules:
+      # Service Down Alerts
+      - alert: ServiceDown
+        expr: up{job=~".*service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          tier: service
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.job }} has been down for more than 1 minute"
+
+      # High Error Rate
+      - alert: HighErrorRate
+        expr: |
+          (
+            rate(http_requests_total{status=~"5.."}[5m]) /
+            rate(http_requests_total[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          tier: service
+        annotations:
+          summary: "High error rate on {{ $labels.job }}"
+          description: "{{ $labels.job }} error rate is {{ $value | humanizePercentage }}"
+
+      # High Latency
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(http_request_duration_seconds_bucket{job=~".*service"}[5m])
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          tier: service
+        annotations:
+          summary: "High latency on {{ $labels.job }}"
+          description: "P95 latency is {{ $value }}s"
+
+  - name: database_health
+    interval: 30s
+    rules:
+      # Database Down
+      - alert: DatabaseDown
+        expr: up{job=~"postgres.*|mongodb.*|timescaledb"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          tier: database
+        annotations:
+          summary: "Database {{ $labels.job }} is down"
+          description: "Database {{ $labels.job }} has been down for more than 1 minute"
+
+      # High Connection Count
+      - alert: HighDatabaseConnections
+        expr: |
+          pg_stat_database_numbackends{datname="campaigns"} > 80
+        for: 5m
+        labels:
+          severity: warning
+          tier: database
+        annotations:
+          summary: "High database connection count"
+          description: "{{ $labels.datname }} has {{ $value }} connections"
+
+  - name: cache_health
+    interval: 30s
+    rules:
+      # Redis Down
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          tier: cache
+        annotations:
+          summary: "Redis is down"
+          description: "Redis has been down for more than 1 minute"
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: |
+          (redis_memory_used_bytes / redis_memory_max_bytes) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          tier: cache
+        annotations:
+          summary: "Redis high memory usage"
+          description: "Redis memory usage is {{ $value | humanizePercentage }}"
+
+  - name: resource_usage
+    interval: 30s
+    rules:
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: |
+          100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          tier: infrastructure
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value }}%"
+
+      # High Memory Usage
+      - alert: HighMemoryUsageNode
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          tier: infrastructure
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value }}%"
+
+      # Disk Space Low
+      - alert: DiskSpaceLow
+        expr: |
+          (node_filesystem_avail_bytes{mountpoint="/"} /
+           node_filesystem_size_bytes{mountpoint="/"}) * 100 < 15
+        for: 5m
+        labels:
+          severity: warning
+          tier: infrastructure
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Disk space is {{ $value }}% available"
+
+  - name: business_metrics
+    interval: 1m
+    rules:
+      # No Active Campaigns
+      - alert: NoActiveCampaigns
+        expr: |
+          count(campaign_status{status="active"}) == 0
+        for: 1h
+        labels:
+          severity: info
+          tier: business
+        annotations:
+          summary: "No active campaigns"
+          description: "No campaigns have been active for 1 hour"
+
+      # Failed Notifications
+      - alert: HighFailedNotifications
+        expr: |
+          (
+            rate(notification_status{status="failed"}[5m]) /
+            rate(notification_status[5m])
+          ) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          tier: business
+        annotations:
+          summary: "High notification failure rate"
+          description: "Notification failure rate is {{ $value | humanizePercentage }}"
+
+      # Integration Sync Failure
+      - alert: IntegrationSyncFailure
+        expr: |
+          rate(sync_status{status="failed"}[5m]) > 0
+        for: 10m
+        labels:
+          severity: warning
+          tier: business
+        annotations:
+          summary: "Integration sync failing"
+          description: "Integration {{ $labels.integration }} has failing syncs"

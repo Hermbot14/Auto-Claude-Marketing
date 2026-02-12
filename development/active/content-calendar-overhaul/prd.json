@@ -1,0 +1,720 @@
+{
+  "id": "content-calendar-overhaul",
+  "title": "Content Calendar Feature Complete Overhaul",
+  "description": "Complete redesign and reimplementation of the Content Calendar feature with enhanced UX, performance optimizations, and new capabilities",
+  "metadata": {
+    "createdAt": "2026-02-05T18:51:00Z",
+    "updatedAt": "2026-02-05T18:51:00Z",
+    "version": "1.0.0",
+    "gitBranch": "prd/content-calendar-overhaul",
+    "worktreePath": ".git/worktrees/content-calendar-overhaul",
+    "status": "active",
+    "priority": "high"
+  },
+  "objectives": [
+    "Redesign the Content Calendar UI for improved usability and visual appeal",
+    "Implement robust state management with proper data persistence",
+    "Add advanced filtering, search, and sorting capabilities",
+    "Integrate with marketing automation workflows",
+    "Optimize performance for large datasets",
+    "Add collaborative features (comments, approvals, assignments)"
+  ],
+  "successMetrics": [
+    "Page load time < 500ms for 1000+ calendar items",
+    "Zero data loss scenarios with proper error handling",
+    "User satisfaction score > 4.5/5",
+    "90%+ reduction in reported bugs compared to current implementation",
+    "Support for 10,000+ calendar items without performance degradation"
+  ],
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Analyze Current Implementation & Define Requirements",
+      "status": "pending",
+      "priority": "critical",
+      "estimatedHours": 8,
+      "acceptanceCriteria": [
+        "Complete audit of existing Content Calendar code",
+        "Document all current bugs and pain points",
+        "Create comprehensive requirements document",
+        "Define new data models and state structure",
+        "Identify all integrations and dependencies"
+      ],
+      "dependencies": [],
+      "filesInvolved": [
+        "apps/frontend/src/features/content-calendar/**/*",
+        "apps/frontend/src/renderer/stores/calendarStore.ts",
+        "apps/frontend/src/shared/i18n/locales/en/calendar.json"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-001-01",
+          "title": "Audit existing Content Calendar components",
+          "status": "pending",
+          "microtasks": [
+            "List all calendar-related components",
+            "Identify component hierarchy and relationships",
+            "Document current state management approach",
+            "Catalog all existing bugs and issues"
+          ]
+        },
+        {
+          "id": "TASK-001-02",
+          "title": "Define new data models and interfaces",
+          "status": "pending",
+          "microtasks": [
+            "Design CalendarEvent interface with all required fields",
+            "Define CalendarView type (month, week, day, list, timeline)",
+            "Create Filter and Sort option types",
+            "Design state management architecture"
+          ]
+        },
+        {
+          "id": "TASK-001-03",
+          "title": "Create technical requirements document",
+          "status": "pending",
+          "microtasks": [
+            "Document performance requirements",
+            "Define accessibility requirements (WCAG AA)",
+            "Specify i18n requirements",
+            "List all API integrations needed"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Design New UI/UX for Content Calendar",
+      "status": "pending",
+      "priority": "critical",
+      "estimatedHours": 16,
+      "acceptanceCriteria": [
+        "Figma designs or wireframes for all calendar views",
+        "Design system components specified",
+        "User interaction flows documented",
+        "Responsive design specifications",
+        "Accessibility audit completed"
+      ],
+      "dependencies": ["TASK-001"],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/components/**/*",
+        "apps/frontend/tailwind.config.js"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-002-01",
+          "title": "Design month and week views",
+          "status": "pending",
+          "microtasks": [
+            "Create grid layout specifications",
+            "Design event card components",
+            "Specify hover and interaction states",
+            "Design navigation controls"
+          ]
+        },
+        {
+          "id": "TASK-002-02",
+          "title": "Design day and timeline views",
+          "status": "pending",
+          "microtasks": [
+            "Create timeline layout specifications",
+            "Design time slot components",
+            "Specify drag-and-drop interactions",
+            "Design multi-day event rendering"
+          ]
+        },
+        {
+          "id": "TASK-002-03",
+          "title": "Design filtering and search UI",
+          "status": "pending",
+          "microtasks": [
+            "Design filter panel component",
+            "Design search input with suggestions",
+            "Create filter preset UI",
+            "Design saved filter management"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Implement Core Calendar Data Layer",
+      "status": "pending",
+      "priority": "critical",
+      "estimatedHours": 24,
+      "acceptanceCriteria": [
+        "Type-safe data models with full coverage",
+        "Efficient data fetching and caching",
+        "Proper error handling and retry logic",
+        "Optimistic updates for better UX",
+        "Data validation and sanitization"
+      ],
+      "dependencies": ["TASK-001"],
+      "filesInvolved": [
+        "apps/frontend/src/shared/types/calendar.ts",
+        "apps/frontend/src/renderer/api/calendar.ts",
+        "apps/frontend/src/renderer/stores/calendarStore.ts"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-003-01",
+          "title": "Create TypeScript types and interfaces",
+          "status": "pending",
+          "microtasks": [
+            "Define CalendarEvent interface",
+            "Define CalendarFilter interface",
+            "Define CalendarView types",
+            "Create utility types for partial updates"
+          ]
+        },
+        {
+          "id": "TASK-003-02",
+          "title": "Implement API client for calendar operations",
+          "status": "pending",
+          "microtasks": [
+            "Create fetchCalendarEvents function",
+            "Create createEvent function",
+            "Create updateEvent function",
+            "Create deleteEvent function",
+            "Add proper error handling and retries"
+          ]
+        },
+        {
+          "id": "TASK-003-03",
+          "title": "Implement state management with Zustand",
+          "status": "pending",
+          "microtasks": [
+            "Create calendar store with actions",
+            "Implement event caching strategy",
+            "Add optimistic updates",
+            "Create selector hooks for derived state"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Build Month and Week View Components",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 32,
+      "acceptanceCriteria": [
+        "Responsive grid layout for month view",
+        "Week view with time-based columns",
+        "Event cards with proper truncation",
+        "Smooth navigation between dates/periods",
+        "Keyboard navigation support",
+        "Accessible to screen readers"
+      ],
+      "dependencies": ["TASK-002", "TASK-003"],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/components/calendar/MonthView.tsx",
+        "apps/frontend/src/renderer/components/calendar/WeekView.tsx",
+        "apps/frontend/src/renderer/components/calendar/CalendarGrid.tsx"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-004-01",
+          "title": "Implement CalendarGrid base component",
+          "status": "pending",
+          "microtasks": [
+            "Create responsive grid layout",
+            "Implement date cell rendering",
+            "Add navigation controls",
+            "Support keyboard navigation"
+          ]
+        },
+        {
+          "id": "TASK-004-02",
+          "title": "Build MonthView component",
+          "status": "pending",
+          "microtasks": [
+            "Render 7-column grid for days of week",
+            "Display events within date cells",
+            "Handle month overflow dates",
+            "Add month navigation"
+          ]
+        },
+        {
+          "id": "TASK-004-03",
+          "title": "Build WeekView component",
+          "status": "pending",
+          "microtasks": [
+            "Create time-based column layout",
+            "Render events at correct time positions",
+            "Handle multi-day events across columns",
+            "Add week navigation"
+          ]
+        },
+        {
+          "id": "TASK-004-04",
+          "title": "Create EventCard component",
+          "status": "pending",
+          "microtasks": [
+            "Design card with color coding",
+            "Add truncation for long titles",
+            "Show event metadata inline",
+            "Handle hover and click states"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Build Day and Timeline View Components",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 24,
+      "acceptanceCriteria": [
+        "Day view with hourly time slots",
+        "Timeline view with customizable scales",
+        "Drag-and-drop event creation",
+        "Event resizing support",
+        "Smooth scrolling performance"
+      ],
+      "dependencies": ["TASK-002", "TASK-003"],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/components/calendar/DayView.tsx",
+        "apps/frontend/src/renderer/components/calendar/TimelineView.tsx",
+        "apps/frontend/src/renderer/components/calendar/TimeSlot.tsx"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-005-01",
+          "title": "Implement DayView component",
+          "status": "pending",
+          "microtasks": [
+            "Create 24-hour time slot grid",
+            "Render events with time positioning",
+            "Add current time indicator",
+            "Implement auto-scroll to current time"
+          ]
+        },
+        {
+          "id": "TASK-005-02",
+          "title": "Implement TimelineView component",
+          "status": "pending",
+          "microtasks": [
+            "Create horizontal timeline layout",
+            "Support variable time scales",
+            "Render events on timeline",
+            "Add zoom controls"
+          ]
+        },
+        {
+          "id": "TASK-005-03",
+          "title": "Add drag-and-drop functionality",
+          "status": "pending",
+          "microtasks": [
+            "Implement event drag to move",
+            "Implement event drag to resize",
+            "Add visual feedback during drag",
+            "Handle conflicts and overlaps"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Implement List View and Search",
+      "status": "pending",
+      "priority": "medium",
+      "estimatedHours": 16,
+      "acceptanceCriteria": [
+        "Sortable list view with customizable columns",
+        "Full-text search across events",
+        "Advanced filter builder",
+        "Filter presets for common queries",
+        "Export functionality (CSV, iCal)"
+      ],
+      "dependencies": ["TASK-003"],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/components/calendar/ListView.tsx",
+        "apps/frontend/src/renderer/components/calendar/CalendarSearch.tsx",
+        "apps/frontend/src/renderer/components/calendar/CalendarFilters.tsx"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-006-01",
+          "title": "Build ListView component",
+          "status": "pending",
+          "microtasks": [
+            "Create table-like list layout",
+            "Add sortable columns",
+            "Implement pagination",
+            "Add row selection"
+          ]
+        },
+        {
+          "id": "TASK-006-02",
+          "title": "Implement search functionality",
+          "status": "pending",
+          "microtasks": [
+            "Create search input component",
+            "Implement full-text search",
+            "Add search suggestions",
+            "Handle search history"
+          ]
+        },
+        {
+          "id": "TASK-006-03",
+          "title": "Build advanced filter system",
+          "status": "pending",
+          "microtasks": [
+            "Create filter builder UI",
+            "Implement date range filters",
+            "Add category/status filters",
+            "Support custom filter expressions"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-007",
+      "title": "Implement Event CRUD Operations",
+      "status": "pending",
+      "priority": "critical",
+      "estimatedHours": 20,
+      "acceptanceCriteria": [
+        "Create event modal with all fields",
+        "Edit existing events",
+        "Delete with confirmation",
+        "Bulk operations (delete, move, update status)",
+        "Form validation with error messages"
+      ],
+      "dependencies": ["TASK-003"],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/components/calendar/EventModal.tsx",
+        "apps/frontend/src/renderer/components/calendar/EventForm.tsx",
+        "apps/frontend/src/renderer/components/calendar/BulkActions.tsx"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-007-01",
+          "title": "Build EventModal component",
+          "status": "pending",
+          "microtasks": [
+            "Create modal with backdrop",
+            "Add all event input fields",
+            "Implement date/time pickers",
+            "Add recurrence editor"
+          ]
+        },
+        {
+          "id": "TASK-007-02",
+          "title": "Implement EventForm with validation",
+          "status": "pending",
+          "microtasks": [
+            "Create form validation schema",
+            "Add real-time validation feedback",
+            "Handle field dependencies",
+            "Show helpful error messages"
+          ]
+        },
+        {
+          "id": "TASK-007-03",
+          "title": "Add bulk operations",
+          "status": "pending",
+          "microtasks": [
+            "Create bulk selection UI",
+            "Implement bulk delete",
+            "Implement bulk status update",
+            "Add bulk move/copy"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-008",
+      "title": "Implement Collaborative Features",
+      "status": "pending",
+      "priority": "medium",
+      "estimatedHours": 24,
+      "acceptanceCriteria": [
+        "Comments on events",
+        "Assignee management",
+        "Approval workflow",
+        "Activity history",
+        "Notifications for changes"
+      ],
+      "dependencies": ["TASK-007"],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/components/calendar/EventComments.tsx",
+        "apps/frontend/src/renderer/components/calendar/AssigneeSelect.tsx",
+        "apps/frontend/src/renderer/components/calendar/ApprovalWorkflow.tsx"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-008-01",
+          "title": "Build comments system",
+          "status": "pending",
+          "microtasks": [
+            "Create comment input component",
+            "Display comment thread",
+            "Add @mentions support",
+            "Implement edit/delete comments"
+          ]
+        },
+        {
+          "id": "TASK-008-02",
+          "title": "Implement assignment workflow",
+          "status": "pending",
+          "microtasks": [
+            "Create assignee selector",
+            "Show assigned events",
+            "Filter by assignee",
+            "Assignment notifications"
+          ]
+        },
+        {
+          "id": "TASK-008-03",
+          "title": "Build approval workflow",
+          "status": "pending",
+          "microtasks": [
+            "Define approval states",
+            "Create approval UI",
+            "Implement approval actions",
+            "Add approval history"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-009",
+      "title": "Performance Optimization",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 16,
+      "acceptanceCriteria": [
+        "Virtualization for large event lists",
+        "Memoized components to prevent re-renders",
+        "Efficient re-renders with proper keys",
+        "Lazy loading of event details",
+        "Request deduplication"
+      ],
+      "dependencies": ["TASK-004", "TASK-005", "TASK-006"],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/components/calendar/**/*",
+        "apps/frontend/src/renderer/stores/calendarStore.ts"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-009-01",
+          "title": "Implement virtualization",
+          "status": "pending",
+          "microtasks": [
+            "Add virtual list for ListView",
+            "Implement virtual grid for MonthView",
+            "Test with 10,000+ events",
+            "Optimize render performance"
+          ]
+        },
+        {
+          "id": "TASK-009-02",
+          "title": "Optimize component re-renders",
+          "status": "pending",
+          "microtasks": [
+            "Add React.memo where appropriate",
+            "Use useMemo/useCallback hooks",
+            "Optimize context usage",
+            "Profile and fix render bottlenecks"
+          ]
+        },
+        {
+          "id": "TASK-009-03",
+          "title": "Implement data caching strategy",
+          "status": "pending",
+          "microtasks": [
+            "Cache API responses",
+            "Implement stale-while-revalidate",
+            "Add prefetching for adjacent dates",
+            "Handle cache invalidation"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-010",
+      "title": "Accessibility and Internationalization",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 12,
+      "acceptanceCriteria": [
+        "WCAG AA compliance",
+        "Screen reader compatibility",
+        "Keyboard navigation for all features",
+        "Complete i18n for all UI strings",
+        "RTL language support"
+      ],
+      "dependencies": ["TASK-004", "TASK-005", "TASK-006"],
+      "filesInvolved": [
+        "apps/frontend/src/renderer/components/calendar/**/*",
+        "apps/frontend/src/shared/i18n/locales/en/calendar.json",
+        "apps/frontend/src/shared/i18n/locales/fr/calendar.json"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-010-01",
+          "title": "Implement accessibility features",
+          "status": "pending",
+          "microtasks": [
+            "Add ARIA labels to all interactive elements",
+            "Ensure keyboard navigation works",
+            "Test with screen reader",
+            "Add focus indicators"
+          ]
+        },
+        {
+          "id": "TASK-010-02",
+          "title": "Complete internationalization",
+          "status": "pending",
+          "microtasks": [
+            "Extract all UI strings to i18n",
+            "Add translations for French",
+            "Format dates/times by locale",
+            "Support week start by locale"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-011",
+      "title": "Testing and Quality Assurance",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 20,
+      "acceptanceCriteria": [
+        "Unit tests for all components",
+        "Integration tests for workflows",
+        "E2E tests for critical paths",
+        "Performance benchmarks",
+        "Accessibility audit"
+      ],
+      "dependencies": ["TASK-004", "TASK-005", "TASK-006", "TASK-007"],
+      "filesInvolved": [
+        "apps/frontend/src/**/__tests__/**/*",
+        "apps/frontend/e2e/calendar.spec.ts"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-011-01",
+          "title": "Write unit tests",
+          "status": "pending",
+          "microtasks": [
+            "Test all calendar components",
+            "Test store actions and selectors",
+            "Test utility functions",
+            "Achieve 80%+ code coverage"
+          ]
+        },
+        {
+          "id": "TASK-011-02",
+          "title": "Write integration tests",
+          "status": "pending",
+          "microtasks": [
+            "Test event CRUD workflows",
+            "Test filtering and searching",
+            "Test view switching",
+            "Test collaborative features"
+          ]
+        },
+        {
+          "id": "TASK-011-03",
+          "title": "Write E2E tests",
+          "status": "pending",
+          "microtasks": [
+            "Test complete user journeys",
+            "Test with Playwright",
+            "Test across browsers",
+            "Test on mobile viewports"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TASK-012",
+      "title": "Documentation and Deployment",
+      "status": "pending",
+      "priority": "medium",
+      "estimatedHours": 8,
+      "acceptanceCriteria": [
+        "Component documentation",
+        "User guide for calendar features",
+        "API documentation",
+        "Migration guide from old calendar",
+        "Deployment checklist"
+      ],
+      "dependencies": ["TASK-011"],
+      "filesInvolved": [
+        "docs/calendar/**/*",
+        "apps/frontend/README.md"
+      ],
+      "subtasks": [
+        {
+          "id": "TASK-012-01",
+          "title": "Create user documentation",
+          "status": "pending",
+          "microtasks": [
+            "Write calendar feature guide",
+            "Create how-to videos/GIFs",
+            "Document keyboard shortcuts",
+            "Create FAQ section"
+          ]
+        },
+        {
+          "id": "TASK-012-02",
+          "title": "Create developer documentation",
+          "status": "pending",
+          "microtasks": [
+            "Document component APIs",
+            "Create integration guide",
+            "Document state management",
+            "Add code examples"
+          ]
+        }
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "id": "RISK-001",
+      "title": "Performance degradation with large datasets",
+      "probability": "medium",
+      "impact": "high",
+      "mitigation": "Implement virtualization early and test with 10,000+ events"
+    },
+    {
+      "id": "RISK-002",
+      "title": "Complex state management leading to bugs",
+      "probability": "medium",
+      "impact": "high",
+      "mitigation": "Use Zustand with proper typing and comprehensive tests"
+    },
+    {
+      "id": "RISK-003",
+      "title": "Accessibility compliance issues",
+      "probability": "low",
+      "impact": "medium",
+      "mitigation": "Conduct accessibility audit early and iterate based on findings"
+    },
+    {
+      "id": "RISK-004",
+      "title": "Data migration from old calendar",
+      "probability": "medium",
+      "impact": "medium",
+      "mitigation": "Create migration script and test thoroughly before deployment"
+    }
+  ],
+  "definitionOfDone": [
+    "All tasks completed and verified",
+    "All acceptance criteria met",
+    "Unit tests passing with 80%+ coverage",
+    "E2E tests passing for all critical paths",
+    "Performance benchmarks met",
+    "Accessibility audit passed (WCAG AA)",
+    "Documentation complete",
+    "Code review approved",
+    "No critical bugs remaining",
+    "Stakeholder sign-off received"
+  ]
+}

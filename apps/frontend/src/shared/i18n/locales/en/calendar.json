@@ -142,5 +142,43 @@
     "retry": "Retry",
     "reportIssue": "Report Issue",
     "errorDetails": "Error details"
+  },
+  "virtualList": {
+    "title": "Events",
+    "view": "View",
+    "listView": "List view",
+    "gridView": "Grid view",
+    "groupBy": "Group by",
+    "groupByDate": "Date",
+    "groupByType": "Type",
+    "groupByStatus": "Status",
+    "groupByNone": "No grouping",
+    "sortBy": "Sort by",
+    "sortDate": "Date",
+    "sortTitle": "Title",
+    "sortType": "Type",
+    "sortStatus": "Status",
+    "sortPriority": "Priority",
+    "sortOrder": "Sort order",
+    "sortAscending": "Ascending",
+    "sortDescending": "Descending",
+    "showing": "Showing {{filtered}} of {{total}} events",
+    "selectedEvents": "{{count}} events selected",
+    "clearSelection": "Clear selection",
+    "emptySearch": "No events match your search",
+    "emptyFilter": "No events match current filters",
+    "adjustFilters": "Try adjusting your filters or search query",
+    "noEventsPeriod": "No events scheduled for this period",
+    "loading": "Loading events...",
+    "loadError": "Error Loading Events",
+    "retry": "Retry",
+    "a11y": {
+      "eventsList": "Events list",
+      "eventsGrid": "Events grid",
+      "eventItem": "{{title}} on {{date}}",
+      "selectEvent": "Select {{title}}",
+      "navigatingEvents": "Navigating events list",
+      "switchView": "Switch to {{view}} view"
+    }
   }
 }
