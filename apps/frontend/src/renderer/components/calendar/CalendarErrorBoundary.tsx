@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle, RefreshCw, ExternalLink } from 'lucide-react';
+import { captureException, trackReactError } from '../../lib/errorTracking';
 
 interface CalendarErrorBoundaryProps {
   children: ReactNode;
@@ -162,15 +163,11 @@ export class CalendarErrorBoundary extends Component<
     // Log to console for development
     console.error('[Calendar Error Boundary]', error, errorInfo);
 
+    // Track error with Sentry and unified error tracking
+    trackReactError(error, errorInfo, 'Calendar');
+
     // Call custom error handler if provided
     this.props.onError?.(error, errorInfo);
-
-    // In production, you would send this to an error reporting service
-    // Example: Sentry, LogRocket, or custom endpoint
-    if (process.env.NODE_ENV === 'production') {
-      // TODO: Integrate with error reporting service
-      // reportErrorToService(error, errorInfo);
-    }
   }
 
   /**

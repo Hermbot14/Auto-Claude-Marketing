@@ -11,6 +11,10 @@ initSentryRenderer().catch((err) => {
   console.warn('[Sentry] Failed to initialize renderer:', err);
 });
 
+// Initialize global error handlers for unhandled errors and promise rejections
+import { initializeErrorHandlers } from './lib/errorTracking';
+initializeErrorHandlers();
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './App';
