@@ -1,0 +1,175 @@
+{
+  "shortcuts": {
+    "title": "Raccourcis Clavier",
+    "description": "Utilisez les raccourcis clavier pour naviguer rapidement. Appuyez sur {{modifierKey}} + K n'importe où pour afficher cette aide.",
+    "searchPlaceholder": "Rechercher des raccourcis...",
+    "searchLabel": "Rechercher des raccourcis clavier",
+    "noResults": "Aucun raccourci trouvé correspondant à votre recherche",
+    "categories": {
+      "navigation": "Navigation",
+      "actions": "Actions",
+      "taskManagement": "Gestion des Tâches",
+      "keyboard": "Navigation au Clavier",
+      "uiControls": "Contrôles de l'Interface",
+      "modifierKeys": "Touches de Modification"
+    },
+    "nav": {
+      "kanban": "Tableau Kanban",
+      "terminals": "Terminaux d'Agent",
+      "insights": "Renseignements Marketing",
+      "roadmap": "Feuille de Route",
+      "calendar": "Calendrier de Contenu",
+      "ideation": "Studio Créatif",
+      "changelog": "Journal des Modifications",
+      "context": "Contexte",
+      "agentTools": "Vue d'ensemble MCP",
+      "worktrees": "Arbores de Travail",
+      "githubIssues": "Tickets GitHub",
+      "githubPRs": "Pull Requests GitHub",
+      "gitlabIssues": "Tickets GitLab",
+      "gitlabMRs": "Merge Requests GitLab"
+    },
+    "actions": {
+      "newTask": "Créer une Nouvelle Tâche",
+      "openProject": "Ouvrir un Projet",
+      "settings": "Ouvrir les Paramètres",
+      "search": "Focus Recherche",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "refresh": "Actualiser"
+    },
+    "tasks": {
+      "openTask": "Ouvrir la tâche sélectionnée",
+      "closeModal": "Fermer la boîte de dialogue",
+      "saveTask": "Enregistrer la tâche actuelle",
+      "refreshTasks": "Actualiser les tâches",
+      "nextTask": "Tâche suivante",
+      "previousTask": "Tâche précédente",
+      "moveTaskUp": "Déplacer la tâche vers le haut",
+      "moveTaskDown": "Déplacer la tâche vers le bas"
+    },
+    "keyboard": {
+      "nextFocus": "Élément focalisable suivant",
+      "previousFocus": "Élément focalisable précédent",
+      "moveDown": "Descendre dans la liste",
+      "moveUp": "Monter dans la liste",
+      "firstItem": "Aller au premier élément",
+      "lastItem": "Aller au dernier élément",
+      "pageDown": "Page vers le bas",
+      "pageUp": "Page vers le haut",
+      "home": "Aller au début",
+      "end": "Aller à la fin"
+    },
+    "ui": {
+      "showShortcuts": "Afficher les raccourcis clavier",
+      "hideShortcuts": "Masquer les raccourcis clavier",
+      "closeDialog": "Fermer la boîte de dialogue",
+      "confirm": "Confirmer l'action",
+      "nextField": "Champ de formulaire suivant",
+      "previousField": "Champ de formulaire précédent",
+      "submitForm": "Soumettre le formulaire",
+      "resetForm": "Réinitialiser le formulaire"
+    },
+    "modifier": {
+      "platformModifier": "Touche de modification de plateforme (varie selon l'OS)",
+      "shift": "Touche Shift - modifier d'autres touches",
+      "alt": "Touche Alt/Option - actions alternatives",
+      "control": "Touche Ctrl - modificateur pour les raccourcis",
+      "tab": "Tab - naviguer entre les éléments",
+      "enter": "Entrée - activer ou confirmer",
+      "esc": "Échap - annuler ou revenir",
+      "space": "Espace - activer ou basculer"
+    }
+  },
+  "skipLinks": {
+    "skipToMain": "Aller au contenu principal",
+    "skipToSidebar": "Aller à la barre latérale",
+    "skipToNavigation": "Aller à la navigation",
+    "skipToContent": "Aller au contenu"
+  },
+  "focus": {
+    "visible": "Focus visible",
+    "indicators": "Les indicateurs de focus montrent quel élément est actif",
+    "mode": "Mode Focus actif - utilisez les flèches pour naviguer"
+  },
+  "screenReader": {
+    "announcements": "Annonces du lecteur d'écran",
+    "liveRegion": "Région dynamique pour les mises à jour",
+    "status": "Annonce de statut",
+    "error": "Annonce d'erreur"
+  },
+  "highContrast": {
+    "enabled": "Mode contraste élevé activé",
+    "disabled": "Mode contraste élevé désactivé"
+  },
+  "reducedMotion": {
+    "enabled": "Mouvement réduit activé",
+    "disabled": "Mouvement réduit désactivé"
+  },
+  "tabNavigation": {
+    "next": "Suivant",
+    "previous": "Précédent",
+    "first": "Premier",
+    "last": "Dernier"
+  },
+  "ariaLabels": {
+    "keyboardShortcutsButton": "Afficher les raccourcis clavier ({{shortcut}})",
+    "focusTrap": "Focus piégé dans la fenêtre modale",
+    "menuExpanded": "Menu développé, appuyez sur Échap pour fermer",
+    "menuCollapsed": "Menu réduit"
+  },
+  "announcements": {
+    "taskCreated": "Tâche créée",
+    "taskUpdated": "Tâche mise à jour",
+    "taskCompleted": "Tâche terminée",
+    "taskDeleted": "Tâche supprimée",
+    "taskFailed": "Échec de la tâche",
+    "formSubmitted": "Formulaire soumis",
+    "formError": "Erreur de formulaire, veuillez vérifier votre saisie",
+    "loadingStarted": "Chargement démarré",
+    "loadingComplete": "Chargement terminé",
+    "notification": "Notification",
+    "navigationChanged": "Navigation changée vers {{page}}",
+    "settingsSaved": "Paramètres enregistrés",
+    "themeChanged": "Thème changé vers {{theme}}",
+    "connectionLost": "Connexion perdue",
+    "connectionRestored": "Connexion rétablie",
+    "copiedToClipboard": "Copié dans le presse-papiers",
+    "dismiss": "Rejeter"
+  },
+  "progress": {
+    "cancel": "Annuler",
+    "complete": "Terminé",
+    "inProgress": "En cours",
+    "estimatedTime": "Temps estimé",
+    "of": "de"
+  },
+  "contrast": {
+    "highContrastMode": "Mode Contraste Élevé",
+    "highContrastDescription": "Augmente le contraste des couleurs pour une meilleure visibilité",
+    "enhancedContrast": "Contraste Amélioré",
+    "wcagAANote": "Respecte les normes WCAG AA (contraste 4.5:1)",
+    "wcagAAANote": "Respecte les normes WCAG AAA (contraste 7:1)",
+    "checkerTitle": "Vérificateur de contraste des couleurs",
+    "checkerDescription": "Vérifiez si vos couleurs respectent les normes d'accessibilité WCAG",
+    "foreground": "Premier plan",
+    "background": "Arrière-plan",
+    "swapColors": "Échanger les couleurs",
+    "contrastRatio": "Taux de contraste",
+    "normalText": "Texte normal",
+    "largeText": "Texte large",
+    "suggestionsTitle": "Suggestions",
+    "suggestionsText": "Cette combinaison de couleurs ne respecte pas les normes WCAG AA. Envisagez ces alternatives :",
+    "useForeground": "Utiliser le premier plan suggéré",
+    "useBackground": "Utiliser l'arrière-plan suggéré",
+    "applyAll": "Appliquer toutes les suggestions",
+    "standardsTitle": "Normes WCAG 2.1",
+    "aa": "AA (Minimum)",
+    "aaDesc": "4.5:1 pour le texte normal, 3:1 pour le texte large",
+    "aaa": "AAA (Amélioré)",
+    "aaaDesc": "7:1 pour le texte normal, 4.5:1 pour le texte large",
+    "previewText": "C'est ainsi que votre texte apparaîtra.",
+    "largePreviewText": "Le texte large est plus facile à lire."
+  }
+}

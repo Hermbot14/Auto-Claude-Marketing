@@ -14,6 +14,7 @@ import { ClaudeCodeAPI, createClaudeCodeAPI } from './modules/claude-code-api';
 import { McpAPI, createMcpAPI } from './modules/mcp-api';
 import { ProfileAPI, createProfileAPI } from './profile-api';
 import { ScreenshotAPI, createScreenshotAPI } from './screenshot-api';
+import type { CSRFAPI, createCSRFAPI } from './csrf-api';
 
 export interface ElectronAPI extends
   ProjectAPI,
@@ -32,6 +33,7 @@ export interface ElectronAPI extends
   ProfileAPI,
   ScreenshotAPI {
   github: GitHubAPI;
+  csrf: CSRFAPI;
 }
 
 export const createElectronAPI = (): ElectronAPI => ({
@@ -47,7 +49,8 @@ export const createElectronAPI = (): ElectronAPI => ({
   ...createMcpAPI(),
   ...createProfileAPI(),
   ...createScreenshotAPI(),
-  github: createGitHubAPI()
+  github: createGitHubAPI(),
+  csrf: createCSRFAPI()
 });
 
 // Export individual API creators for potential use in tests or specialized contexts
@@ -65,7 +68,8 @@ export {
   createDebugAPI,
   createClaudeCodeAPI,
   createMcpAPI,
-  createScreenshotAPI
+  createScreenshotAPI,
+  createCSRFAPI
 };
 
 export type {
@@ -84,5 +88,6 @@ export type {
   DebugAPI,
   ClaudeCodeAPI,
   McpAPI,
-  ScreenshotAPI
+  ScreenshotAPI,
+  CSRFAPI
 };

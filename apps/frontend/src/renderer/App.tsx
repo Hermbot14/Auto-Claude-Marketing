@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, RefreshCw, AlertCircle } from 'lucide-react';
 import { debugLog } from '../shared/utils/debug-logger';
@@ -28,24 +28,14 @@ import {
   DialogTitle
 } from './components/ui/dialog';
 import { Sidebar, type SidebarView } from './components/Sidebar';
-import { KanbanBoard } from './components/KanbanBoard';
 import { TaskDetailModal } from './components/task-detail/TaskDetailModal';
 import { TaskCreationWizard } from './components/TaskCreationWizard';
 import { AppSettingsDialog, type AppSection } from './components/settings/AppSettings';
 import type { ProjectSettingsSection } from './components/settings/ProjectSettingsContent';
 import { TerminalGrid } from './components/TerminalGrid';
-import { Roadmap } from './components/Roadmap';
-import { CalendarView, CalendarErrorBoundary } from './components/calendar';
-import { Context } from './components/Context';
-import { Ideation } from './components/Ideation';
-import { Insights } from './components/Insights';
-import { GitHubIssues } from './components/GitHubIssues';
-import { GitLabIssues } from './components/GitLabIssues';
-import { GitHubPRs } from './components/github-prs';
-import { GitLabMergeRequests } from './components/gitlab-merge-requests';
-import { Changelog } from './components/Changelog';
-import { Worktrees } from './components/Worktrees';
-import { AgentTools } from './components/AgentTools';
+import { RouteLoadingFallback } from './routes/RouteLoadingFallback';
+import { useRoutePreload, usePriorityPreload } from './hooks/useRoutePreload';
+import { CalendarErrorBoundary } from './components/calendar';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { RateLimitModal } from './components/RateLimitModal';
 import { SDKRateLimitModal } from './components/SDKRateLimitModal';
@@ -71,6 +61,7 @@ import type { Task, Project, ColorTheme } from '../shared/types';
 import { ProjectTabBar } from './components/ProjectTabBar';
 import { AddProjectModal } from './components/AddProjectModal';
 import { ViewStateProvider } from './contexts/ViewStateContext';
+import { LazyViews } from './routes';
 
 // Version constant for version-specific warnings (e.g., reauthentication notices)
 const VERSION_WARNING_275 = '2.7.5';
@@ -110,7 +101,7 @@ export function App() {
   useIpcListeners();
 
   // Load global terminal output listeners to buffer output across project switches
-  // This ensures terminal output is captured even when the terminal component is not rendered
+  // This ensures terminal output is captured even when terminal component is not rendered
   useGlobalTerminalListeners();
 
   // Handle terminal profile change events (recreate terminals on profile switch)
@@ -220,10 +211,10 @@ export function App() {
       projectTabIds: projectTabs.map(p => p.id)
     });
 
-    // No tabs persisted at all, open the first available project
+    // No tabs persisted at all, open first available project
     const projectToOpen = activeProjectId || selectedProjectId || projects[0].id;
     console.warn('[App] No tabs persisted, opening project:', projectToOpen);
-    // Verify the project exists before opening
+    // Verify project exists before opening
     if (projects.some(p => p.id === projectToOpen)) {
       openProjectTab(projectToOpen);
       setActiveProject(projectToOpen);
@@ -565,6 +556,19 @@ export function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally omit selectedTask object to prevent infinite re-render loop
   }, [tasks, selectedTask?.id, selectedTask?.specId]);
 
+  // Route preloading - enabled by default, disabled in data saver mode
+  useRoutePreload({
+    currentRoute: activeView,
+    enabled: !settings.dataSaverMode,
+  });
+
+  // Priority-based preloading - preload high-priority routes on idle
+  usePriorityPreload({
+    enabled: !settings.dataSaverMode,
+    minPriority: 80,
+    maxPreloads: 2,
+  });
+
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
   };
@@ -598,7 +602,7 @@ export function App() {
     setSelectedTask(null);
 
     // Add terminal to store - this will trigger Terminal component to mount
-    // which will then create the backend PTY via usePtyProcess
+    // which will then create backend PTY via usePtyProcess
     // Note: TerminalGrid is always mounted (just hidden), so no need to wait
     const terminal = useTerminalStore.getState().addTerminal(cwd, selectedProject?.path);
 
@@ -628,7 +632,7 @@ export function App() {
   };
 
   const handleProjectTabClose = (projectId: string) => {
-    // Show confirmation dialog before removing the project
+    // Show confirmation dialog before removing project
     const project = projects.find(p => p.id === projectId);
     if (project) {
       setProjectToRemove(project);
@@ -641,7 +645,7 @@ export function App() {
       try {
         // Clear any previous error
         setRemoveProjectError(null);
-        // Remove the project from the app (files are preserved on disk for re-adding later)
+        // Remove project from app (files are preserved on disk for re-adding later)
         removeProject(projectToRemove.id);
         // Only clear dialog state on success
         setShowRemoveProjectDialog(false);
@@ -791,12 +795,26 @@ export function App() {
   const handleGoToTask = (taskId: string) => {
     // Switch to kanban view
     setActiveView('kanban');
-    // Find and select the task (match by id or specId)
+    // Find and select task (match by id or specId)
     const task = tasks.find((t) => t.id === taskId || t.specId === taskId);
     if (task) {
       setSelectedTask(task);
     }
   };
+
+  const LazyKanbanBoard = LazyViews.kanban;
+  const LazyRoadmap = LazyViews.roadmap;
+  const LazyCalendarView = LazyViews.calendar;
+  const LazyContext = LazyViews.context;
+  const LazyIdeation = LazyViews.ideation;
+  const LazyInsights = LazyViews.insights;
+  const LazyGitHubIssues = LazyViews.githubIssues;
+  const LazyGitLabIssues = LazyViews.gitlabIssues;
+  const LazyGitHubPRs = LazyViews.githubPrs;
+  const LazyGitLabMrs = LazyViews.gitlabMrs;
+  const LazyChangelog = LazyViews.changelog;
+  const LazyWorktrees = LazyViews.worktrees;
+  const LazyAgentTools = LazyViews.agentTools;
 
   return (
     <ViewStateProvider>
@@ -851,13 +869,15 @@ export function App() {
             {selectedProject ? (
               <>
                 {activeView === 'kanban' && (
-                  <KanbanBoard
-                    tasks={tasks}
-                    onTaskClick={handleTaskClick}
-                    onNewTaskClick={() => setIsNewTaskDialogOpen(true)}
-                    onRefresh={handleRefreshTasks}
-                    isRefreshing={isRefreshingTasks}
-                  />
+                  <Suspense fallback={<RouteLoadingFallback />}>
+                    <LazyKanbanBoard
+                      tasks={tasks}
+                      onTaskClick={handleTaskClick}
+                      onNewTaskClick={() => setIsNewTaskDialogOpen(true)}
+                      onRefresh={handleRefreshTasks}
+                      isRefreshing={isRefreshingTasks}
+                    />
+                  </Suspense>
                 )}
                 {/* TerminalGrid is always mounted but hidden when not active to preserve terminal state */}
                 <div className={activeView === 'terminals' ? 'h-full' : 'hidden'}>
@@ -868,72 +888,98 @@ export function App() {
                   />
                 </div>
                 {activeView === 'roadmap' && (activeProjectId || selectedProjectId) && (
-                  <Roadmap projectId={activeProjectId || selectedProjectId!} onGoToTask={handleGoToTask} />
+                  <Suspense fallback={<RouteLoadingFallback />}>
+                    <LazyRoadmap projectId={activeProjectId || selectedProjectId!} onGoToTask={handleGoToTask} />
+                  </Suspense>
                 )}
                 {activeView === 'calendar' && (
-                  <CalendarErrorBoundary
-                    onError={(error, errorInfo) => {
-                      console.error('[App] Calendar error caught by boundary:', error, errorInfo);
-                    }}
-                  >
-                    <CalendarView projectId={activeProjectId || selectedProjectId || 'demo'} />
-                  </CalendarErrorBoundary>
+                  <Suspense fallback={<RouteLoadingFallback />}>
+                    <CalendarErrorBoundary
+                      onError={(error, errorInfo) => {
+                        console.error('[App] Calendar error caught by boundary:', error, errorInfo);
+                      }}
+                    >
+                      <LazyCalendarView projectId={activeProjectId || selectedProjectId || 'demo'} />
+                    </CalendarErrorBoundary>
+                  </Suspense>
                 )}
                 {activeView === 'context' && (activeProjectId || selectedProjectId) && (
-                  <Context projectId={activeProjectId || selectedProjectId!} />
+                  <Suspense fallback={<RouteLoadingFallback />}>
+                    <LazyContext projectId={activeProjectId || selectedProjectId!} />
+                  </Suspense>
                 )}
                 {activeView === 'ideation' && (activeProjectId || selectedProjectId) && (
-                  <Ideation projectId={activeProjectId || selectedProjectId!} onGoToTask={handleGoToTask} />
+                  <Suspense fallback={<RouteLoadingFallback />}>
+                    <LazyIdeation projectId={activeProjectId || selectedProjectId!} onGoToTask={handleGoToTask} />
+                  </Suspense>
                 )}
                 {activeView === 'insights' && (activeProjectId || selectedProjectId) && (
-                  <Insights projectId={activeProjectId || selectedProjectId!} />
+                  <Suspense fallback={<RouteLoadingFallback />}>
+                    <LazyInsights projectId={activeProjectId || selectedProjectId!} />
+                  </Suspense>
                 )}
                 {activeView === 'github-issues' && (activeProjectId || selectedProjectId) && (
-                  <GitHubIssues
-                    onOpenSettings={() => {
-                      setSettingsInitialProjectSection('github');
-                      setIsSettingsDialogOpen(true);
-                    }}
-                    onNavigateToTask={handleGoToTask}
-                  />
-                )}
-                {activeView === 'gitlab-issues' && (activeProjectId || selectedProjectId) && (
-                  <GitLabIssues
-                    onOpenSettings={() => {
-                      setSettingsInitialProjectSection('gitlab');
-                      setIsSettingsDialogOpen(true);
-                    }}
-                    onNavigateToTask={handleGoToTask}
-                  />
-                )}
-                {/* GitHubPRs is always mounted but hidden when not active to preserve review state */}
-                {(activeProjectId || selectedProjectId) && (
-                  <div className={activeView === 'github-prs' ? 'h-full' : 'hidden'}>
-                    <GitHubPRs
+                  <Suspense fallback={<RouteLoadingFallback />}>
+                    <LazyGitHubIssues
                       onOpenSettings={() => {
                         setSettingsInitialProjectSection('github');
                         setIsSettingsDialogOpen(true);
                       }}
-                      isActive={activeView === 'github-prs'}
+                      onNavigateToTask={handleGoToTask}
                     />
+                  </Suspense>
+                )}
+                {activeView === 'gitlab-issues' && (activeProjectId || selectedProjectId) && (
+                  <Suspense fallback={<RouteLoadingFallback />}>
+                    <LazyGitLabIssues
+                      onOpenSettings={() => {
+                        setSettingsInitialProjectSection('gitlab');
+                        setIsSettingsDialogOpen(true);
+                      }}
+                      onNavigateToTask={handleGoToTask}
+                    />
+                  </Suspense>
+                )}
+                {/* GitHubPRs is always mounted but hidden when not active to preserve review state */}
+                {(activeProjectId || selectedProjectId) && (
+                  <div className={activeView === 'github-prs' ? 'h-full' : 'hidden'}>
+                    <Suspense fallback={<RouteLoadingFallback />}>
+                      <LazyGitHubPRs
+                        onOpenSettings={() => {
+                          setSettingsInitialProjectSection('github');
+                          setIsSettingsDialogOpen(true);
+                        }}
+                        isActive={activeView === 'github-prs'}
+                      />
+                    </Suspense>
                   </div>
                 )}
                 {activeView === 'gitlab-merge-requests' && (activeProjectId || selectedProjectId) && (
-                  <GitLabMergeRequests
-                    projectId={activeProjectId || selectedProjectId!}
-                    onOpenSettings={() => {
-                      setSettingsInitialProjectSection('gitlab');
-                      setIsSettingsDialogOpen(true);
-                    }}
-                  />
+                  <Suspense fallback={<RouteLoadingFallback />}>
+                    <LazyGitLabMrs
+                      projectId={activeProjectId || selectedProjectId!}
+                      onOpenSettings={() => {
+                        setSettingsInitialProjectSection('gitlab');
+                        setIsSettingsDialogOpen(true);
+                      }}
+                    />
+                  </Suspense>
                 )}
                 {activeView === 'changelog' && (activeProjectId || selectedProjectId) && (
-                  <Changelog />
+                  <Suspense fallback={<RouteLoadingFallback />}>
+                    <LazyChangelog />
+                  </Suspense>
                 )}
                 {activeView === 'worktrees' && (activeProjectId || selectedProjectId) && (
-                  <Worktrees projectId={activeProjectId || selectedProjectId!} />
+                  <Suspense fallback={<RouteLoadingFallback />}>
+                    <LazyWorktrees projectId={activeProjectId || selectedProjectId!} />
+                  </Suspense>
                 )}
-                {activeView === 'agent-tools' && <AgentTools />}
+                {activeView === 'agent-tools' && (
+                  <Suspense fallback={<RouteLoadingFallback />}>
+                    <LazyAgentTools />
+                  </Suspense>
+                )}
               </>
             ) : (
               <WelcomeScreen

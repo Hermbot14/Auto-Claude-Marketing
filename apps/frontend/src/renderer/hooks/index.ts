@@ -8,3 +8,10 @@ export {
 } from './useResolvedAgentSettings';
 export { useVirtualizedTree } from './useVirtualizedTree';
 export { useTerminalProfileChange } from './useTerminalProfileChange';
+export {
+  useStreamingResponse,
+  calculateLatencyReduction,
+  type StreamingState,
+  type StreamingOptions,
+  type UseStreamingResponseResult,
+} from './useStreamingResponse';
