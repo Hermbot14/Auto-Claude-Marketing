@@ -1,36 +1,29 @@
 {
-  "name": "auto-claude-marketing",
-  "version": "1.0.0",
+  "name": "auto-claude-ui",
+  "version": "2.7.6",
   "type": "module",
-  "description": "Marketing website for Auto-Marketing autonomous AI framework",
-  "homepage": "https://github.com/AndyMik90/Auto-Claude-Marketing",
+  "description": "Desktop UI for Auto Claude autonomous coding framework",
+  "homepage": "https://github.com/AndyMik90/Auto-Claude",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AndyMik90/Auto-Claude-Marketing.git"
+    "url": "https://github.com/AndyMik90/Auto-Claude.git"
   },
+  "main": "./out/main/index.js",
   "author": {
-    "name": "Auto-Marketing Team",
+    "name": "Auto Claude Team",
     "email": "119136210+AndyMik90@users.noreply.github.com"
   },
-  "license": "MIT",
-  "main": "out/main/index.cjs",
-  "bin": {
-    "acm": "./cli/index.ts"
-  },
+  "license": "AGPL-3.0",
   "engines": {
     "node": ">=24.0.0",
-    "bun": ">=1.0.0"
+    "npm": ">=10.0.0"
   },
   "scripts": {
     "postinstall": "node scripts/postinstall.cjs",
     "dev": "electron-vite dev",
-    "dev:web": "vite --config vite.web.config.ts",
-    "dev:mock": "cross-env VITE_USE_MOCK_SERVER=true vite --config vite.web.config.ts",
-    "dev:live": "cross-env VITE_USE_MOCK_SERVER=false vite --config vite.web.config.ts",
     "dev:debug": "cross-env DEBUG=true electron-vite dev",
     "dev:mcp": "electron-vite dev -- --remote-debugging-port=9222",
     "build": "electron-vite build",
-    "build:mock": "cross-env VITE_USE_MOCK_SERVER=true electron-vite build",
     "start": "electron .",
     "start:mcp": "electron . --remote-debugging-port=9222",
     "preview": "electron-vite preview",
@@ -43,32 +36,25 @@
     "package:win": "node scripts/package-with-python.cjs --win",
     "package:linux": "node scripts/package-with-python.cjs --linux",
     "package:flatpak": "node scripts/package-with-python.cjs --linux flatpak",
-    "start:packaged:mac": "open dist/mac-arm64/Auto-Marketing.app || open dist/mac/Auto-Marketing.app",
-    "start:packaged:win": "start \"\" \"dist\\win-unpacked\\Auto-Marketing.exe\"",
+    "verify:linux": "node scripts/verify-linux-packages.cjs dist",
+    "test:verify-linux": "node --test scripts/verify-linux-packages.test.mjs",
+    "start:packaged:mac": "open dist/mac-arm64/Auto-Claude.app || open dist/mac/Auto-Claude.app",
+    "start:packaged:win": "start \"\" \"dist\\win-unpacked\\Auto-Claude.exe\"",
     "start:packaged:linux": "./dist/linux-unpacked/auto-claude",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "bunx playwright test --config=e2e/playwright.config.ts",
-    "test:e2e:web": "bunx playwright test --config=e2e/playwright.web.config.ts",
-    "test:web:explore": "node e2e/web-tests/browser-explorer.mjs",
-    "playwright:install": "bunx playwright install chromium",
+    "test:e2e": "npx playwright test --config=e2e/playwright.config.ts",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "typecheck": "tsc --noEmit",
-    "images:optimize": "bun run scripts/image-optimizer.ts",
-    "performance:check": "node scripts/performance-budget.js",
-    "performance:lighthouse": "node scripts/performance-budget.js --lighthouse",
-    "performance:baseline": "node scripts/performance-budget.js --save-baseline",
-    "performance:compare": "node scripts/performance-budget.js --compare .tmp/performance-baseline.json"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@hookform/resolvers": "^5.2.2",
     "@lydell/node-pty": "^1.1.0",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-checkbox": "^1.1.4",
@@ -89,7 +75,6 @@
     "@sentry/electron": "^7.5.0",
     "@tailwindcss/typography": "^0.5.19",
     "@tanstack/react-virtual": "^3.13.13",
-    "@types/sharp": "^0.32.0",
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/addon-serialize": "^0.14.0",
     "@xterm/addon-web-links": "^0.12.0",
@@ -98,28 +83,25 @@
     "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "date-fns": "^4.1.0",
-    "dotenv": "^16.6.1",
+    "dotenv": "^17.2.3",
     "electron-log": "^5.4.3",
     "electron-updater": "^6.6.2",
     "i18next": "^25.7.3",
-    "immer": "^11.1.3",
     "lucide-react": "^0.562.0",
     "minimatch": "^10.1.1",
     "motion": "^12.23.26",
     "proper-lockfile": "^4.1.2",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-hook-form": "^7.71.1",
     "react-i18next": "^16.5.0",
     "react-markdown": "^10.1.0",
-    "react-resizable-panels": "^4.2.0",
-    "react-router-dom": "^7.13.0",
+    "rehype-raw": "^7.0.0",
+    "rehype-sanitize": "^6.0.0",
     "remark-gfm": "^4.0.1",
     "semver": "^7.7.3",
-    "sharp": "^0.34.5",
     "tailwind-merge": "^3.4.0",
     "uuid": "^13.0.0",
+    "xstate": "^5.26.0",
     "zod": "^4.2.1",
     "zustand": "^5.0.9"
   },
@@ -133,16 +115,16 @@
     "@testing-library/dom": "^10.0.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.1.0",
-    "@types/minimatch": "^5.1.2",
+    "@types/minimatch": "^6.0.0",
     "@types/node": "^25.0.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@types/semver": "^7.7.1",
-    "@types/uuid": "^10.0.0",
+    "@types/uuid": "^11.0.0",
     "@vitejs/plugin-react": "^5.1.2",
     "autoprefixer": "^10.4.22",
     "cross-env": "^10.1.0",
-    "electron": "^39.2.7",
+    "electron": "40.0.0",
     "electron-builder": "^26.4.0",
     "electron-vite": "^5.0.0",
     "husky": "^9.1.7",
@@ -152,8 +134,7 @@
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
     "vite": "^7.2.7",
-    "vitest": "^4.0.16",
-    "workbox-window": "^7.4.0"
+    "vitest": "^4.0.16"
   },
   "overrides": {
     "electron-builder-squirrel-windows": "^26.0.12",
@@ -161,15 +142,15 @@
     "@electron/rebuild": "4.0.2"
   },
   "build": {
-    "appId": "com.automarketing.ui",
-    "productName": "Auto-Marketing",
+    "appId": "com.autoclaude.ui",
+    "productName": "Auto-Claude",
     "npmRebuild": false,
     "artifactName": "${productName}-${version}-${platform}-${arch}.${ext}",
     "publish": [
       {
         "provider": "github",
         "owner": "AndyMik90",
-        "repo": "Auto-Claude-Marketing"
+        "repo": "Auto-Claude"
       }
     ],
     "directories": {
@@ -187,14 +168,6 @@
       {
         "from": "resources/icon.ico",
         "to": "icon.ico"
-      },
-      {
-        "from": "python-runtime/${os}-${arch}/python",
-        "to": "python"
-      },
-      {
-        "from": "python-runtime/${os}-${arch}/site-packages",
-        "to": "python-site-packages"
       },
       {
         "from": "../backend",
@@ -225,6 +198,16 @@
       "target": [
         "dmg",
         "zip"
+      ],
+      "extraResources": [
+        {
+          "from": "python-runtime/${os}-${arch}/python",
+          "to": "python"
+        },
+        {
+          "from": "python-runtime/${os}-${arch}/site-packages",
+          "to": "python-site-packages"
+        }
       ]
     },
     "win": {
@@ -232,6 +215,16 @@
       "target": [
         "nsis",
         "zip"
+      ],
+      "extraResources": [
+        {
+          "from": "python-runtime/${os}-${arch}/python",
+          "to": "python"
+        },
+        {
+          "from": "python-runtime/${os}-${arch}/site-packages",
+          "to": "python-site-packages"
+        }
       ]
     },
     "linux": {
@@ -241,7 +234,17 @@
         "deb",
         "flatpak"
       ],
-      "category": "Development"
+      "category": "Development",
+      "extraResources": [
+        {
+          "from": "python-runtime/${os}-${arch}/python",
+          "to": "python"
+        },
+        {
+          "from": "python-runtime/${os}-${arch}/site-packages",
+          "to": "python-site-packages"
+        }
+      ]
     },
     "flatpak": {
       "runtime": "org.freedesktop.Platform",
@@ -264,9 +267,5 @@
     "*.{ts,tsx,js,jsx,json}": [
       "biome check --write --no-errors-on-unmatched"
     ]
-  },
-  "cliDependencies": {
-    "commander": "^11.0.0",
-    "chalk": "^5.0.0"
   }
 }

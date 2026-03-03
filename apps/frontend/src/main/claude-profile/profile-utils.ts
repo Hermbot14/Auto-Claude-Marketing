@@ -6,7 +6,8 @@
 import { homedir } from 'os';
 import { join } from 'path';
 import { existsSync, readFileSync, readdirSync, mkdirSync } from 'fs';
-import type { ClaudeProfile } from '../../shared/types';
+import type { ClaudeProfile, APIProfile } from '../../shared/types';
+import { getCredentialsFromKeychain } from './credential-utils';
 
 /**
  * Default Claude config directory
@@ -38,18 +39,17 @@ export function generateProfileId(name: string, existingProfiles: ClaudeProfile[
  * Create a new profile directory and initialize it
  */
 export async function createProfileDirectory(profileName: string): Promise<string> {
-  // Ensure profiles directory exists
-  if (!existsSync(CLAUDE_PROFILES_DIR)) {
-    mkdirSync(CLAUDE_PROFILES_DIR, { recursive: true });
-  }
+  // Create profiles directory - mkdirSync with recursive:true is idempotent
+  // and won't throw if the directory already exists, so no existsSync check needed
+  mkdirSync(CLAUDE_PROFILES_DIR, { recursive: true });
 
   // Create directory for this profile
   const sanitizedName = profileName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   const profileDir = join(CLAUDE_PROFILES_DIR, sanitizedName);
 
-  if (!existsSync(profileDir)) {
-    mkdirSync(profileDir, { recursive: true });
-  }
+  // mkdirSync with recursive:true is idempotent and won't throw if directory exists
+  // No existsSync check needed - avoids TOCTOU race condition
+  mkdirSync(profileDir, { recursive: true });
 
   return profileDir;
 }
@@ -80,11 +80,59 @@ export function isProfileAuthenticated(profile: ClaudeProfile): boolean {
       const data = JSON.parse(content);
       // Check for oauthAccount which indicates successful OAuth authentication
       if (data && typeof data === 'object' && (data.oauthAccount?.accountUuid || data.oauthAccount?.emailAddress)) {
+        // The actual OAuth tokens are stored in platform-specific credential storage:
+        // - macOS: Keychain
+        // - Windows: Credential Manager
+        // - Linux: Secret Service or .credentials.json file
+        // We need to verify that the credential store actually has the tokens
+        // Expand ~ in configDir before checking credentials
+        const expandedConfigDir = configDir.startsWith('~')
+          ? configDir.replace(/^~/, homedir())
+          : configDir;
+        const platformCreds = getCredentialsFromKeychain(expandedConfigDir);
+        if (!platformCreds.token) {
+          // .claude.json exists but credential store is missing tokens - NOT authenticated
+          console.warn(`[profile-utils] Profile has .claude.json but no platform credentials for: ${configDir}`);
+          return false;
+        }
         return true;
       }
     } catch (error) {
       // Log parse errors for debugging, but fall through to legacy checks
       console.warn(`[profile-utils] Failed to read or parse ${claudeJsonPath}:`, error);
+    }
+  }
+
+  // Check for .credentials.json with OAuth tokens (Linux CLI storage)
+  // On Linux, the Claude CLI stores OAuth tokens in this file
+  const credentialsJsonPath = join(configDir, '.credentials.json');
+  if (existsSync(credentialsJsonPath)) {
+    try {
+      const content = readFileSync(credentialsJsonPath, 'utf-8');
+      const data = JSON.parse(content);
+      // Validate OAuth data structure
+      // Check for claudeAiOauth (primary Linux structure)
+      if (data && typeof data === 'object' && data.claudeAiOauth) {
+        // Validate that claudeAiOauth contains actual auth data
+        const hasValidAuth = data.claudeAiOauth.accessToken ||
+                             data.claudeAiOauth.refreshToken ||
+                             data.claudeAiOauth.email ||
+                             data.claudeAiOauth.emailAddress;
+        if (hasValidAuth) {
+          return true;
+        }
+      }
+      // Check for oauthAccount (alternative structure)
+      if (data && typeof data === 'object' && data.oauthAccount?.emailAddress) {
+        return true;
+      }
+      // Check for generic token fields (legacy formats)
+      if (data && typeof data === 'object' && (data.accessToken || data.refreshToken || data.token)) {
+        return true;
+      }
+    } catch (error) {
+      // Log parse errors for debugging, but fall through to legacy checks
+      console.warn(`[profile-utils] Failed to read or parse ${credentialsJsonPath}:`, error);
     }
   }
 
@@ -156,10 +204,30 @@ export function hasValidToken(profile: ClaudeProfile): boolean {
 }
 
 /**
+ * Check if an API profile has valid authentication credentials.
+ * Validates that both apiKey and baseUrl are present and non-empty.
+ *
+ * @param profile - The API profile to check
+ * @returns true if the profile has both apiKey and baseUrl, false otherwise
+ */
+export function isAPIProfileAuthenticated(profile: APIProfile): boolean {
+  // Check for presence of required fields
+  if (!profile?.apiKey || !profile?.baseUrl) {
+    return false;
+  }
+
+  // Validate that the fields are non-empty strings (after trimming whitespace)
+  const hasValidApiKey = typeof profile.apiKey === 'string' && profile.apiKey.trim().length > 0;
+  const hasValidBaseUrl = typeof profile.baseUrl === 'string' && profile.baseUrl.trim().length > 0;
+
+  return hasValidApiKey && hasValidBaseUrl;
+}
+
+/**
  * Expand ~ in path to home directory
  */
 export function expandHomePath(path: string): string {
-  if (path && path.startsWith('~')) {
+  if (path?.startsWith('~')) {
     const home = homedir();
     return path.replace(/^~/, home);
   }

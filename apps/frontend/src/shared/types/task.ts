@@ -16,7 +16,7 @@ export type TaskOrderState = Record<TaskStatus, string[]>;
 // - 'errors': Subtasks failed during execution
 // - 'qa_rejected': QA found issues that need fixing
 // - 'plan_review': Spec/plan created and awaiting approval before coding starts
-export type ReviewReason = 'completed' | 'errors' | 'qa_rejected' | 'plan_review';
+export type ReviewReason = 'completed' | 'errors' | 'qa_rejected' | 'plan_review' | 'stopped';
 
 export type SubtaskStatus = 'pending' | 'in_progress' | 'completed' | 'failed';
 
@@ -155,6 +155,7 @@ export interface TaskDraft {
   images: ImageAttachment[];
   referencedFiles: ReferencedFile[];
   requireReviewBeforeCoding?: boolean;
+  fastMode?: boolean;
   savedAt: Date;
 }
 
@@ -164,7 +165,7 @@ export type TaskImpact = 'low' | 'medium' | 'high' | 'critical';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 // Re-export ThinkingLevel (defined in settings.ts) for convenience
 export type { ThinkingLevel };
-export type ModelType = 'haiku' | 'sonnet' | 'opus';
+export type ModelType = 'haiku' | 'sonnet' | 'opus' | 'opus-1m' | 'opus-4.5';
 export type TaskCategory =
   | 'feature'
   | 'bug_fix'
@@ -228,16 +229,18 @@ export interface TaskMetadata {
 
   // Agent configuration (from agent profile or manual selection)
   model?: ModelType;  // Claude model to use (haiku, sonnet, opus) - used when not auto profile
-  thinkingLevel?: ThinkingLevel;  // Thinking budget level (none, low, medium, high, ultrathink)
+  thinkingLevel?: ThinkingLevel;  // Thinking budget level (low, medium, high)
   // Auto profile - per-phase model configuration
   isAutoProfile?: boolean;  // True when using Auto (Optimized) profile
   phaseModels?: PhaseModelConfig;  // Per-phase model configuration
   phaseThinking?: PhaseThinkingConfig;  // Per-phase thinking configuration
+  fastMode?: boolean;  // Fast Mode — faster Opus 4.6 output, higher cost per token
 
   // Git/Worktree configuration
   baseBranch?: string;  // Override base branch for this task's worktree
   prUrl?: string;  // GitHub PR URL if task has been submitted as a PR
   useWorktree?: boolean;  // If false, use direct mode (no worktree isolation) - default is true for safety
+  useLocalBranch?: boolean;  // If true, use the local branch directly instead of preferring origin/branch (preserves gitignored files)
 
   // Archive status
   archivedAt?: string;  // ISO date when task was archived
@@ -280,6 +283,14 @@ export interface ImplementationPlan {
   // Added for UI status persistence
   status?: TaskStatus;
   planStatus?: string;
+  reviewReason?: ReviewReason;
+  xstateState?: string;  // Persisted XState machine state for restoration (e.g., 'planning', 'coding')
+  lastEvent?: {
+    eventId: string;
+    sequence: number;
+    type: string;
+    timestamp: string;
+  };
   recoveryNote?: string;
   description?: string;
 }
@@ -353,6 +364,13 @@ export interface PathMappedAIMerge {
   reason: string;
 }
 
+// Conflict scenario types for better UX messaging
+// - 'already_merged': Task changes already identical in target branch
+// - 'superseded': Target has newer version of same feature
+// - 'diverged': Standard diverged branches (AI can resolve)
+// - 'normal_conflict': Actual conflicting changes
+export type ConflictScenario = 'already_merged' | 'superseded' | 'diverged' | 'normal_conflict';
+
 // Git-level conflict information (branch divergence)
 export interface GitConflictInfo {
   hasConflicts: boolean;
@@ -365,6 +383,12 @@ export interface GitConflictInfo {
   pathMappedAIMerges?: PathMappedAIMerge[];
   // Total number of file renames detected
   totalRenames?: number;
+  // Conflict scenario for better UX messaging
+  scenario?: ConflictScenario;
+  // Files that are already merged (identical in both branches)
+  alreadyMergedFiles?: string[];
+  // Human-readable message about the scenario
+  scenarioMessage?: string;
 }
 
 // Summary statistics from merge preview/execution
@@ -378,6 +402,30 @@ export interface MergeStats {
   hasGitConflicts?: boolean; // True if there are git-level conflicts requiring rebase
   // Count of files needing AI merge due to path mappings (file renames)
   pathMappedAIMergeCount?: number;
+}
+
+// Merge progress tracking (for progress bar during merge operations)
+export type MergeStage = 'analyzing' | 'detecting_conflicts' | 'resolving' | 'validating' | 'complete' | 'error';
+
+export interface MergeProgress {
+  stage: MergeStage;
+  percent: number;
+  message: string;
+  details?: {
+    conflicts_found?: number;
+    conflicts_resolved?: number;
+    current_file?: string;
+  };
+}
+
+// Merge log entry (for conflict resolution logging)
+export type MergeLogEntryType = 'info' | 'success' | 'warning' | 'error';
+
+export interface MergeLogEntry {
+  timestamp: string;
+  type: MergeLogEntryType;
+  message: string;
+  details?: string;
 }
 
 export interface WorktreeMergeResult {
@@ -443,10 +491,12 @@ export interface WorktreeListItem {
   path: string;
   branch: string;
   baseBranch: string;
-  commitCount: number;
-  filesChanged: number;
-  additions: number;
-  deletions: number;
+  commitCount?: number;
+  filesChanged?: number;
+  additions?: number;
+  deletions?: number;
+  /** True if git commands failed on this worktree (corrupted/orphaned state) */
+  isOrphaned?: boolean;
 }
 
 /**

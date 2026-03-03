@@ -1,34 +1,34 @@
 {
-  "name": "auto-marketing",
-  "version": "2.7.5",
-  "description": "Autonomous multi-agent marketing AI framework powered by Claude",
+  "name": "auto-claude",
+  "version": "2.7.6",
+  "description": "Autonomous multi-agent coding framework powered by Claude AI",
   "license": "AGPL-3.0",
-  "author": "Auto-Marketing Team",
+  "author": "Auto Claude Team",
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "libs/*"
   ],
   "scripts": {
     "install:backend": "node scripts/install-backend.js",
-    "install:frontend": "cd apps/frontend && bun install",
-    "install:all": "bun run install:backend && bun run install:frontend",
-    "start": "cd apps/frontend && bun run build && bun run start",
-    "dev": "cd apps/frontend && bun run dev",
-    "dev:debug": "cd apps/frontend && bun run dev:debug",
-    "dev:mcp": "cd apps/frontend && bun run dev:mcp",
-    "dev:web": "cd apps/frontend && bun run dev:web",
-    "dev:full": "node scripts/dev-full-wrapper.js",
-    "build": "cd apps/frontend && bun run build",
-    "lint": "cd apps/frontend && bun run lint",
-    "test": "cd apps/frontend && bun test",
+    "install:frontend": "cd apps/frontend && npm install",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "start": "cd apps/frontend && npm run build && npm run start",
+    "dev": "cd apps/frontend && npm run dev",
+    "dev:debug": "cd apps/frontend && npm run dev:debug",
+    "dev:mcp": "cd apps/frontend && npm run dev:mcp",
+    "build": "cd apps/frontend && npm run build",
+    "lint": "cd apps/frontend && npm run lint",
+    "test": "cd apps/frontend && npm test",
     "test:backend": "node scripts/test-backend.js",
-    "package": "cd apps/frontend && bun run package",
-    "package:mac": "cd apps/frontend && bun run package:mac",
-    "package:win": "cd apps/frontend && bun run package:win",
-    "package:linux": "cd apps/frontend && bun run package:linux"
+    "test:coverage": "node scripts/test-backend.js --cov --cov-report=term-missing --cov-report=html",
+    "package": "cd apps/frontend && npm run package",
+    "package:mac": "cd apps/frontend && npm run package:mac",
+    "package:win": "cd apps/frontend && npm run package:win",
+    "package:linux": "cd apps/frontend && npm run package:linux"
   },
   "engines": {
     "node": ">=24.0.0",
-    "bun": ">=1.0.0"
+    "npm": ">=10.0.0"
   },
   "repository": {
     "type": "git",

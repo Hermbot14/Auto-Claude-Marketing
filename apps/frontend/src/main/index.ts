@@ -29,101 +29,34 @@ const possibleEnvPaths = [
 
 for (const envPath of possibleEnvPaths) {
   if (existsSync(envPath)) {
-    config({ path: envPath });
+    config({ path: envPath, quiet: true });
     console.log(`[dotenv] Loaded environment from: ${envPath}`);
     break;
   }
 }
 
-import { app, BrowserWindow, shell, nativeImage, session, screen } from 'electron';
+import { app, BrowserWindow, shell, nativeImage, session, screen, Menu, MenuItem } from 'electron';
 import { join } from 'path';
 import { accessSync, readFileSync, writeFileSync, rmSync } from 'fs';
-// NOTE: Sentry and error logging are imported dynamically in app.whenReady()
-// to avoid module-level electron.app access
+import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import { setupIpcHandlers } from './ipc-setup';
-
-/**
- * Safe implementation of development mode detection.
- * Uses a function to safely access electron.app.isPackaged only when needed.
- * This avoids the error when electron.app is not yet initialized at module load time.
- */
-function isDev(): boolean {
-  try {
-    return app && typeof app.isPackaged === 'boolean' && !app.isPackaged;
-  } catch {
-    // Fallback: assume dev mode if app is not available
-    return true;
-  }
-}
-
-/**
- * Compatibility object for @electron-toolkit/utils `is` API.
- * Uses function-based access to safely check electron.app.isPackaged.
- */
-const is = {
-  get dev(): boolean {
-    return isDev();
-  }
-};
-
-/**
- * Electron app utilities (replaces @electron-toolkit/utils electronApp)
- */
-const electronApp = {
-  setAppUserModelId(id: string): void {
-    if (process.platform === 'win32') {
-      app.setAppUserModelId(is.dev ? process.execPath : id);
-    }
-  }
-};
-
-/**
- * Window optimizer utilities (replaces @electron-toolkit/utils optimizer)
- */
-const optimizer = {
-  watchWindowShortcuts(window: Electron.BrowserWindow): void {
-    if (!window) return;
-
-    const { webContents } = window;
-
-    webContents.on('before-input-event', (_event, input) => {
-      if (input.type !== 'keyDown') return;
-
-      // In production, disable DevTools shortcuts and reload
-      if (!is.dev) {
-        if (input.code === 'KeyR' && (input.control || input.meta)) {
-          _event.preventDefault();
-        }
-        if (input.code === 'KeyI' && ((input.alt && input.meta) || (input.control && input.shift))) {
-          _event.preventDefault();
-        }
-      } else {
-        // In development, F12 toggles DevTools
-        if (input.code === 'F12') {
-          if (webContents.isDevToolsOpened()) {
-            webContents.closeDevTools();
-          } else {
-            webContents.openDevTools({ mode: 'undocked' });
-          }
-        }
-      }
-    });
-  }
-};
-
 import { AgentManager } from './agent';
 import { TerminalManager } from './terminal-manager';
 import { pythonEnvManager } from './python-env-manager';
 import { getUsageMonitor } from './claude-profile/usage-monitor';
 import { initializeUsageMonitorForwarding } from './ipc-handlers/terminal-handlers';
 import { initializeAppUpdater, stopPeriodicUpdates } from './app-updater';
-import { DEFAULT_APP_SETTINGS } from '../shared/constants';
+import { DEFAULT_APP_SETTINGS, IPC_CHANNELS, SPELL_CHECK_LANGUAGE_MAP, DEFAULT_SPELL_CHECK_LANGUAGE, ADD_TO_DICTIONARY_LABELS } from '../shared/constants';
+import { getAppLanguage, initAppLanguage } from './app-language';
 import { readSettingsFile } from './settings-utils';
-import { setupErrorLogging } from './app-logger';
+import { appLog, setupErrorLogging } from './app-logger';
 import { initSentryMain } from './sentry';
 import { preWarmToolCache } from './cli-tool-manager';
-import { initializeClaudeProfileManager } from './claude-profile-manager';
-import type { AppSettings } from '../shared/types';
+import { initializeClaudeProfileManager, getClaudeProfileManager } from './claude-profile-manager';
+import { isProfileAuthenticated } from './claude-profile/profile-utils';
+import { isMacOS, isWindows } from './platform';
+import { ptyDaemonClient } from './terminal/pty-daemon-client';
+import type { AppSettings, AuthFailureInfo } from '../shared/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Window sizing constants
@@ -142,8 +75,11 @@ const WINDOW_SCREEN_MARGIN: number = 20;
 const DEFAULT_SCREEN_WIDTH: number = 1920;
 const DEFAULT_SCREEN_HEIGHT: number = 1080;
 
-// NOTE: Error logging and Sentry initialization are now done inside app.whenReady()
-// to ensure electron.app is fully initialized before accessing app properties
+// Setup error logging early (captures uncaught exceptions)
+setupErrorLogging();
+
+// Initialize Sentry for error tracking (respects user's sentryEnabled setting)
+initSentryMain();
 
 /**
  * Load app settings synchronously (for use during startup).
@@ -189,10 +125,10 @@ function getIconPath(): string {
     : join(process.resourcesPath);
 
   let iconName: string;
-  if (process.platform === 'darwin') {
+  if (isMacOS()) {
     // Use PNG in dev mode (works better), ICNS in production
     iconName = is.dev ? 'icon-256.png' : 'icon.icns';
-  } else if (process.platform === 'win32') {
+  } else if (isWindows()) {
     iconName = 'icon.ico';
   } else {
     iconName = 'icon.png';
@@ -207,6 +143,17 @@ let mainWindow: BrowserWindow | null = null;
 let agentManager: AgentManager | null = null;
 let terminalManager: TerminalManager | null = null;
 
+// Capture child process exits (renderer/GPU/utility) for crash diagnostics.
+app.on('child-process-gone', (_event, details) => {
+  appLog.error('[main] child-process-gone:', details);
+});
+
+// Re-entrancy guard for before-quit handler.
+// The first before-quit call pauses quit for async cleanup, then calls app.quit() again.
+// The second call sees isQuitting=true and allows quit to proceed immediately.
+// Fixes: pty.node SIGABRT crash caused by environment teardown before PTY cleanup (GitHub #1469)
+let isQuitting = false;
+
 function createWindow(): void {
   // Get the primary display's work area (accounts for taskbar, dock, etc.)
   // Wrapped in try/catch to handle potential failures with fallback to safe defaults
@@ -215,8 +162,7 @@ function createWindow(): void {
     const display = screen.getPrimaryDisplay();
     // Validate the returned object has expected structure with valid dimensions
     if (
-      display &&
-      display.workAreaSize &&
+      display?.workAreaSize &&
       typeof display.workAreaSize.width === 'number' &&
       typeof display.workAreaSize.height === 'number' &&
       display.workAreaSize.width > 0 &&
@@ -263,13 +209,100 @@ function createWindow(): void {
       sandbox: false,
       contextIsolation: true,
       nodeIntegration: false,
-      backgroundThrottling: false // Prevent terminal lag when window loses focus
+      backgroundThrottling: false, // Prevent terminal lag when window loses focus
+      spellcheck: true // Enable spell check for text inputs
     }
   });
 
   // Show window when ready to avoid visual flash
   mainWindow.on('ready-to-show', () => {
     mainWindow?.show();
+  });
+
+  // Capture renderer process crashes/termination reasons for diagnostics.
+  mainWindow.webContents.on('render-process-gone', (_event, details) => {
+    appLog.error('[main] render-process-gone:', details);
+  });
+
+  // Configure initial spell check languages with proper fallback logic
+  // Uses shared constant for consistency with the IPC handler
+  const defaultLanguage = 'en';
+  const defaultSpellCheckLanguages = SPELL_CHECK_LANGUAGE_MAP[defaultLanguage] || [DEFAULT_SPELL_CHECK_LANGUAGE];
+  const availableSpellCheckLanguages = session.defaultSession.availableSpellCheckerLanguages;
+  const validSpellCheckLanguages = defaultSpellCheckLanguages.filter(lang =>
+    availableSpellCheckLanguages.includes(lang)
+  );
+  const initialSpellCheckLanguages = validSpellCheckLanguages.length > 0
+    ? validSpellCheckLanguages
+    : (availableSpellCheckLanguages.includes(DEFAULT_SPELL_CHECK_LANGUAGE) ? [DEFAULT_SPELL_CHECK_LANGUAGE] : []);
+
+  if (initialSpellCheckLanguages.length > 0) {
+    session.defaultSession.setSpellCheckerLanguages(initialSpellCheckLanguages);
+    console.log(`[SPELLCHECK] Initial languages set to: ${initialSpellCheckLanguages.join(', ')}`);
+  } else {
+    console.warn('[SPELLCHECK] No spell check languages available on this system');
+  }
+
+  // Handle context menu with spell check and standard editing options
+  mainWindow.webContents.on('context-menu', (_event, params) => {
+    const menu = new Menu();
+
+    // Add spelling suggestions if there's a misspelled word
+    if (params.misspelledWord) {
+      for (const suggestion of params.dictionarySuggestions) {
+        menu.append(new MenuItem({
+          label: suggestion,
+          click: () => mainWindow?.webContents.replaceMisspelling(suggestion)
+        }));
+      }
+
+      if (params.dictionarySuggestions.length > 0) {
+        menu.append(new MenuItem({ type: 'separator' }));
+      }
+
+      // Use localized label for "Add to Dictionary" based on app language (not OS locale)
+      // getAppLanguage() tracks the user's in-app language setting, updated via SPELLCHECK_SET_LANGUAGES IPC
+      const addToDictionaryLabel = ADD_TO_DICTIONARY_LABELS[getAppLanguage()] || ADD_TO_DICTIONARY_LABELS['en'];
+      menu.append(new MenuItem({
+        label: addToDictionaryLabel,
+        click: () => mainWindow?.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord)
+      }));
+
+      menu.append(new MenuItem({ type: 'separator' }));
+    }
+
+    // Standard editing options for editable fields
+    // Using role without explicit label allows Electron to provide localized labels
+    if (params.isEditable) {
+      menu.append(new MenuItem({
+        role: 'cut',
+        enabled: params.editFlags.canCut
+      }));
+      menu.append(new MenuItem({
+        role: 'copy',
+        enabled: params.editFlags.canCopy
+      }));
+      menu.append(new MenuItem({
+        role: 'paste',
+        enabled: params.editFlags.canPaste
+      }));
+      menu.append(new MenuItem({
+        role: 'selectAll',
+        enabled: params.editFlags.canSelectAll
+      }));
+    } else if (params.selectionText?.trim()) {
+      // Non-editable text selection (e.g., labels, paragraphs)
+      // Use .trim() to avoid showing menu for whitespace-only selections
+      menu.append(new MenuItem({
+        role: 'copy',
+        enabled: params.editFlags.canCopy
+      }));
+    }
+
+    // Only show menu if there are items
+    if (menu.items.length > 0) {
+      menu.popup();
+    }
   });
 
   // Handle external links with URL scheme allowlist for security
@@ -307,57 +340,67 @@ function createWindow(): void {
 
   // Clean up on close
   mainWindow.on('closed', () => {
+    // Kill all agents when window closes (prevents orphaned processes)
+    agentManager?.killAll?.()?.catch((err: unknown) => {
+      console.warn('[main] Error killing agents on window close:', err);
+    });
     mainWindow = null;
   });
 }
 
 // Set app name before ready (for dock tooltip on macOS in dev mode)
 app.setName('Auto Claude');
-if (process.platform === 'darwin') {
+if (isMacOS()) {
   // Force the name to appear in dock on macOS
   app.name = 'Auto Claude';
 }
 
 // Fix Windows GPU cache permission errors (0x5 Access Denied)
-if (process.platform === 'win32') {
+if (isWindows()) {
   app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
   app.commandLine.appendSwitch('disable-gpu-program-cache');
   console.log('[main] Applied Windows GPU cache fixes');
 }
 
 // Initialize the application
-app.whenReady().then(async () => {
-  // Setup error logging early (now that app is ready - dynamic import)
-  try {
-    const { setupErrorLogging } = await import('./app-logger.js');
-    setupErrorLogging();
-  } catch (e) {
-    console.error('[main] Failed to setup error logging:', e);
-  }
-
-  // Initialize Sentry for error tracking (now that app is ready - dynamic import)
-  try {
-    const { initSentryMain } = await import('./sentry.js');
-    initSentryMain();
-  } catch (e) {
-    console.error('[main] Failed to initialize Sentry:', e);
-  }
-
+app.whenReady().then(() => {
   // Set app user model id for Windows
   electronApp.setAppUserModelId('com.autoclaude.ui');
 
   // Clear cache on Windows to prevent permission errors from stale cache
-  if (process.platform === 'win32') {
+  if (isWindows()) {
     session.defaultSession.clearCache()
       .then(() => console.log('[main] Cleared cache on startup'))
       .catch((err) => console.warn('[main] Failed to clear cache:', err));
   }
 
+  // Initialize app language from OS locale for main process i18n (context menus)
+  initAppLanguage();
+
   // Clean up stale update metadata from the old source updater system
   // This prevents version display desync after electron-updater installs a new version
   cleanupStaleUpdateMetadata();
 
-  // Initialize agent manager (MOVED from module level)
+  // Set dock icon on macOS
+  if (isMacOS()) {
+    const iconPath = getIconPath();
+    try {
+      const icon = nativeImage.createFromPath(iconPath);
+      if (!icon.isEmpty()) {
+        app.dock?.setIcon(icon);
+      }
+    } catch (e) {
+      console.warn('Could not set dock icon:', e);
+    }
+  }
+
+  // Default open or close DevTools by F12 in development
+  // and ignore CommandOrControl + R in production.
+  app.on('browser-window-created', (_, window) => {
+    optimizer.watchWindowShortcuts(window);
+  });
+
+  // Initialize agent manager
   agentManager = new AgentManager();
 
   // Load settings and configure agent manager with Python and auto-claude paths
@@ -406,15 +449,16 @@ app.whenReady().then(async () => {
             // Save the corrected setting - we're the only process modifying settings at startup
             try {
               writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf-8');
+              console.log('[main] Successfully saved migrated autoBuildPath to settings');
             } catch (writeError) {
-              console.warn('[main] Failed to save migrated settings:', writeError);
+              console.warn('[main] Failed to save migrated autoBuildPath:', writeError);
             }
           }
         }
 
         if (!migrated) {
-          console.warn('[main] autoBuildPath validation failed - spec_runner.py not found at:', validAutoBuildPath);
-          validAutoBuildPath = null;
+          console.warn('[main] Configured autoBuildPath is invalid (missing runners/spec_runner.py), will use auto-detection:', validAutoBuildPath);
+          validAutoBuildPath = undefined; // Let auto-detection find the correct path
         }
       }
     }
@@ -435,7 +479,7 @@ app.whenReady().then(async () => {
     }
   }
 
-  // Initialize terminal manager (MOVED from module level)
+  // Initialize terminal manager
   terminalManager = new TerminalManager(() => mainWindow);
 
   // Setup IPC handlers (pass pythonEnvManager for Python path management)
@@ -443,25 +487,6 @@ app.whenReady().then(async () => {
 
   // Create window
   createWindow();
-
-  // Set dock icon on macOS
-  if (process.platform === 'darwin') {
-    const iconPath = getIconPath();
-    try {
-      const icon = nativeImage.createFromPath(iconPath);
-      if (!icon.isEmpty()) {
-        app.dock?.setIcon(icon);
-      }
-    } catch (e) {
-      console.warn('Could not set dock icon:', e);
-    }
-  }
-
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window);
-  });
 
   // Pre-warm CLI tool cache in background (non-blocking)
   // This ensures CLI detection is done before user needs it
@@ -483,10 +508,53 @@ app.whenReady().then(async () => {
         // Setup event forwarding from usage monitor to renderer
         initializeUsageMonitorForwarding(mainWindow);
 
-        // Start the usage monitor
+        // Start the usage monitor (uses unified OperationRegistry for proactive restart)
         const usageMonitor = getUsageMonitor();
         usageMonitor.start();
         console.warn('[main] Usage monitor initialized and started (after profile load)');
+
+        // Check for migrated profiles that need re-authentication
+        // These profiles were moved from shared ~/.claude to isolated directories
+        // and need new credentials since they now use a different keychain entry
+        const profileManager = getClaudeProfileManager();
+        const migratedProfileIds = profileManager.getMigratedProfileIds();
+        const activeProfile = profileManager.getActiveProfile();
+
+        if (migratedProfileIds.length > 0) {
+          console.warn('[main] Found migrated profiles that need re-authentication:', migratedProfileIds);
+
+          // Check ALL migrated profiles for valid credentials, not just the active one
+          // This prevents stale migrated flags from triggering unnecessary re-auth prompts
+          // when the user switches to a different profile later
+          for (const profileId of migratedProfileIds) {
+            const profile = profileManager.getProfile(profileId);
+            if (profile && isProfileAuthenticated(profile)) {
+              // Credentials are valid - clear the migrated flag
+              console.warn('[main] Migrated profile has valid credentials via file fallback, clearing migrated flag:', profile.name);
+              profileManager.clearMigratedProfile(profileId);
+            }
+          }
+
+          // Re-check if the active profile still needs re-auth after clearing valid ones
+          const remainingMigratedIds = profileManager.getMigratedProfileIds();
+          if (remainingMigratedIds.includes(activeProfile.id)) {
+            // Active profile still needs re-auth - show the modal
+            mainWindow.webContents.once('did-finish-load', () => {
+              // Small delay to ensure stores are initialized
+              setTimeout(() => {
+                const authFailureInfo: AuthFailureInfo = {
+                  profileId: activeProfile.id,
+                  profileName: activeProfile.name,
+                  failureType: 'missing',
+                  message: `Profile "${activeProfile.name}" was migrated to an isolated directory and needs re-authentication.`,
+                  detectedAt: new Date()
+                };
+                console.warn('[main] Sending auth failure for migrated active profile:', activeProfile.name);
+                mainWindow?.webContents.send(IPC_CHANNELS.CLAUDE_AUTH_FAILURE, authFailureInfo);
+              }, 1000);
+            });
+          }
+        }
       }
     })
     .catch((error) => {
@@ -541,29 +609,55 @@ app.whenReady().then(async () => {
 
 // Quit when all windows are closed (except on macOS)
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  if (!isMacOS()) {
     app.quit();
   }
 });
 
-// Cleanup before quit
-app.on('before-quit', async () => {
-  // Stop periodic update checks
+// Cleanup before quit — uses event.preventDefault() to allow async PTY cleanup
+// before the JS environment tears down. Without this, pty.node's native
+// ThreadSafeFunction callbacks fire after teardown, causing SIGABRT (GitHub #1469).
+app.on('before-quit', (event) => {
+  // Re-entrancy guard: the second app.quit() call (after cleanup) must pass through
+  if (isQuitting) {
+    return;
+  }
+  isQuitting = true;
+
+  // Pause quit to perform async cleanup
+  event.preventDefault();
+
+  // Stop synchronous services immediately
   stopPeriodicUpdates();
 
-  // Stop usage monitor
   const usageMonitor = getUsageMonitor();
   usageMonitor.stop();
   console.warn('[main] Usage monitor stopped');
 
-  // Kill all running agent processes
-  if (agentManager) {
-    await agentManager.killAll();
-  }
-  // Kill all terminal processes
-  if (terminalManager) {
-    await terminalManager.killAll();
-  }
+  // Perform async cleanup, then allow quit to proceed
+  (async () => {
+    try {
+      // Kill all running agent processes
+      if (agentManager) {
+        await agentManager.killAll();
+      }
+
+      // Kill all terminal processes — waits for PTY exit with bounded timeout
+      if (terminalManager) {
+        await terminalManager.killAll();
+      }
+
+      // Shut down PTY daemon client AFTER terminal cleanup completes,
+      // ensuring all kill commands reach PTY processes before the daemon disconnects
+      ptyDaemonClient.shutdown();
+      console.warn('[main] PTY daemon client shutdown complete');
+    } catch (error) {
+      console.error('[main] Error during pre-quit cleanup:', error);
+    } finally {
+      // Always allow quit to proceed, even if cleanup fails
+      app.quit();
+    }
+  })();
 });
 
 // Note: Uncaught exceptions and unhandled rejections are now

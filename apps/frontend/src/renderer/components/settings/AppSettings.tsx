@@ -18,9 +18,8 @@ import {
   Globe,
   Code,
   Bug,
-  Users,
-  Key,
-  Calendar
+  Terminal,
+  Users
 } from 'lucide-react';
 
 // GitLab icon component (lucide-react doesn't have one)
@@ -52,10 +51,10 @@ import { GeneralSettings } from './GeneralSettings';
 import { AdvancedSettings } from './AdvancedSettings';
 import { DevToolsSettings } from './DevToolsSettings';
 import { DebugSettings } from './DebugSettings';
+import { TerminalFontSettings } from './terminal-font-settings/TerminalFontSettings';
 import { AccountSettings } from './AccountSettings';
 import { ProjectSelector } from './ProjectSelector';
 import { ProjectSettingsContent, ProjectSettingsSection } from './ProjectSettingsContent';
-import { ApiSettings } from '../../features/api-settings';
 import { useProjectStore } from '../../stores/project-store';
 import type { UseProjectSettingsReturn } from '../project-settings/hooks/useProjectSettings';
 
@@ -68,7 +67,7 @@ interface AppSettingsDialogProps {
 }
 
 // App-level settings sections
-export type AppSection = 'appearance' | 'display' | 'language' | 'devtools' | 'agent' | 'paths' | 'accounts' | 'apiSettings' | 'updates' | 'notifications' | 'debug';
+export type AppSection = 'appearance' | 'display' | 'language' | 'devtools' | 'terminal-fonts' | 'agent' | 'paths' | 'integrations' | 'accounts' | 'api-profiles' | 'updates' | 'notifications' | 'debug';
 
 interface NavItemConfig<T extends string> {
   id: T;
@@ -80,10 +79,10 @@ const appNavItemsConfig: NavItemConfig<AppSection>[] = [
   { id: 'display', icon: Monitor },
   { id: 'language', icon: Globe },
   { id: 'devtools', icon: Code },
+  { id: 'terminal-fonts', icon: Terminal },
   { id: 'agent', icon: Bot },
   { id: 'paths', icon: FolderOpen },
   { id: 'accounts', icon: Users },
-  { id: 'apiSettings', icon: Key },
   { id: 'updates', icon: Package },
   { id: 'notifications', icon: Bell },
   { id: 'debug', icon: Bug }
@@ -94,7 +93,6 @@ const projectNavItemsConfig: NavItemConfig<ProjectSettingsSection>[] = [
   { id: 'linear', icon: Zap },
   { id: 'github', icon: Github },
   { id: 'gitlab', icon: GitLabIcon },
-  { id: 'calendar', icon: Calendar },
   { id: 'memory', icon: Database }
 ];
 
@@ -190,14 +188,14 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
         return <LanguageSettings settings={settings} onSettingsChange={setSettings} />;
       case 'devtools':
         return <DevToolsSettings settings={settings} onSettingsChange={setSettings} />;
+      case 'terminal-fonts':
+        return <TerminalFontSettings />;
       case 'agent':
         return <GeneralSettings settings={settings} onSettingsChange={setSettings} section="agent" />;
       case 'paths':
         return <GeneralSettings settings={settings} onSettingsChange={setSettings} section="paths" />;
       case 'accounts':
         return <AccountSettings settings={settings} onSettingsChange={setSettings} isOpen={open} />;
-      case 'apiSettings':
-        return <ApiSettings />;
       case 'updates':
         return <AdvancedSettings settings={settings} onSettingsChange={setSettings} section="updates" version={version} />;
       case 'notifications':
@@ -369,7 +367,7 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
             {/* Main content */}
             <div className="flex-1 overflow-hidden">
               <ScrollArea className="h-full">
-                <div className="p-8 max-w-2xl">
+                <div className={appSection === 'terminal-fonts' ? 'p-8' : 'p-8 max-w-2xl'}>
                   {renderContent()}
                 </div>
               </ScrollArea>

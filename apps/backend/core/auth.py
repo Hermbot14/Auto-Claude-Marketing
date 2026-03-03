@@ -1,18 +1,12 @@
 """
-Authentication helpers for Auto-Marketing.
+Authentication helpers for Auto Claude.
 
 Provides centralized authentication token resolution with fallback support
 for multiple environment variables, and SDK environment variable passthrough
 for custom API endpoints.
-
-Configuration priority chain:
-1. Global ~/.claude/settings.json (HIGHEST priority)
-2. Project .env file
-3. System environment variables
-4. System credential store
-5. Hardcoded defaults
 """
 
+import hashlib
 import json
 import logging
 import os
@@ -20,8 +14,8 @@ import shutil
 import subprocess
 from typing import TYPE_CHECKING
 
-from core.global_settings import GlobalSettings
 from core.platform import (
+    get_where_exe_path,
     is_linux,
     is_macos,
     is_windows,
@@ -71,6 +65,48 @@ SDK_ENV_VARS = [
     # Profile's custom config directory (for multi-profile token storage)
     "CLAUDE_CONFIG_DIR",
 ]
+
+
+def _calculate_config_dir_hash(config_dir: str) -> str:
+    """
+    Calculate hash of config directory path for Keychain service name.
+
+    This MUST match the frontend's calculateConfigDirHash() in credential-utils.ts.
+    The frontend uses SHA256 hash of the config dir path, taking first 8 hex chars.
+
+    Args:
+        config_dir: Path to the config directory (should be absolute/expanded)
+
+    Returns:
+        8-character hex hash string (e.g., "d74c9506")
+    """
+    return hashlib.sha256(config_dir.encode()).hexdigest()[:8]
+
+
+def _get_keychain_service_name(config_dir: str | None = None) -> str:
+    """
+    Get the Keychain service name for credential storage.
+
+    This MUST match the frontend's getKeychainServiceName() in credential-utils.ts.
+    All profiles use hash-based keychain entries for isolation:
+    - Profile with configDir: "Claude Code-credentials-{hash}"
+    - No configDir (legacy/default): "Claude Code-credentials"
+
+    Args:
+        config_dir: Optional CLAUDE_CONFIG_DIR path. If provided, uses hash-based name.
+
+    Returns:
+        Keychain service name (e.g., "Claude Code-credentials-d74c9506")
+    """
+    if not config_dir:
+        return "Claude Code-credentials"
+
+    # Expand ~ to home directory (matching frontend normalization)
+    expanded_dir = os.path.expanduser(config_dir)
+
+    # Calculate hash and return hash-based service name
+    hash_suffix = _calculate_config_dir_hash(expanded_dir)
+    return f"Claude Code-credentials-{hash_suffix}"
 
 
 def is_encrypted_token(token: str | None) -> bool:
@@ -354,36 +390,50 @@ def _try_decrypt_token(token: str | None) -> str | None:
     return token
 
 
-def get_token_from_keychain() -> str | None:
+def get_token_from_keychain(config_dir: str | None = None) -> str | None:
     """
     Get authentication token from system credential store.
 
     Reads Claude Code credentials from:
-    - macOS: Keychain
+    - macOS: Keychain (uses hash-based service name if config_dir provided)
     - Windows: Credential Manager
     - Linux: Secret Service API (via dbus/secretstorage)
+
+    Args:
+        config_dir: Optional CLAUDE_CONFIG_DIR path for profile-specific credentials.
+                   When provided, reads from hash-based keychain entry matching
+                   the frontend's storage location.
 
     Returns:
         Token string if found, None otherwise
     """
     if is_macos():
-        return _get_token_from_macos_keychain()
+        return _get_token_from_macos_keychain(config_dir)
     elif is_windows():
-        return _get_token_from_windows_credential_files()
+        return _get_token_from_windows_credential_files(config_dir)
     else:
         # Linux: use secret-service API via DBus
-        return _get_token_from_linux_secret_service()
+        return _get_token_from_linux_secret_service(config_dir)
 
 
-def _get_token_from_macos_keychain() -> str | None:
-    """Get token from macOS Keychain."""
+def _get_token_from_macos_keychain(config_dir: str | None = None) -> str | None:
+    """Get token from macOS Keychain.
+
+    Args:
+        config_dir: Optional CLAUDE_CONFIG_DIR path. When provided, uses hash-based
+                   service name (e.g., "Claude Code-credentials-d74c9506") matching
+                   the frontend's credential storage location.
+    """
+    # Get the correct service name (hash-based if config_dir provided)
+    service_name = _get_keychain_service_name(config_dir)
+
     try:
         result = subprocess.run(
             [
                 "/usr/bin/security",
                 "find-generic-password",
                 "-s",
-                "Claude Code-credentials",
+                service_name,
                 "-w",
             ],
             capture_output=True,
@@ -392,6 +442,14 @@ def _get_token_from_macos_keychain() -> str | None:
         )
 
         if result.returncode != 0:
+            # If hash-based lookup fails and we have a config_dir, DON'T fall back
+            # to default service name - that would return the wrong profile's token.
+            # The config_dir was provided explicitly, so we should only use that.
+            if config_dir:
+                logger.debug(
+                    f"No keychain entry found for service '{service_name}' "
+                    f"(config_dir: {config_dir})"
+                )
             return None
 
         credentials_json = result.stdout.strip()
@@ -405,22 +463,51 @@ def _get_token_from_macos_keychain() -> str | None:
             return None
 
         # Validate token format (Claude OAuth tokens start with sk-ant-oat01-)
-        if not token.startswith("sk-ant-oat01-"):
+        # Also accept encrypted tokens (enc:) which will be decrypted later
+        if not (token.startswith("sk-ant-oat01-") or token.startswith("enc:")):
             return None
 
+        logger.debug(f"Found token in keychain service '{service_name}'")
         return token
 
     except (subprocess.TimeoutExpired, json.JSONDecodeError, KeyError, Exception):
         return None
 
 
-def _get_token_from_windows_credential_files() -> str | None:
+def _get_token_from_windows_credential_files(
+    config_dir: str | None = None,
+) -> str | None:
     """Get token from Windows credential files.
 
     Claude Code on Windows stores credentials in ~/.claude/.credentials.json
+    For custom profiles, uses the config_dir's .credentials.json file.
+
+    Args:
+        config_dir: Optional CLAUDE_CONFIG_DIR path for profile-specific credentials.
     """
     try:
-        # Claude Code stores credentials in ~/.claude/.credentials.json
+        # If config_dir is provided, read from that directory first
+        if config_dir:
+            expanded_dir = os.path.expanduser(config_dir)
+            profile_cred_paths = [
+                os.path.join(expanded_dir, ".credentials.json"),
+                os.path.join(expanded_dir, "credentials.json"),
+            ]
+            for cred_path in profile_cred_paths:
+                if os.path.exists(cred_path):
+                    with open(cred_path, encoding="utf-8") as f:
+                        data = json.load(f)
+                        token = data.get("claudeAiOauth", {}).get("accessToken")
+                        if token and (
+                            token.startswith("sk-ant-oat01-")
+                            or token.startswith("enc:")
+                        ):
+                            logger.debug(f"Found token in {cred_path}")
+                            return token
+            # If config_dir provided but no token found, don't fall back to default
+            return None
+
+        # Default Claude Code credential paths (no profile specified)
         cred_paths = [
             os.path.expandvars(r"%USERPROFILE%\.claude\.credentials.json"),
             os.path.expandvars(r"%USERPROFILE%\.claude\credentials.json"),
@@ -433,7 +520,9 @@ def _get_token_from_windows_credential_files() -> str | None:
                 with open(cred_path, encoding="utf-8") as f:
                     data = json.load(f)
                     token = data.get("claudeAiOauth", {}).get("accessToken")
-                    if token and token.startswith("sk-ant-oat01-"):
+                    if token and (
+                        token.startswith("sk-ant-oat01-") or token.startswith("enc:")
+                    ):
                         return token
 
         return None
@@ -442,7 +531,7 @@ def _get_token_from_windows_credential_files() -> str | None:
         return None
 
 
-def _get_token_from_linux_secret_service() -> str | None:
+def _get_token_from_linux_secret_service(config_dir: str | None = None) -> str | None:
     """Get token from Linux Secret Service API via DBus.
 
     Claude Code on Linux stores credentials in the Secret Service API
@@ -450,8 +539,11 @@ def _get_token_from_linux_secret_service() -> str | None:
     uses the secretstorage library which communicates via DBus.
 
     The credential is stored with:
-    - Label: "Claude Code-credentials"
+    - Label: "Claude Code-credentials" or "Claude Code-credentials-{hash}" for profiles
     - Attributes: {application: "claude-code"}
+
+    Args:
+        config_dir: Optional CLAUDE_CONFIG_DIR path for profile-specific credentials.
 
     Returns:
         Token string if found, None otherwise
@@ -459,6 +551,9 @@ def _get_token_from_linux_secret_service() -> str | None:
     if secretstorage is None:
         # secretstorage not installed, fall back to env var
         return None
+
+    # Get the correct service name (hash-based if config_dir provided)
+    target_label = _get_keychain_service_name(config_dir)
 
     try:
         # Get the default collection (typically "login" keyring)
@@ -484,10 +579,10 @@ def _get_token_from_linux_secret_service() -> str | None:
         items = collection.search_items({"application": "claude-code"})
 
         for item in items:
-            # Check if this is the Claude Code credentials item
+            # Check if this is the correct Claude Code credentials item
             label = item.get_label()
-            # Use exact match for "Claude Code-credentials" to avoid false positives
-            if label == "Claude Code-credentials":
+            # Use exact match for target label (profile-specific or default)
+            if label == target_label:
                 # Get the secret (stored as JSON string)
                 secret = item.get_secret()
                 if not secret:
@@ -500,10 +595,22 @@ def _get_token_from_linux_secret_service() -> str | None:
                     data = json.loads(secret)
                     token = data.get("claudeAiOauth", {}).get("accessToken")
 
-                    if token and token.startswith("sk-ant-oat01-"):
+                    if token and (
+                        token.startswith("sk-ant-oat01-") or token.startswith("enc:")
+                    ):
+                        logger.debug(
+                            f"Found token in secret service with label '{target_label}'"
+                        )
                         return token
                 except json.JSONDecodeError:
                     continue
+
+        # If config_dir was provided but no token found, don't fall back
+        if config_dir:
+            logger.debug(
+                f"No secret service entry found with label '{target_label}' "
+                f"(config_dir: {config_dir})"
+            )
 
         return None
 
@@ -565,7 +672,7 @@ def _get_token_from_config_dir(config_dir: str) -> str | None:
 
 def get_auth_token(config_dir: str | None = None) -> str | None:
     """
-    Get authentication token from global settings, environment variables, or credential store.
+    Get authentication token from environment variables or credential store.
 
     Args:
         config_dir: Optional custom config directory (profile's configDir).
@@ -573,11 +680,10 @@ def get_auth_token(config_dir: str | None = None) -> str | None:
                    If None, checks CLAUDE_CONFIG_DIR env var, then uses default locations.
 
     Checks multiple sources in priority order:
-    1. Global ~/.claude/settings.json (HIGHEST priority - NEW)
-    2. CLAUDE_CODE_OAUTH_TOKEN (env var)
-    3. ANTHROPIC_AUTH_TOKEN (CCR/proxy env var for enterprise setups)
-    4. Custom config directory (config_dir param or CLAUDE_CONFIG_DIR env var)
-    5. System credential store (macOS Keychain, Windows Credential Manager, Linux Secret Service)
+    1. CLAUDE_CODE_OAUTH_TOKEN (env var)
+    2. ANTHROPIC_AUTH_TOKEN (CCR/proxy env var for enterprise setups)
+    3. Custom config directory (config_dir param or CLAUDE_CONFIG_DIR env var)
+    4. System credential store (macOS Keychain, Windows Credential Manager, Linux Secret Service)
 
     NOTE: ANTHROPIC_API_KEY is intentionally NOT supported to prevent
     silent billing to user's API credits when OAuth is misconfigured.
@@ -588,32 +694,77 @@ def get_auth_token(config_dir: str | None = None) -> str | None:
     Returns:
         Token string if found, None otherwise
     """
-    # STEP 1: Check global settings first (HIGHEST priority)
-    # This reads from ~/.claude/settings.json env.ANTHROPIC_AUTH_TOKEN
-    global_settings = GlobalSettings.load()
-    global_token = global_settings.api_token
-    if global_token:
-        logger.debug("Using auth token from global settings (~/.claude/settings.json)")
-        return _try_decrypt_token(global_token)
+    _debug = os.environ.get("DEBUG", "").lower() in ("true", "1")
 
-    # STEP 2: Check environment variables (second priority)
+    if _debug:
+        # Log which auth env vars are set (presence only, never values)
+        set_vars = [v for v in AUTH_TOKEN_ENV_VARS if os.environ.get(v)]
+        logger.info(
+            "[Auth] get_auth_token() called — config_dir param=%s, "
+            "env vars present: %s, CLAUDE_CONFIG_DIR env=%s",
+            repr(config_dir),
+            set_vars or "(none)",
+            "set" if os.environ.get("CLAUDE_CONFIG_DIR") else "unset",
+        )
+
+    # First check environment variables (highest priority)
     for var in AUTH_TOKEN_ENV_VARS:
         token = os.environ.get(var)
         if token:
+            if _debug:
+                logger.info("[Auth] Token resolved from env var: %s", var)
             return _try_decrypt_token(token)
 
-    # STEP 3: Check CLAUDE_CONFIG_DIR environment variable (profile's custom config directory)
+    # Check CLAUDE_CONFIG_DIR environment variable (profile's custom config directory)
     env_config_dir = os.environ.get("CLAUDE_CONFIG_DIR")
     effective_config_dir = config_dir or env_config_dir
 
-    # STEP 4: If a custom config directory is specified, read from there
+    # Debug: Log which config_dir is being used for credential resolution
+    if _debug and effective_config_dir:
+        service_name = _get_keychain_service_name(effective_config_dir)
+        logger.info(
+            "[Auth] Resolving credentials for profile config_dir: %s "
+            "(Keychain service: %s)",
+            effective_config_dir,
+            service_name,
+        )
+
+    # If a custom config directory is specified, read from there first
     if effective_config_dir:
+        # Try reading from .credentials.json file in the config directory
         token = _get_token_from_config_dir(effective_config_dir)
         if token:
+            if _debug:
+                logger.info(
+                    "[Auth] Token resolved from config dir file: %s",
+                    effective_config_dir,
+                )
             return _try_decrypt_token(token)
 
-    # STEP 5: Fallback to system credential store (default locations)
-    return _try_decrypt_token(get_token_from_keychain())
+        # Also try the system credential store with hash-based service name
+        # This is needed because macOS stores credentials in Keychain, not files
+        token = get_token_from_keychain(effective_config_dir)
+        if token:
+            if _debug:
+                logger.info("[Auth] Token resolved from Keychain (profile-specific)")
+            return _try_decrypt_token(token)
+
+        # If config_dir was explicitly provided, DON'T fall back to default keychain
+        # - that would return the wrong profile's token
+        logger.debug(
+            "No credentials found for config_dir '%s' in file or keychain",
+            effective_config_dir,
+        )
+        return None
+
+    # No config_dir specified - use default system credential store
+    keychain_token = get_token_from_keychain()
+    if _debug:
+        logger.info(
+            "[Auth] Token resolved from default Keychain: %s",
+            "found" if keychain_token else "not found",
+        )
+    return _try_decrypt_token(keychain_token)
 
 
 def get_auth_token_source(config_dir: str | None = None) -> str | None:
@@ -625,12 +776,7 @@ def get_auth_token_source(config_dir: str | None = None) -> str | None:
                    If provided, checks this directory for credentials.
                    If None, checks CLAUDE_CONFIG_DIR env var.
     """
-    # Check global settings first (HIGHEST priority)
-    global_settings = GlobalSettings.load()
-    if global_settings.api_token:
-        return "~/.claude/settings.json"
-
-    # Check environment variables
+    # Check environment variables first
     for var in AUTH_TOKEN_ENV_VARS:
         if os.environ.get(var):
             return var
@@ -638,10 +784,20 @@ def get_auth_token_source(config_dir: str | None = None) -> str | None:
     # Check if token came from custom config directory (profile's configDir)
     env_config_dir = os.environ.get("CLAUDE_CONFIG_DIR")
     effective_config_dir = config_dir or env_config_dir
-    if effective_config_dir and _get_token_from_config_dir(effective_config_dir):
-        return "CLAUDE_CONFIG_DIR"
+    if effective_config_dir:
+        # Check file-based storage
+        if _get_token_from_config_dir(effective_config_dir):
+            return "CLAUDE_CONFIG_DIR"
+        # Check hash-based keychain entry for this profile
+        if get_token_from_keychain(effective_config_dir):
+            if is_macos():
+                return "macOS Keychain (profile)"
+            elif is_windows():
+                return "Windows Credential Files (profile)"
+            else:
+                return "Linux Secret Service (profile)"
 
-    # Check if token came from system credential store
+    # Check if token came from default system credential store
     if get_token_from_keychain():
         if is_macos():
             return "macOS Keychain"
@@ -728,9 +884,9 @@ def _find_git_bash_path() -> str | None:
 
     # Method 1: Use 'where' command to find git.exe
     try:
-        # Use where.exe explicitly for reliability
+        # Use full path to where.exe for reliability (works even when System32 isn't in PATH)
         result = subprocess.run(
-            ["where.exe", "git"],
+            [get_where_exe_path(), "git"],
             capture_output=True,
             text=True,
             timeout=5,
@@ -822,6 +978,75 @@ def get_sdk_env_vars() -> dict[str, str]:
     return env
 
 
+def configure_sdk_authentication(config_dir: str | None = None) -> None:
+    """
+    Configure SDK authentication based on environment variables.
+
+    Supports two authentication modes:
+    - API Profile mode (ANTHROPIC_BASE_URL set): uses ANTHROPIC_AUTH_TOKEN
+    - OAuth mode (default): uses CLAUDE_CODE_OAUTH_TOKEN
+
+    In API profile mode, explicitly removes CLAUDE_CODE_OAUTH_TOKEN from the
+    environment because the SDK gives OAuth priority over API keys when both
+    are present.
+
+    Args:
+        config_dir: Optional profile config directory for per-profile Keychain
+                    lookup. When set, enables multi-profile token storage.
+
+    Raises:
+        ValueError: If required tokens are missing for the active mode.
+                   - API profile mode: requires ANTHROPIC_AUTH_TOKEN
+                   - OAuth mode: requires CLAUDE_CODE_OAUTH_TOKEN (from Keychain or env)
+    """
+    _debug = os.environ.get("DEBUG", "").lower() in ("true", "1")
+    api_profile_mode = bool(os.environ.get("ANTHROPIC_BASE_URL", "").strip())
+
+    if _debug:
+        logger.info(
+            "[Auth] configure_sdk_authentication() — mode=%s, config_dir=%s, "
+            "CLAUDE_CONFIG_DIR env=%s",
+            "api_profile" if api_profile_mode else "oauth",
+            repr(config_dir),
+            "set" if os.environ.get("CLAUDE_CONFIG_DIR") else "unset",
+        )
+
+    if api_profile_mode:
+        # API profile mode: ensure ANTHROPIC_AUTH_TOKEN is present
+        if not os.environ.get("ANTHROPIC_AUTH_TOKEN"):
+            raise ValueError(
+                "API profile mode active (ANTHROPIC_BASE_URL is set) "
+                "but ANTHROPIC_AUTH_TOKEN is not set"
+            )
+        # Explicitly remove CLAUDE_CODE_OAUTH_TOKEN so SDK uses ANTHROPIC_AUTH_TOKEN
+        # SDK gives OAuth priority over API keys when both are present
+        os.environ.pop("CLAUDE_CODE_OAUTH_TOKEN", None)
+        logger.info("Using API profile authentication")
+    else:
+        # OAuth mode: require and validate OAuth token
+        # Get OAuth token - uses profile-specific Keychain lookup when config_dir is set
+        # This correctly reads from "Claude Code-credentials-{hash}" for non-default profiles
+        oauth_token = require_auth_token(config_dir)
+
+        # Validate token is not encrypted before passing to SDK
+        # Encrypted tokens (enc:...) should have been decrypted by require_auth_token()
+        # If we still have an encrypted token here, it means decryption failed or was skipped
+        validate_token_not_encrypted(oauth_token)
+
+        # Ensure SDK can access it via its expected env var
+        # This is required because the SDK doesn't know about per-profile Keychain naming
+        os.environ["CLAUDE_CODE_OAUTH_TOKEN"] = oauth_token
+        logger.info("Using OAuth authentication")
+
+        if _debug:
+            logger.info(
+                "[Auth] SDK env check — CLAUDE_CONFIG_DIR=%s, "
+                "CLAUDE_CODE_OAUTH_TOKEN=%s",
+                "set" if os.environ.get("CLAUDE_CONFIG_DIR") else "unset",
+                "set" if os.environ.get("CLAUDE_CODE_OAUTH_TOKEN") else "unset",
+            )
+
+
 def ensure_claude_code_oauth_token() -> None:
     """
     Ensure CLAUDE_CODE_OAUTH_TOKEN is set (for SDK compatibility).
@@ -857,333 +1082,6 @@ def trigger_login() -> bool:
         # Linux: fall back to manual instructions
         print("\nTo authenticate, run 'claude' and type '/login'")
         return False
-
-
-# =============================================================================
-# Secure Vault Integration
-# =============================================================================
-
-
-def get_vault_token(
-    credential_id: str,
-    tenant_id: str = "default"
-) -> str | None:
-    """
-    Retrieve a credential from the secure vault.
-
-    This function provides seamless integration with the vault system,
-    allowing applications to retrieve credentials without handling encryption.
-
-    Args:
-        credential_id: Unique credential identifier in the vault
-        tenant_id: Tenant identifier for multi-tenancy support
-
-    Returns:
-        Decrypted credential value if found, None otherwise
-
-    Example:
-        >>> token = get_vault_token("anthropic_api_key")
-        >>> # Use token for API calls
-
-    Note: This function automatically:
-    - Logs audit events for access tracking
-    - Updates access metadata in the vault
-    - Handles tenant isolation automatically
-    """
-    try:
-        # Lazy import to avoid circular dependency
-        from core.vault import get_vault, CredentialNotFoundError
-    except ImportError:
-        # Vault module not available
-        logger.warning("Vault module not available - credentials must be in environment")
-        return None
-
-    try:
-        vault = get_vault()
-        plaintext, metadata = vault.retrieve_credential(
-            credential_id=credential_id,
-            tenant_id=tenant_id,
-        )
-
-        logger.debug(f"Retrieved credential '{credential_id}' from vault (tenant: '{tenant_id}')")
-        return plaintext
-
-    except CredentialNotFoundError:
-        logger.debug(f"Credential '{credential_id}' not found in vault (tenant: '{tenant_id}')")
-        return None
-    except Exception as e:
-        logger.error(f"Failed to retrieve credential from vault: {str(e)}")
-        return None
-
-
-def store_vault_token(
-    credential_id: str,
-    credential_value: str,
-    credential_type: str = "custom",
-    tenant_id: str = "default",
-    rotation_interval_days: int | None = None,
-) -> bool:
-    """
-    Store a credential in the secure vault.
-
-    This function provides seamless integration with the vault system,
-    allowing applications to store credentials without handling encryption.
-
-    Args:
-        credential_id: Unique credential identifier (will be generated if not provided)
-        credential_value: The plaintext credential value to store
-        credential_type: Type of credential (default: "custom")
-        tenant_id: Tenant identifier for multi-tenancy support
-        rotation_interval_days: Optional custom rotation interval in days
-
-    Returns:
-        True if credential was stored successfully, False otherwise
-
-    Example:
-        >>> success = store_vault_token(
-        ...     "my_api_key",
-        ...     "sk-ant-...",
-        ...     credential_type="anthropic_api_key"
-        ... )
-        >>> # Credential is now encrypted and stored securely
-
-    Note: This function automatically:
-    - Encrypts credentials using AES-256-GCM
-    - Stores per-tenant isolated credentials
-    - Logs audit events for storage tracking
-    - Handles keychain integration for master keys
-    """
-    try:
-        # Lazy import to avoid circular dependency
-        from core.vault import get_vault
-    except ImportError:
-        # Vault module not available
-        logger.error("Vault module not available - cannot store credentials securely")
-        return False
-
-    # Generate credential ID if not provided
-    if credential_id is None or not credential_id.strip():
-        import time
-        credential_id = f"autogenerated_{int(time.time())}"
-
-    try:
-        vault = get_vault()
-        metadata = vault.store_credential(
-            credential_id=credential_id,
-            credential_type=credential_type,
-            credential_value=credential_value,
-            tenant_id=tenant_id,
-            rotation_interval_days=rotation_interval_days,
-        )
-
-        logger.info(f"Stored credential '{credential_id}' in vault (tenant: '{tenant_id}')")
-        return True
-
-    except Exception as e:
-        logger.error(f"Failed to store credential in vault: {str(e)}")
-        return False
-
-
-def list_vault_credentials(tenant_id: str = "default") -> list[dict]:
-    """
-    List all credentials in the vault for a tenant.
-
-    Args:
-        tenant_id: Tenant identifier to list credentials for
-
-    Returns:
-        List of credential metadata dictionaries with keys:
-        - credential_id: Unique identifier
-        - credential_type: Type of credential
-        - tenant_id: Tenant identifier
-        - created_at: Creation timestamp
-        - rotation_status: Current rotation status
-        - access_count: Number of times accessed
-
-    Example:
-        >>> creds = list_vault_credentials()
-        >>> for cred in creds:
-        ...     print(f"{cred['credential_id']}: {cred['credential_type']}")
-    """
-    try:
-        # Lazy import to avoid circular dependency
-        from core.vault import get_vault
-    except ImportError:
-        logger.warning("Vault module not available")
-        return []
-
-    try:
-        vault = get_vault()
-        credentials = vault.list_credentials(tenant_id=tenant_id)
-
-        # Convert to list of dicts for JSON serialization
-        result = []
-        for cred in credentials:
-            result.append({
-                'credential_id': cred.credential_id,
-                'credential_type': cred.credential_type,
-                'tenant_id': cred.tenant_id,
-                'created_at': cred.created_at.isoformat(),
-                'rotated_at': cred.rotated_at.isoformat() if cred.rotated_at else None,
-                'rotation_status': cred.rotation_status,
-                'rotation_interval_days': cred.rotation_interval_days,
-                'access_count': cred.access_count,
-                'last_accessed_at': cred.last_accessed_at.isoformat() if cred.last_accessed_at else None,
-            })
-
-        logger.debug(f"Listed {len(result)} credentials from vault (tenant: '{tenant_id}')")
-        return result
-
-    except Exception as e:
-        logger.error(f"Failed to list vault credentials: {str(e)}")
-        return []
-
-
-def check_vault_health(tenant_id: str = "default") -> dict[str, Any]:
-    """
-    Check the health of credential vault for a tenant.
-
-    Args:
-        tenant_id: Tenant identifier to check
-
-    Returns:
-        Dict with health information:
-        - vault_available: Whether vault is accessible
-        - total_credentials: Number of credentials stored
-        - credentials_need_rotation: Number of credentials needing rotation
-        - rotation_enabled: Whether automatic rotation is enabled
-        - vault_path: Path to vault directory
-        - keychain_available: Whether OS keychain is available
-        - master_key_exists: Whether tenant master key exists
-
-    Example:
-        >>> health = check_vault_health()
-        >>> if health['vault_available']:
-        ...     print(f"Vault has {health['total_credentials']} credentials")
-        ...     if health['credentials_need_rotation'] > 0:
-        ...         print(f"WARNING: {health['credentials_need_rotation']} need rotation")
-    """
-    try:
-        # Lazy import to avoid circular dependency
-        from core.vault import get_vault
-    except ImportError:
-        logger.warning("Vault module not available")
-        return {
-            'vault_available': False,
-            'error': 'Vault module not imported',
-        }
-
-    try:
-        vault = get_vault()
-        health_info = {
-            'vault_available': True,
-            'vault_path': vault.vault_dir,
-            'keychain_available': vault.keychain is not None,
-            'master_key_exists': True,  # Vault would fail if keychain unavailable
-        }
-
-        # Get rotation health
-        rotation_health = vault.check_rotation_health()
-        if tenant_id in rotation_health:
-            health_info.update(rotation_health[tenant_id])
-
-        # Count credentials
-        credentials = vault.list_credentials(tenant_id=tenant_id)
-        health_info['total_credentials'] = len(credentials)
-        health_info['credentials_need_rotation'] = rotation_health.get(tenant_id, {}).get('credentials_need_rotation', 0)
-        health_info['rotation_enabled'] = vault._rotation_enabled
-
-        logger.debug(f"Checked vault health (tenant: '{tenant_id}')")
-        return health_info
-
-    except Exception as e:
-        logger.error(f"Failed to check vault health: {str(e)}")
-        return {
-            'vault_available': False,
-            'error': str(e),
-        }
-
-
-def migrate_to_vault(
-    source_dir: str | None = None,
-    strategy: str = "env_vars",
-    dry_run: bool = False,
-) -> dict[str, str]:
-    """
-    Migrate legacy credentials to the secure vault.
-
-    This function provides a unified interface for credential migration,
-    supporting multiple strategies with safety checks and logging.
-
-    Args:
-        source_dir: Directory containing legacy credential files
-        strategy: Migration strategy - "env_vars", "plaintext_files", or "in_place"
-        dry_run: Test mode without making changes
-
-    Returns:
-        Dict mapping credential_id to credential_type for migrated credentials
-
-    Strategies:
-        -----------
-        env_vars: Scans environment variables (ANTHROPIC_API_KEY, etc.)
-        plaintext_files: Scans directories for .key, .token, credentials.json files
-        in_place: Encrypts files in place without moving them
-
-    Example:
-        >>> migrated = migrate_to_vault(source_dir="./legacy")
-        >>> print(f"Migrated {len(migrated)} credentials")
-        >>> # Review vault and remove source files
-
-    Security:
-        --------
-        - Creates backups before migration
-        - Validates data integrity
-        - Provides dry-run mode for testing
-        - Logs all migration operations
-        - Supports rollback if migration fails
-
-    Note: After migration, review migrated credentials in the vault
-    and remove plaintext sources from disk.
-    """
-    try:
-        # Lazy import to avoid circular dependency
-        from core.vault import get_vault, MigrationStrategy
-    except ImportError:
-        logger.error("Vault module not available - cannot migrate credentials")
-        return {}
-
-    try:
-        vault = get_vault()
-
-        # Import migrator
-        if strategy == "env_vars":
-            from core.vault_migrate import CredentialMigrator
-            migrator = CredentialMigrator(vault, dry_run=dry_run)
-            results = migrator.migrate_env_vars(source_dir)
-        elif strategy == "plaintext_files":
-            from core.vault_migrate import CredentialMigrator
-            migrator = CredentialMigrator(vault, dry_run=dry_run)
-            if not source_dir:
-                logger.error("Source directory required for file migration")
-                return {}
-            results = migrator.migrate_plaintext_files(source_dir)
-        else:
-            logger.error(f"Unknown strategy: {strategy}")
-            return {}
-
-        migrated = {}
-        for result in results:
-            if result.get('result') == 'success':
-                credential_id = result.get('credential_id', '')
-                credential_type = result.get('metadata', {}).get('credential_type', 'custom')
-                migrated[credential_id] = credential_type
-
-        logger.info(f"Migration completed: {len(migrated)} credentials migrated to vault")
-        return migrated
-
-    except Exception as e:
-        logger.error(f"Migration failed: {str(e)}")
-        return {}
 
 
 def _trigger_login_macos() -> bool:
@@ -1340,133 +1238,3 @@ def ensure_authenticated() -> str:
         "  3. Press Enter to open browser\n"
         "  4. Complete OAuth login in browser"
     )
-
-def get_secret_manager_token(
-    credential_id: str,
-    tenant_id: str = "default"
-) -> str | None:
-    """
-    Get a credential from the centralized SecretManager.
-
-    This provides a unified interface for credential access across the application.
-    Secrets are retrieved from providers in priority order:
-    1. Vault (encrypted storage)
-    2. Environment variables (development/CI)
-
-    Args:
-        credential_id: Unique credential identifier in vault
-        tenant_id: Optional tenant for multi-tenancy support
-
-    Returns:
-        Decrypted credential value if found, None otherwise
-
-    Example:
-        >>> # Get API key from vault
-        >>> key = get_secret_manager_token("anthropic_api_key")
-        >>> # Use for API calls
-    """
-    try:
-        from core.secret_management import get_secret_manager
-        manager = get_secret_manager()
-
-        context = {
-            "tenant_id": tenant_id,
-        }
-
-        return manager.get_secret(credential_id, context=context)
-
-    except ImportError:
-        # SecretManager not available
-        return None
-    except Exception:
-        # SecretManager failed
-        return None
-
-
-def set_secret_manager_token(
-    credential_id: str,
-    credential_value: str,
-    credential_type: str = "custom",
-    tenant_id: str = "default",
-    rotation_interval_days: int | None = None,
-) -> bool:
-    """
-    Store a credential in the centralized SecretManager.
-
-    This provides a unified interface for secure credential storage.
-    Credentials are encrypted with AES-256-GCM before storage.
-
-    Args:
-        credential_id: Unique credential identifier
-        credential_value: The plaintext credential value
-        credential_type: Type of credential (api_key, auth_token, etc.)
-        tenant_id: Optional tenant for multi-tenancy
-        rotation_interval_days: Optional rotation interval in days
-
-    Returns:
-        True if stored successfully, False otherwise
-
-    Example:
-        >>> # Store API key securely
-        >>> success = set_secret_manager_token(
-        ...     "anthropic_api_key",
-        ...     "sk-ant-...",
-        ...     "api_key"
-        ... )
-        >>> if success:
-        ...     print("API key stored securely")
-    """
-    try:
-        from core.secret_management import get_secret_manager
-        manager = get_secret_manager()
-
-        context = {
-            "tenant_id": tenant_id,
-        }
-
-        if rotation_interval_days:
-            context["rotation_interval_days"] = rotation_interval_days
-
-        manager.store_secret(
-            credential_id,
-            credential_value,
-            credential_type,
-            context=context,
-        )
-
-        return True
-    except ImportError:
-        # SecretManager not available
-        return False
-    except Exception:
-        return False
-
-
-def check_secret_rotation_health() -> dict[str, Any]:
-    """
-    Check health of secret rotation across all secrets.
-
-    Returns a report of which secrets need rotation,
-    are expiring soon, and rotation system status.
-
-    Returns:
-        Dict with rotation health information:
-        - total_secrets: Total number of secrets
-        - expired_count: Secrets past rotation deadline
-        - expiring_soon_count: Secrets within warning period
-        - rotation_enabled: Whether rotation is enabled
-
-    Example:
-        >>> health = check_secret_rotation_health()
-        >>> if health['expired_count'] > 0:
-        ...     print(f"WARNING: {health['expired_count']} secrets need rotation")
-    """
-    try:
-        from core.secret_management import check_rotation_health
-        return check_rotation_health()
-    except ImportError:
-        # SecretManager not available
-        return {
-            "error": "SecretManager not available",
-            "rotation_enabled": False,
-        }

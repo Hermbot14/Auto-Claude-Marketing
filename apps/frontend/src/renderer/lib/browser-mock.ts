@@ -62,144 +62,8 @@ const browserMockAPI: ElectronAPI = {
     success: true
   }),
 
-  // Calendar Operations
-  getCalendarData: async (projectId: string) => {
-    const now = new Date();
-    return {
-      success: true,
-      data: {
-        projectId,
-        items: [
-          {
-            id: 'mock-item-1',
-            title: 'Q1 Marketing Campaign',
-            description: 'Annual marketing campaign for Q1',
-            type: 'campaign' as const,
-            status: 'published' as const,
-            source: 'manual' as const,
-            startDate: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
-            endDate: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
-            allDay: true,
-            priority: 'high' as const,
-            tags: ['marketing', 'q1'],
-            assignee: 'Marketing Team',
-            createdAt: now,
-            updatedAt: now,
-          },
-          {
-            id: 'mock-item-2',
-            title: 'Blog Post: AI Trends',
-            description: 'Blog post about AI marketing trends',
-            type: 'content' as const,
-            status: 'scheduled' as const,
-            source: 'manual' as const,
-            startDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000),
-            allDay: true,
-            priority: 'medium' as const,
-            tags: ['blog', 'content'],
-            assignee: 'Sarah Chen',
-            createdAt: now,
-            updatedAt: now,
-          },
-          {
-            id: 'mock-item-3',
-            title: 'Weekly Social Posts',
-            description: 'Weekly social media content',
-            type: 'social' as const,
-            status: 'published' as const,
-            source: 'manual' as const,
-            startDate: now,
-            allDay: true,
-            priority: 'medium' as const,
-            tags: ['social'],
-            assignee: 'Alex Rivera',
-            recurrence: {
-              frequency: 'weekly' as const,
-              interval: 1,
-            },
-            createdAt: now,
-            updatedAt: now,
-          },
-          {
-            id: 'mock-item-4',
-            title: 'Monthly Newsletter',
-            description: 'Monthly email newsletter',
-            type: 'email' as const,
-            status: 'scheduled' as const,
-            source: 'manual' as const,
-            startDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
-            allDay: true,
-            priority: 'medium' as const,
-            tags: ['newsletter', 'email'],
-            assignee: 'Jamie Smith',
-            createdAt: now,
-            updatedAt: now,
-          },
-          {
-            id: 'mock-item-5',
-            title: 'SEO Keyword Research',
-            description: 'Q1 SEO keywords research',
-            type: 'seo' as const,
-            status: 'published' as const,
-            source: 'manual' as const,
-            startDate: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
-            endDate: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000),
-            allDay: true,
-            priority: 'high' as const,
-            tags: ['seo', 'research'],
-            assignee: 'Mike Johnson',
-            createdAt: now,
-            updatedAt: now,
-          },
-        ],
-        viewMode: 'month' as const,
-        zoomLevel: 'month' as const,
-        currentDate: now,
-        filters: {
-          itemTypes: [],
-          status: [],
-          sources: [],
-          tags: [],
-          searchQuery: '',
-        },
-        updatedAt: now,
-      },
-    };
-  },
-
-  saveCalendarData: async () => ({
-    success: true,
-  }),
-
-  addCalendarItem: async () => ({
-    success: true,
-    data: `mock-item-${Date.now()}`,
-  }),
-
-  updateCalendarItem: async () => ({
-    success: true,
-  }),
-
-  deleteCalendarItem: async () => ({
-    success: true,
-  }),
-
-  syncRoadmap: async () => ({
-    success: true,
-    data: [],
-  }),
-
-  scanFiles: async () => ({
-    success: true,
-    data: [],
-  }),
-
-  checkCalendarConnection: async () => ({
-    success: true,
-    data: {
-      connected: false,
-      error: 'Calendar integration not available in browser mode',
-    },
+  saveCompetitorAnalysis: async () => ({
+    success: true
   }),
 
   generateRoadmap: (_projectId: string, _enableCompetitorAnalysis?: boolean, _refreshCompetitorAnalysis?: boolean) => {
@@ -229,6 +93,11 @@ const browserMockAPI: ElectronAPI = {
   }),
 
   stopRoadmap: async () => ({ success: true }),
+
+  // Roadmap Progress Persistence
+  saveRoadmapProgress: async () => ({ success: true }),
+  loadRoadmapProgress: async () => ({ success: true, data: null }),
+  clearRoadmapProgress: async () => ({ success: true }),
 
   // Roadmap Event Listeners
   onRoadmapProgress: () => () => {},
@@ -286,60 +155,13 @@ const browserMockAPI: ElectronAPI = {
     success: true
   }),
 
-  testConnection: async (baseUrl: string, apiKey: string, _signal?: AbortSignal) => {
-    // Real API connection test (not mock)
-    console.log('[Browser] Testing real API connection to:', baseUrl);
-
-    try {
-      const response = await fetch(`${baseUrl}/v1/messages`, {
-        method: 'POST',
-        headers: {
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'glm-4.7',
-          max_tokens: 50,
-          messages: [{
-            role: 'user',
-            content: 'Connection test. Reply "OK".'
-          }]
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('[Browser] Connection test SUCCESS:', data.id);
-        return {
-          success: true,
-          data: {
-            success: true,
-            message: `Connection successful! Model: ${data.model}`
-          }
-        };
-      } else {
-        const errorText = await response.text();
-        console.error('[Browser] Connection test FAILED:', response.status, errorText);
-        return {
-          success: true,
-          data: {
-            success: false,
-            message: `Connection failed: ${response.status} ${response.statusText}`
-          }
-        };
-      }
-    } catch (error) {
-      console.error('[Browser] Connection test ERROR:', error);
-      return {
-        success: true,
-        data: {
-          success: false,
-          message: `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`
-        }
-      };
+  testConnection: async (_baseUrl: string, _apiKey: string, _signal?: AbortSignal) => ({
+    success: true,
+    data: {
+      success: true,
+      message: 'Connection successful (mock)'
     }
-  },
+  }),
 
   discoverModels: async (_baseUrl: string, _apiKey: string, _signal?: AbortSignal) => ({
     success: true,
@@ -371,6 +193,7 @@ const browserMockAPI: ElectronAPI = {
     addGitRemote: async () => ({ success: true, data: { remoteUrl: '' } }),
     listGitHubOrgs: async () => ({ success: true, data: { orgs: [] } }),
     onGitHubAuthDeviceCode: () => () => {},
+    onGitHubAuthChanged: () => () => {},
     onGitHubInvestigationProgress: () => () => {},
     onGitHubInvestigationComplete: () => () => {},
     onGitHubInvestigationError: () => () => {},
@@ -383,7 +206,8 @@ const browserMockAPI: ElectronAPI = {
     onAutoFixProgress: () => () => {},
     onAutoFixComplete: () => () => {},
     onAutoFixError: () => () => {},
-    listPRs: async () => [],
+    listPRs: async () => ({ prs: [], hasNextPage: false }),
+    listMorePRs: async () => ({ prs: [], hasNextPage: false }),
     getPR: async () => null,
     runPRReview: () => {},
     cancelPRReview: async () => true,
@@ -394,6 +218,7 @@ const browserMockAPI: ElectronAPI = {
     markReviewPosted: async () => true,
     getPRReview: async () => null,
     getPRReviewsBatch: async () => ({}),
+    notifyExternalReviewComplete: async () => {},
     deletePRReview: async () => true,
     checkNewCommits: async () => ({ hasNewCommits: false, newCommitCount: 0 }),
     checkMergeReadiness: async () => ({ isDraft: false, mergeable: 'UNKNOWN' as const, isBehind: false, ciStatus: 'none' as const, blockers: [] }),
@@ -405,6 +230,8 @@ const browserMockAPI: ElectronAPI = {
     onPRReviewProgress: () => () => {},
     onPRReviewComplete: () => () => {},
     onPRReviewError: () => () => {},
+    onPRReviewStateChange: () => () => {},
+    onPRLogsUpdated: () => () => {},
     batchAutoFix: () => {},
     getBatches: async () => [],
     onBatchProgress: () => () => {},
@@ -415,7 +242,25 @@ const browserMockAPI: ElectronAPI = {
     approveBatches: async () => ({ success: true, batches: [] }),
     onAnalyzePreviewProgress: () => () => {},
     onAnalyzePreviewComplete: () => () => {},
-    onAnalyzePreviewError: () => () => {}
+    onAnalyzePreviewError: () => () => {},
+    // PR status polling
+    startStatusPolling: async () => true,
+    stopStatusPolling: async () => true,
+    getPollingMetadata: async () => null,
+    onPRStatusUpdate: () => () => {}
+  },
+
+  // Queue Routing API (rate limit recovery)
+  queue: {
+    getRunningTasksByProfile: async () => ({ success: true, data: { byProfile: {}, totalRunning: 0 } }),
+    getBestProfileForTask: async () => ({ success: true, data: null }),
+    getBestUnifiedAccount: async () => ({ success: true, data: null }),
+    assignProfileToTask: async () => ({ success: true }),
+    updateTaskSession: async () => ({ success: true }),
+    getTaskSession: async () => ({ success: true, data: null }),
+    onQueueProfileSwapped: () => () => {},
+    onQueueSessionCaptured: () => () => {},
+    onQueueBlockedNoProfiles: () => () => {}
   },
 
   // Claude Code Operations
@@ -466,6 +311,12 @@ const browserMockAPI: ElectronAPI = {
   setClaudeCodeActivePath: async (cliPath: string) => ({
     success: true,
     data: { path: cliPath }
+  }),
+
+  // Worktree Change Detection
+  checkWorktreeChanges: async () => ({
+    success: true,
+    data: { hasChanges: false, changedFileCount: 0 }
   }),
 
   // Terminal Worktree Operations

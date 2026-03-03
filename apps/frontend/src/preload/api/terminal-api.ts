@@ -33,8 +33,8 @@ export interface TerminalAPI {
   createTerminal: (options: TerminalCreateOptions) => Promise<IPCResult>;
   destroyTerminal: (id: string) => Promise<IPCResult>;
   sendTerminalInput: (id: string, data: string) => void;
-  resizeTerminal: (id: string, cols: number, rows: number) => void;
-  invokeClaudeInTerminal: (id: string, cwd?: string, dangerouslySkipPermissions?: boolean) => void;
+  resizeTerminal: (id: string, cols: number, rows: number) => Promise<IPCResult<{ success: boolean }>>;
+  invokeClaudeInTerminal: (id: string, cwd?: string) => void;
   generateTerminalName: (command: string, cwd?: string) => Promise<IPCResult<string>>;
   setTerminalTitle: (id: string, title: string) => void;
   setTerminalWorktreeConfig: (id: string, config: TerminalWorktreeConfig | undefined) => void;
@@ -47,7 +47,7 @@ export interface TerminalAPI {
     rows?: number
   ) => Promise<IPCResult<import('../../shared/types').TerminalRestoreResult>>;
   clearTerminalSessions: (projectPath: string) => Promise<IPCResult>;
-  resumeClaudeInTerminal: (id: string, sessionId?: string) => void;
+  resumeClaudeInTerminal: (id: string, sessionId?: string, options?: { migratedSession?: boolean }) => void;
   activateDeferredClaudeResume: (id: string) => void;
   getTerminalSessionDates: (projectPath?: string) => Promise<IPCResult<import('../../shared/types').SessionDateInfo[]>>;
   getTerminalSessionsForDate: (
@@ -120,7 +120,7 @@ export interface TerminalAPI {
 
   // Usage Monitoring (Proactive Account Switching)
   requestUsageUpdate: () => Promise<IPCResult<import('../../shared/types').ClaudeUsageSnapshot | null>>;
-  requestAllProfilesUsage: () => Promise<IPCResult<import('../../shared/types').AllProfilesUsage | null>>;
+  requestAllProfilesUsage: (forceRefresh?: boolean) => Promise<IPCResult<import('../../shared/types').AllProfilesUsage | null>>;
   onUsageUpdated: (callback: (usage: import('../../shared/types').ClaudeUsageSnapshot) => void) => () => void;
   onAllProfilesUsageUpdated: (callback: (allProfilesUsage: import('../../shared/types').AllProfilesUsage) => void) => () => void;
   onProactiveSwapNotification: (callback: (notification: ProactiveSwapNotification) => void) => () => void;
@@ -137,11 +137,11 @@ export const createTerminalAPI = (): TerminalAPI => ({
   sendTerminalInput: (id: string, data: string): void =>
     ipcRenderer.send(IPC_CHANNELS.TERMINAL_INPUT, id, data),
 
-  resizeTerminal: (id: string, cols: number, rows: number): void =>
-    ipcRenderer.send(IPC_CHANNELS.TERMINAL_RESIZE, id, cols, rows),
+  resizeTerminal: (id: string, cols: number, rows: number): Promise<IPCResult<{ success: boolean }>> =>
+    ipcRenderer.invoke(IPC_CHANNELS.TERMINAL_RESIZE, id, cols, rows),
 
-  invokeClaudeInTerminal: (id: string, cwd?: string, dangerouslySkipPermissions?: boolean): void =>
-    ipcRenderer.send(IPC_CHANNELS.TERMINAL_INVOKE_CLAUDE, id, cwd, dangerouslySkipPermissions),
+  invokeClaudeInTerminal: (id: string, cwd?: string): void =>
+    ipcRenderer.send(IPC_CHANNELS.TERMINAL_INVOKE_CLAUDE, id, cwd),
 
   generateTerminalName: (command: string, cwd?: string): Promise<IPCResult<string>> =>
     ipcRenderer.invoke(IPC_CHANNELS.TERMINAL_GENERATE_NAME, command, cwd),
@@ -166,8 +166,8 @@ export const createTerminalAPI = (): TerminalAPI => ({
   clearTerminalSessions: (projectPath: string): Promise<IPCResult> =>
     ipcRenderer.invoke(IPC_CHANNELS.TERMINAL_CLEAR_SESSIONS, projectPath),
 
-  resumeClaudeInTerminal: (id: string, sessionId?: string): void =>
-    ipcRenderer.send(IPC_CHANNELS.TERMINAL_RESUME_CLAUDE, id, sessionId),
+  resumeClaudeInTerminal: (id: string, sessionId?: string, options?: { migratedSession?: boolean }): void =>
+    ipcRenderer.send(IPC_CHANNELS.TERMINAL_RESUME_CLAUDE, id, sessionId, options),
 
   activateDeferredClaudeResume: (id: string): void =>
     ipcRenderer.send(IPC_CHANNELS.TERMINAL_ACTIVATE_DEFERRED_RESUME, id),
@@ -518,8 +518,8 @@ export const createTerminalAPI = (): TerminalAPI => ({
   requestUsageUpdate: (): Promise<IPCResult<import('../../shared/types').ClaudeUsageSnapshot | null>> =>
     ipcRenderer.invoke(IPC_CHANNELS.USAGE_REQUEST),
 
-  requestAllProfilesUsage: (): Promise<IPCResult<import('../../shared/types').AllProfilesUsage | null>> =>
-    ipcRenderer.invoke(IPC_CHANNELS.ALL_PROFILES_USAGE_REQUEST),
+  requestAllProfilesUsage: (forceRefresh?: boolean): Promise<IPCResult<import('../../shared/types').AllProfilesUsage | null>> =>
+    ipcRenderer.invoke(IPC_CHANNELS.ALL_PROFILES_USAGE_REQUEST, forceRefresh ?? false),
 
   onUsageUpdated: (
     callback: (usage: import('../../shared/types').ClaudeUsageSnapshot) => void

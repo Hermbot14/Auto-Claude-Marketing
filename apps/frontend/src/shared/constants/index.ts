@@ -15,9 +15,6 @@ export * from './task';
 // Roadmap constants
 export * from './roadmap';
 
-// Calendar constants
-export * from './calendar';
-
 // Ideation constants
 export * from './ideation';
 
@@ -38,3 +35,6 @@ export * from './api-profiles';
 
 // Configuration and paths
 export * from './config';
+
+// Spell check configuration
+export * from './spellcheck';

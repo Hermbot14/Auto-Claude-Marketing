@@ -3,7 +3,8 @@ import type {
   Roadmap,
   RoadmapFeatureStatus,
   RoadmapGenerationStatus,
-  RoadmapProgressLog,
+  PersistedRoadmapProgress,
+  CompetitorAnalysis,
   Task,
   IPCResult
 } from '../../../shared/types';
@@ -29,17 +30,18 @@ export interface RoadmapAPI {
     projectId: string,
     featureId: string
   ) => Promise<IPCResult<Task>>;
-  processRoadmapChat: (
-    projectId: string,
-    message: string
-  ) => Promise<IPCResult<{ response: string; operations: unknown[] }>>;
+
+  // Competitor analysis
+  saveCompetitorAnalysis: (projectId: string, competitorAnalysis: CompetitorAnalysis) => Promise<IPCResult>;
+
+  // Progress persistence
+  saveRoadmapProgress: (projectId: string, progress: PersistedRoadmapProgress) => Promise<IPCResult>;
+  loadRoadmapProgress: (projectId: string) => Promise<IPCResult<PersistedRoadmapProgress | null>>;
+  clearRoadmapProgress: (projectId: string) => Promise<IPCResult>;
 
   // Event Listeners
   onRoadmapProgress: (
     callback: (projectId: string, status: RoadmapGenerationStatus) => void
-  ) => IpcListenerCleanup;
-  onRoadmapLog: (
-    callback: (projectId: string, log: RoadmapProgressLog) => void
   ) => IpcListenerCleanup;
   onRoadmapComplete: (
     callback: (projectId: string, roadmap: Roadmap) => void
@@ -88,22 +90,25 @@ export const createRoadmapAPI = (): RoadmapAPI => ({
   ): Promise<IPCResult<Task>> =>
     invokeIpc(IPC_CHANNELS.ROADMAP_CONVERT_TO_SPEC, projectId, featureId),
 
-  processRoadmapChat: (
-    projectId: string,
-    message: string
-  ): Promise<IPCResult<{ response: string; operations: unknown[] }>> =>
-    invokeIpc(IPC_CHANNELS.ROADMAP_CHAT, projectId, message),
+  // Competitor analysis
+  saveCompetitorAnalysis: (projectId: string, competitorAnalysis: CompetitorAnalysis): Promise<IPCResult> =>
+    invokeIpc(IPC_CHANNELS.COMPETITOR_ANALYSIS_SAVE, projectId, competitorAnalysis),
+
+  // Progress persistence
+  saveRoadmapProgress: (projectId: string, progress: PersistedRoadmapProgress): Promise<IPCResult> =>
+    invokeIpc(IPC_CHANNELS.ROADMAP_PROGRESS_SAVE, projectId, progress),
+
+  loadRoadmapProgress: (projectId: string): Promise<IPCResult<PersistedRoadmapProgress | null>> =>
+    invokeIpc(IPC_CHANNELS.ROADMAP_PROGRESS_LOAD, projectId),
+
+  clearRoadmapProgress: (projectId: string): Promise<IPCResult> =>
+    invokeIpc(IPC_CHANNELS.ROADMAP_PROGRESS_CLEAR, projectId),
 
   // Event Listeners
   onRoadmapProgress: (
     callback: (projectId: string, status: RoadmapGenerationStatus) => void
   ): IpcListenerCleanup =>
     createIpcListener(IPC_CHANNELS.ROADMAP_PROGRESS, callback),
-
-  onRoadmapLog: (
-    callback: (projectId: string, log: RoadmapProgressLog) => void
-  ): IpcListenerCleanup =>
-    createIpcListener(IPC_CHANNELS.ROADMAP_LOG, callback),
 
   onRoadmapComplete: (
     callback: (projectId: string, roadmap: Roadmap) => void
