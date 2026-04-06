@@ -43,6 +43,71 @@ export function resetActors(): void {
 }
 
 /**
+ * Set up IPC listeners for roadmap events.
+ * Returns a cleanup function to remove listeners.
+ */
+export function setupRoadmapListeners(): () => void {
+  const isCurrentProject = (eventProjectId: string): boolean => {
+    const currentProjectId = useRoadmapStore.getState().currentProjectId;
+    return currentProjectId === eventProjectId;
+  };
+
+  const cleanupRoadmapProgress = window.electronAPI.onRoadmapProgress(
+    (projectId: string, status: RoadmapGenerationStatus) => {
+      if (isCurrentProject(projectId)) {
+        useRoadmapStore.getState().setGenerationStatus(status);
+      }
+    }
+  );
+
+  const cleanupRoadmapComplete = window.electronAPI.onRoadmapComplete(
+    (projectId: string, roadmap: Roadmap) => {
+      if (isCurrentProject(projectId)) {
+        useRoadmapStore.getState().setRoadmap(roadmap);
+        useRoadmapStore.getState().setGenerationStatus({
+          phase: 'complete',
+          progress: 100,
+          message: 'Roadmap ready'
+        });
+      }
+    }
+  );
+
+  const cleanupRoadmapError = window.electronAPI.onRoadmapError(
+    (projectId: string, error: string) => {
+      if (isCurrentProject(projectId)) {
+        useRoadmapStore.getState().setGenerationStatus({
+          phase: 'error',
+          progress: 0,
+          message: 'Generation failed',
+          error
+        });
+      }
+    }
+  );
+
+  const cleanupRoadmapStopped = window.electronAPI.onRoadmapStopped(
+    (projectId: string) => {
+      if (isCurrentProject(projectId)) {
+        useRoadmapStore.getState().setGenerationStatus({
+          phase: 'idle',
+          progress: 0,
+          message: 'Generation stopped'
+        });
+      }
+    }
+  );
+
+  // Return cleanup function
+  return () => {
+    cleanupRoadmapProgress();
+    cleanupRoadmapComplete();
+    cleanupRoadmapError();
+    cleanupRoadmapStopped();
+  };
+}
+
+/**
  * Get or create the singleton generation actor.
  * Optionally provide an initial state and context to restore from persisted data.
  */

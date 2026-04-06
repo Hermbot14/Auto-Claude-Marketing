@@ -38,3 +38,6 @@ export * from './config';
 
 // Spell check configuration
 export * from './spellcheck';
+
+// Calendar constants
+export * from './calendar';

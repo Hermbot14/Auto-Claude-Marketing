@@ -10,7 +10,12 @@
 import { test, expect, _electron as electron, ElectronApplication, Page } from '@playwright/test';
 import { mkdirSync, rmSync, existsSync } from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import * as os from 'os';
+
+// ESM equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Global Navigator declaration for clipboard
 declare global {
@@ -74,9 +79,17 @@ test.describe('Terminal Copy/Paste Flows', () => {
   });
 
   test.beforeEach(async () => {
+    test.skip(!process.env.ELECTRON_PATH, 'Electron app not built - run build first');
+
     // Launch Electron app
     const appPath = path.join(__dirname, '..');
-    app = await electron.launch({ args: [appPath] });
+    app = await electron.launch({
+      args: [appPath],
+      env: {
+        ...process.env,
+        NODE_ENV: 'test'
+      }
+    });
 
     window = await app.firstWindow({
       timeout: 15000

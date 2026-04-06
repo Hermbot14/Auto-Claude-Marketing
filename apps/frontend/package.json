@@ -1,12 +1,12 @@
 {
-  "name": "auto-claude-ui",
-  "version": "2.7.6",
+  "name": "auto-claude-marketing-ui",
+  "version": "1.0.0",
   "type": "module",
-  "description": "Desktop UI for Auto Claude autonomous coding framework",
-  "homepage": "https://github.com/AndyMik90/Auto-Claude",
+  "description": "Desktop UI for Marketing Hub autonomous marketing automation platform",
+  "homepage": "https://github.com/Hermbot14/Auto-Claude-Marketing",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AndyMik90/Auto-Claude.git"
+    "url": "https://github.com/Hermbot14/Auto-Claude-Marketing.git"
   },
   "main": "./out/main/index.js",
   "author": {
@@ -21,6 +21,7 @@
   "scripts": {
     "postinstall": "node scripts/postinstall.cjs",
     "dev": "electron-vite dev",
+    "dev:web": "vite --config vite.web.config.ts",
     "dev:debug": "cross-env DEBUG=true electron-vite dev",
     "dev:mcp": "electron-vite dev -- --remote-debugging-port=9222",
     "build": "electron-vite build",
@@ -45,6 +46,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "npx playwright test --config=e2e/playwright.config.ts",
+    "test:e2e:web": "npx playwright test --config=e2e/playwright.web.config.ts",
+    "test:e2e:ui": "npx playwright test --config=e2e/playwright.web.config.ts --ui",
+    "test:e2e:headed": "npx playwright test --config=e2e/playwright.web.config.ts --headed",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
@@ -142,15 +146,15 @@
     "@electron/rebuild": "4.0.2"
   },
   "build": {
-    "appId": "com.autoclaude.ui",
-    "productName": "Auto-Claude",
+    "appId": "com.autoclaude.marketing",
+    "productName": "Auto-Claude Marketing Hub",
     "npmRebuild": false,
     "artifactName": "${productName}-${version}-${platform}-${arch}.${ext}",
     "publish": [
       {
         "provider": "github",
-        "owner": "AndyMik90",
-        "repo": "Auto-Claude"
+        "owner": "Hermbot14",
+        "repo": "Auto-Claude-Marketing"
       }
     ],
     "directories": {
